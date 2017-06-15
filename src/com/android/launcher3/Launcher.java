@@ -44,6 +44,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
@@ -144,7 +145,8 @@ import java.util.Set;
  * Default launcher application.
  */
 public class Launcher extends BaseDraggingActivity implements LauncherExterns,
-        LauncherModel.Callbacks, LauncherProviderChangeListener, UserEventDelegate{
+        LauncherModel.Callbacks, LauncherProviderChangeListener, UserEventDelegate,
+        OnSharedPreferenceChangeListener{
     public static final String TAG = "Launcher";
     static final boolean LOGD = false;
 
@@ -266,6 +268,7 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
                     .build());
         }
         TraceHelper.beginSection("Launcher-onCreate");
+        mSharedPrefs = Utilities.getPrefs(this);
 
         super.onCreate(savedInstanceState);
         TraceHelper.partitionSection("Launcher-onCreate", "super call");
@@ -343,6 +346,8 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
             mLauncherCallbacks.onCreate(savedInstanceState);
         }
         mRotationHelper.initialize();
+
+		mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
         TraceHelper.endSection("Launcher-onCreate");
     }
@@ -1334,7 +1339,9 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onDestroy();
         }
-    }
+
+		mSharedPrefs.unregisterOnSharedPreferenceChangeListener(this);
+    }	
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
         return mAccessibilityDelegate;
@@ -2424,4 +2431,12 @@ public class Launcher extends BaseDraggingActivity implements LauncherExterns,
 
         void onLauncherResume();
     }
+
+   @Override
+   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if ("pref_iconPackPackage".equals(key)) {
+            mModel.clearIconCache();
+            mModel.forceReload();
+        }
+   }
 }
