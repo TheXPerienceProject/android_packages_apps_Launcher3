@@ -15,31 +15,57 @@
  */
 package com.android.quickstep;
 
+import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.TraceHelper;
-import com.android.systemui.shared.system.BackgroundExecutor;
+import com.android.launcher3.util.UiThreadHelper;
+import com.android.quickstep.util.RemoteAnimationTargetSet;
 import com.android.systemui.shared.system.RecentsAnimationControllerCompat;
-import com.android.systemui.shared.system.RemoteAnimationTargetCompat;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Wrapper around RecentsAnimationController to help with some synchronization
  */
 public class RecentsAnimationWrapper {
 
-    public RecentsAnimationControllerCompat controller;
-    public RemoteAnimationTargetCompat[] targets;
+    // A list of callbacks to run when we receive the recents animation target. There are different
+    // than the state callbacks as these run on the current worker thread.
+    private final ArrayList<Runnable> mCallbacks = new ArrayList<>();
 
+    public RemoteAnimationTargetSet targetSet;
+
+    private RecentsAnimationControllerCompat mController;
     private boolean mInputConsumerEnabled = false;
     private boolean mBehindSystemBars = true;
     private boolean mSplitScreenMinimized = false;
 
+    private final ExecutorService mExecutorService =
+            new LooperExecutor(UiThreadHelper.getBackgroundLooper());
+
     public synchronized void setController(
-            RecentsAnimationControllerCompat controller, RemoteAnimationTargetCompat[] targets) {
+            RecentsAnimationControllerCompat controller, RemoteAnimationTargetSet targetSet) {
         TraceHelper.partitionSection("RecentsController", "Set controller " + controller);
-        this.controller = controller;
-        this.targets = targets;
+        this.mController = controller;
+        this.targetSet = targetSet;
 
         if (mInputConsumerEnabled) {
             enableInputConsumer();
+        }
+
+        if (!mCallbacks.isEmpty()) {
+            for (Runnable action : new ArrayList<>(mCallbacks)) {
+                action.run();
+            }
+            mCallbacks.clear();
+        }
+    }
+
+    public synchronized void runOnInit(Runnable action) {
+        if (targetSet == null) {
+            mCallbacks.add(action);
+        } else {
+            action.run();
         }
     }
 
@@ -48,16 +74,16 @@ public class RecentsAnimationWrapper {
      *                         on the background thread.
      */
     public void finish(boolean toHome, Runnable onFinishComplete) {
-        BackgroundExecutor.get().submit(() -> {
-            synchronized (this) {
-                TraceHelper.endSection("RecentsController",
-                        "Finish " + controller + ", toHome=" + toHome);
-                if (controller != null) {
-                    controller.setInputConsumerEnabled(false);
-                    controller.finish(toHome);
-                    if (onFinishComplete != null) {
-                        onFinishComplete.run();
-                    }
+        mExecutorService.submit(() -> {
+            RecentsAnimationControllerCompat controller = mController;
+            mController = null;
+            TraceHelper.endSection("RecentsController",
+                    "Finish " + controller + ", toHome=" + toHome);
+            if (controller != null) {
+                controller.setInputConsumerEnabled(false);
+                controller.finish(toHome);
+                if (onFinishComplete != null) {
+                    onFinishComplete.run();
                 }
             }
         });
@@ -66,13 +92,12 @@ public class RecentsAnimationWrapper {
     public void enableInputConsumer() {
         mInputConsumerEnabled = true;
         if (mInputConsumerEnabled) {
-            BackgroundExecutor.get().submit(() -> {
-                synchronized (this) {
-                    TraceHelper.partitionSection("RecentsController",
-                            "Enabling consumer on " + controller);
-                    if (controller != null) {
-                        controller.setInputConsumerEnabled(true);
-                    }
+            mExecutorService.submit(() -> {
+                RecentsAnimationControllerCompat controller = mController;
+                TraceHelper.partitionSection("RecentsController",
+                        "Enabling consumer on " + controller);
+                if (controller != null) {
+                    controller.setInputConsumerEnabled(true);
                 }
             });
         }
@@ -83,13 +108,12 @@ public class RecentsAnimationWrapper {
             return;
         }
         mBehindSystemBars = behindSystemBars;
-        BackgroundExecutor.get().submit(() -> {
-            synchronized (this) {
-                TraceHelper.partitionSection("RecentsController",
-                        "Setting behind system bars on " + controller);
-                if (controller != null) {
-                    controller.setAnimationTargetsBehindSystemBars(behindSystemBars);
-                }
+        mExecutorService.submit(() -> {
+            RecentsAnimationControllerCompat controller = mController;
+            TraceHelper.partitionSection("RecentsController",
+                    "Setting behind system bars on " + controller);
+            if (controller != null) {
+                controller.setAnimationTargetsBehindSystemBars(behindSystemBars);
             }
         });
     }
@@ -105,14 +129,28 @@ public class RecentsAnimationWrapper {
             return;
         }
         mSplitScreenMinimized = minimized;
-        BackgroundExecutor.get().submit(() -> {
-            synchronized (this) {
-                TraceHelper.partitionSection("RecentsController",
-                        "Setting minimize dock on " + controller);
-                if (controller != null) {
-                    controller.setSplitScreenMinimized(minimized);
-                }
+        mExecutorService.submit(() -> {
+            RecentsAnimationControllerCompat controller = mController;
+            TraceHelper.partitionSection("RecentsController",
+                    "Setting minimize dock on " + controller);
+            if (controller != null) {
+                controller.setSplitScreenMinimized(minimized);
             }
         });
+    }
+
+    public void hideCurrentInputMethod() {
+        mExecutorService.submit(() -> {
+            RecentsAnimationControllerCompat controller = mController;
+            TraceHelper.partitionSection("RecentsController",
+                    "Hiding currentinput method on " + controller);
+            if (controller != null) {
+                controller.hideCurrentInputMethod();
+            }
+        });
+    }
+
+    public RecentsAnimationControllerCompat getController() {
+        return mController;
     }
 }
