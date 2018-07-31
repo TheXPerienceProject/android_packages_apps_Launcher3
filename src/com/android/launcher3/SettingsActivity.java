@@ -36,6 +36,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
@@ -47,6 +48,8 @@ import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.util.ListViewHighlighter;
 import com.android.launcher3.util.SettingsObserver;
 import com.android.launcher3.views.ButtonPreference;
+import com.android.launcher3.xperience.NightfallLauncherCallbacks;
+import com.android.launcher3.xperience.NightfallUtils;
 
 import java.util.Objects;
 
@@ -65,6 +68,8 @@ public class SettingsActivity extends Activity {
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final int DELAY_HIGHLIGHT_DURATION_MILLIS = 600;
     private static final String SAVE_HIGHLIGHTED_KEY = "android:preference_highlighted";
+
+    public static final String KEY_MINUS_ONE = "pref_enable_minus_one";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +141,12 @@ public class SettingsActivity extends Activity {
             } else {
                 // Initialize the UI once
                 rotationPref.setDefaultValue(getAllowRotationDefaultValue());
+
+                SwitchPreference minusOne = (SwitchPreference) findPreference(KEY_MINUS_ONE);
+                if (!NightfallUtils.hasPackageInstalled(getActivity(),
+                        NightfallLauncherCallbacks.SEARCH_PACKAGE)) {
+                    getPreferenceScreen().removePreference(minusOne);
+                }
             }
         }
 

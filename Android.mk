@@ -29,6 +29,18 @@ LOCAL_SDK_VERSION := current
 include $(BUILD_PREBUILT)
 
 #
+# Prebuilt Google Feed library
+#
+include $(CLEAR_VARS)
+LOCAL_MODULE := libGoogleFeed
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
+LOCAL_SRC_FILES := libs/libGoogleFeed.jar
+LOCAL_UNINSTALLABLE_MODULE := true
+LOCAL_SDK_VERSION := 27
+include $(BUILD_PREBUILT)
+
+#
 # Build rule for  Nightfall app.
 #
 include $(CLEAR_VARS)
@@ -36,7 +48,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-annotations
+    android-support-annotations \
+    libGoogleFeed
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-compat \
@@ -85,7 +98,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-annotations
+    android-support-annotations \
+    libGoogleFeed
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-compat \
@@ -140,7 +154,8 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-annotations \
-    libSharedSystemUI
+    libSharedSystemUI \
+    libGoogleFeed
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-compat \
@@ -196,7 +211,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v4 \
     android-support-v7-recyclerview \
     android-support-dynamic-animation \
-    libSharedSystemUI
+    libSharedSystemUI \
+    libGoogleFeed
 
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src) \
