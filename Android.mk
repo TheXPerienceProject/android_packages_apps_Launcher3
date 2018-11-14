@@ -225,7 +225,7 @@ LOCAL_SDK_VERSION := system_current
 LOCAL_MIN_SDK_VERSION := 26
 LOCAL_PACKAGE_NAME := Launcher3QuickStepGo
 LOCAL_PRIVILEGED_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep XPeriaHome
 
 LOCAL_FULL_LIBS_MANIFEST_FILES := \
     $(LOCAL_PATH)/go/AndroidManifest.xml \
