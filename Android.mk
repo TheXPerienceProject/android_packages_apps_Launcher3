@@ -81,7 +81,7 @@ LOCAL_MIN_SDK_VERSION := 26
 LOCAL_PACKAGE_NAME := Launcher3
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_SYSTEM_EXT_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2 XPeriaHome
 LOCAL_REQUIRED_MODULES := privapp_whitelist_com.android.launcher3
 LOCAL_REQUIRED_MODULES += privapp_whitelist_com.android.launcher3-ext.xml
 
@@ -183,7 +183,7 @@ LOCAL_PACKAGE_NAME := Launcher3QuickStep
 LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_SYSTEM_EXT_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 XPeriaHome
 LOCAL_REQUIRED_MODULES := privapp_whitelist_com.android.launcher3
 LOCAL_REQUIRED_MODULES += privapp_whitelist_com.android.launcher3-ext.xml
 
@@ -238,7 +238,7 @@ LOCAL_PROGUARD_ENABLED := full
 LOCAL_PACKAGE_NAME := Launcher3QuickStepGo
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_SYSTEM_EXT_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep Launcher3Go XPeriaHome
 LOCAL_REQUIRED_MODULES := privapp_whitelist_com.android.launcher3
 LOCAL_REQUIRED_MODULES += privapp_whitelist_com.android.launcher3-ext.xml
 
