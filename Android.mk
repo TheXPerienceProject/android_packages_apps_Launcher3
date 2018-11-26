@@ -29,7 +29,7 @@ LOCAL_SDK_VERSION := current
 include $(BUILD_PREBUILT)
 
 #
-# Build rule for Launcher3 app.
+# Build rule for  Nightfall app.
 #
 include $(CLEAR_VARS)
 
@@ -66,8 +66,8 @@ LOCAL_PROTO_JAVA_OUTPUT_PARAMS := enum_style=java
 LOCAL_USE_AAPT2 := true
 
 LOCAL_SDK_VERSION := current
-LOCAL_MIN_SDK_VERSION := 21
-LOCAL_PACKAGE_NAME := Launcher3
+LOCAL_MIN_SDK_VERSION := 23
+LOCAL_PACKAGE_NAME :=  Nightfall
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_OVERRIDES_PACKAGES := Home Launcher2
 
@@ -78,7 +78,7 @@ LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.launcher3.*
 include $(BUILD_PACKAGE)
 
 #
-# Build rule for Launcher3 Go app for Android Go devices.
+# Build rule for  Nightfall Go app for Android Go devices.
 #
 include $(CLEAR_VARS)
 
@@ -116,10 +116,10 @@ LOCAL_PROTO_JAVA_OUTPUT_PARAMS := enum_style=java
 LOCAL_USE_AAPT2 := true
 
 LOCAL_SDK_VERSION := current
-LOCAL_MIN_SDK_VERSION := 21
-LOCAL_PACKAGE_NAME := Launcher3Go
+LOCAL_MIN_SDK_VERSION := 23
+LOCAL_PACKAGE_NAME :=  NightfallGo
 LOCAL_PRIVILEGED_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep Launcher3QuickStepGo
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2  Nightfall  NightfallQuickStep  NightfallQuickStepGo
 
 LOCAL_FULL_LIBS_MANIFEST_FILES := \
     $(LOCAL_PATH)/AndroidManifest.xml \
@@ -172,9 +172,9 @@ LOCAL_USE_AAPT2 := true
 
 LOCAL_SDK_VERSION := system_current
 LOCAL_MIN_SDK_VERSION := 26
-LOCAL_PACKAGE_NAME := Launcher3QuickStep
+LOCAL_PACKAGE_NAME :=  NightfallQuickStep
 LOCAL_PRIVILEGED_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2  Nightfall
 
 LOCAL_FULL_LIBS_MANIFEST_FILES := \
     $(LOCAL_PATH)/AndroidManifest.xml \
@@ -186,7 +186,7 @@ LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.launcher3.*
 include $(BUILD_PACKAGE)
 
 #
-# Build rule for Launcher3 Go app with quickstep for Android Go devices.
+# Build rule for  Nightfall Go app with quickstep for Android Go devices.
 #
 include $(CLEAR_VARS)
 
@@ -223,9 +223,9 @@ LOCAL_AAPT_FLAGS := \
 
 LOCAL_SDK_VERSION := system_current
 LOCAL_MIN_SDK_VERSION := 26
-LOCAL_PACKAGE_NAME := Launcher3QuickStepGo
+LOCAL_PACKAGE_NAME :=  NightfallQuickStepGo
 LOCAL_PRIVILEGED_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep XPeriaHome
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2  Nightfall  NightfallQuickStep XPeriaHome
 
 LOCAL_FULL_LIBS_MANIFEST_FILES := \
     $(LOCAL_PATH)/go/AndroidManifest.xml \
