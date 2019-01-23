@@ -49,6 +49,7 @@
                      android:featureFlag="android.security.app_lock_apis" />
     <uses-permission android:name="com.android.systemui.permission.LAUNCH_ACCESSIBILITY_SHORTCUT_CHOOSER_DIALOG" />
     <uses-permission android:name="android.permission.ACCESS_CONTEXTUAL_SEARCH" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <permission
         android:name="${applicationId}.permission.GRID_CONTROL"
@@ -183,6 +184,12 @@
         <property
             android:name="android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED"
             android:value="true" />
+
+        <activity
+            android:name="com.android.launcher3.lineage.trust.TrustAppsActivity"
+            android:label="@string/trust_apps_manager_name"
+            android:theme="@android:style/Theme.DeviceDefault.Settings"
+            android:autoRemoveFromRecents="true" />
 
         <activity
             android:name="com.android.launcher3.organizer.creation.screen.ui.OrganizerActivity"
