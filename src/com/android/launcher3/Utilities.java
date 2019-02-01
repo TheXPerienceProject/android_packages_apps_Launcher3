@@ -146,7 +146,6 @@ public final class Utilities {
         return Log.isLoggable(propertyName, Log.VERBOSE);
     }
 
-
     public static int getGridColumns(Context context, int fallback) {
         return getIconCount(context, GRID_COLUMNS, fallback);
     }
@@ -196,6 +195,10 @@ public final class Utilities {
         } catch (Exception e) {
             return preferenceFallback;
         }
+    }
+
+    public interface Consumer<T> {
+        void accept(T t);
     }
 
     /**

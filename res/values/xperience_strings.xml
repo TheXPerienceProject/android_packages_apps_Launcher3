@@ -56,4 +56,7 @@
     <string name="icon_pack">Icon pack</string>
     <string name="icon_pack_summary">Select a custom icon pack</string>
 
+    <!-- Expand statusbar -->
+    <string name="statusbar_expand">Swipe down to show notifications</string>
+
 </resources>
