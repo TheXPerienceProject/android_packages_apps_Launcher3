@@ -147,6 +147,17 @@ public class SettingsActivity extends Activity {
                 }
             }
 
+            final ListPreference iconSizes = (ListPreference) findPreference(Utilities.ICON_SIZE);
+            iconSizes.setSummary(iconSizes.getEntry());
+            iconSizes.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    int index = iconSizes.findIndexOfValue((String) newValue);
+                    iconSizes.setSummary(iconSizes.getEntries()[index]);
+                    Utilities.restart(getActivity());
+                    return true;
+                }
+            });
+
             // Setup allow rotation preference
             Preference rotationPref = findPreference(ALLOW_ROTATION_PREFERENCE_KEY);
             if (getResources().getBoolean(R.bool.allow_rotation)) {
