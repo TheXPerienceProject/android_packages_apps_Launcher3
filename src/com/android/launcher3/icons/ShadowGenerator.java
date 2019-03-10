@@ -25,7 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import com.android.internal.graphics.ColorUtils;
+import com.android.launcher3.xperience.ColorUtils;
 
 /**
  * Utility class to add shadows to bitmaps.
