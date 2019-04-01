@@ -575,6 +575,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         mPopupDataProvider = new PopupDataProvider(this);
         mWidgetPickerDataProvider = new WidgetPickerDataProvider(this);
         PillColorProvider.getInstance(mWorkspace.getContext()).registerObserver();
+        LauncherNotifications.getInstance().addListener(mPopupDataProvider);
 
         boolean internalStateHandled = ACTIVITY_TRACKER.handleCreate(this);
         if (internalStateHandled) {
@@ -1163,7 +1164,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         mModel.validateModelDataOnResume();
 
         // Set the notification listener and fetch updated notifications when we resume
-        NotificationListener.addNotificationsChangedListener(mPopupDataProvider);
+        NotificationListener.addNotificationsChangedListener(LauncherNotifications.getInstance());
 
         DiscoveryBounce.showForHomeIfNeeded(this);
         mAppWidgetHolder.setActivityResumed(true);
