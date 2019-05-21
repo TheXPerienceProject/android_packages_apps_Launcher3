@@ -16,15 +16,15 @@
 package com.android.quickstep;
 
 import static android.view.View.TRANSLATION_Y;
-
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.allapps.AllAppsTransitionController.SPRING_DAMPING_RATIO;
 import static com.android.launcher3.allapps.AllAppsTransitionController.SPRING_STIFFNESS;
-import static com.android.launcher3.anim.Interpolators.DEACCEL_3;
+import static com.android.launcher3.anim.Interpolators.ACCEL_DEACCEL;
 import static com.android.launcher3.anim.Interpolators.LINEAR;
+import static com.android.quickstep.WindowTransformSwipeHandler.RECENTS_ATTACH_DURATION;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -39,16 +39,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
-import com.android.launcher3.LauncherInitListener;
+import com.android.launcher3.LauncherInitListenerEx;
 import com.android.launcher3.LauncherState;
-import com.android.launcher3.LauncherStateManager;
-import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.allapps.DiscoveryBounce;
 import com.android.launcher3.anim.AnimatorPlaybackController;
-import com.android.launcher3.anim.AnimatorSetBuilder;
 import com.android.launcher3.anim.SpringObjectAnimator;
 import com.android.launcher3.compat.AccessibilityManagerCompat;
 import com.android.launcher3.userevent.nano.LauncherLogProto;
@@ -62,10 +63,6 @@ import com.android.systemui.shared.system.RemoteAnimationTargetCompat;
 
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
 
 /**
  * {@link ActivityControlHelper} for the in-launcher recents.
@@ -101,7 +98,7 @@ public final class LauncherActivityControllerHelper implements ActivityControlHe
     public void onAssistantVisibilityChanged(float visibility) {
         Launcher launcher = getCreatedActivity();
         if (launcher != null) {
-            launcher.setQuickSearchBarAlpha(1f - visibility);
+            launcher.onAssistantVisibilityChanged(visibility);
         }
     }
 
@@ -167,30 +164,26 @@ public final class LauncherActivityControllerHelper implements ActivityControlHe
         }
         activity.getStateManager().setRestState(resetState);
 
-        final LauncherState fromState;
-        if (!activityVisible) {
-            // Since the launcher is not visible, we can safely reset the scroll position.
-            // This ensures then the next swipe up to all-apps starts from scroll 0.
-            activity.getAppsView().reset(false /* animate */);
-            fromState = animateActivity ? BACKGROUND_APP : OVERVIEW;
-            activity.getStateManager().goToState(fromState, false);
+        final LauncherState fromState = animateActivity ? BACKGROUND_APP : OVERVIEW;
+        activity.getStateManager().goToState(fromState, false);
+        // Since all apps is not visible, we can safely reset the scroll position.
+        // This ensures then the next swipe up to all-apps starts from scroll 0.
+        activity.getAppsView().reset(false /* animate */);
 
-            // Optimization, hide the all apps view to prevent layout while initializing
-            activity.getAppsView().getContentView().setVisibility(View.GONE);
+        // Optimization, hide the all apps view to prevent layout while initializing
+        activity.getAppsView().getContentView().setVisibility(View.GONE);
 
-            AccessibilityManagerCompat.sendStateEventToTest(activity, fromState.ordinal);
-        } else {
-            fromState = startState;
-        }
+        AccessibilityManagerCompat.sendStateEventToTest(activity, fromState.ordinal);
 
         return new AnimationFactory() {
             private Animator mShelfAnim;
             private ShelfAnimState mShelfState;
+            private Animator mAttachToWindowAnim;
+            private boolean mIsAttachedToWindow;
 
             @Override
             public void createActivityController(long transitionLength) {
-                createActivityControllerInternal(activity, activityVisible, fromState,
-                        transitionLength, callback);
+                createActivityControllerInternal(activity, fromState, transitionLength, callback);
             }
 
             @Override
@@ -220,7 +213,7 @@ public final class LauncherActivityControllerHelper implements ActivityControlHe
                         : mShelfState == ShelfAnimState.PEEK
                                 ? shelfPeekingProgress
                                 : shelfOverviewProgress;
-                mShelfAnim = createShelfProgressAnim(activity, toProgress);
+                mShelfAnim = createShelfAnim(activity, toProgress);
                 mShelfAnim.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -231,21 +224,34 @@ public final class LauncherActivityControllerHelper implements ActivityControlHe
                 mShelfAnim.setDuration(duration);
                 mShelfAnim.start();
             }
+
+            @Override
+            public void setRecentsAttachedToAppWindow(boolean attached, boolean animate) {
+                if (mIsAttachedToWindow == attached && animate) {
+                    return;
+                }
+                mIsAttachedToWindow = attached;
+                if (mAttachToWindowAnim != null) {
+                    mAttachToWindowAnim.cancel();
+                }
+                mAttachToWindowAnim = ObjectAnimator.ofFloat(activity.getOverviewPanel(),
+                        RecentsView.CONTENT_ALPHA, attached ? 1 : 0);
+                mAttachToWindowAnim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mAttachToWindowAnim = null;
+                    }
+                });
+                mAttachToWindowAnim.setInterpolator(ACCEL_DEACCEL);
+                mAttachToWindowAnim.setDuration(animate ? RECENTS_ATTACH_DURATION : 0);
+                mAttachToWindowAnim.start();
+            }
         };
     }
 
-    private void createActivityControllerInternal(Launcher activity, boolean wasVisible,
-            LauncherState fromState, long transitionLength,
-            Consumer<AnimatorPlaybackController> callback) {
+    private void createActivityControllerInternal(Launcher activity, LauncherState fromState,
+            long transitionLength, Consumer<AnimatorPlaybackController> callback) {
         LauncherState endState = OVERVIEW;
-        DeviceProfile dp = activity.getDeviceProfile();
-        long accuracy = 2 * Math.max(dp.widthPx, dp.heightPx);
-        if (wasVisible && fromState != BACKGROUND_APP) {
-            // If a translucent app was launched fom launcher, animate launcher states.
-            callback.accept(activity.getStateManager()
-                    .createAnimationToNewWorkspace(fromState, endState, accuracy));
-            return;
-        }
         if (fromState == endState) {
             return;
         }
@@ -254,11 +260,10 @@ public final class LauncherActivityControllerHelper implements ActivityControlHe
         if (!activity.getDeviceProfile().isVerticalBarLayout()
                 && SysUINavigationMode.getMode(activity) != Mode.NO_BUTTON) {
             // Don't animate the shelf when the mode is NO_BUTTON, because we update it atomically.
-            Animator shiftAnim = createShelfProgressAnim(activity,
+            Animator shiftAnim = createShelfAnim(activity,
                     fromState.getVerticalProgress(activity),
                     endState.getVerticalProgress(activity));
             anim.play(shiftAnim);
-            anim.play(createShelfAlphaAnim(activity, endState, accuracy));
         }
         playScaleDownAnim(anim, activity, endState);
 
@@ -275,25 +280,12 @@ public final class LauncherActivityControllerHelper implements ActivityControlHe
         callback.accept(controller);
     }
 
-    private Animator createShelfProgressAnim(Launcher activity, float ... progressValues) {
+    private Animator createShelfAnim(Launcher activity, float ... progressValues) {
         Animator shiftAnim = new SpringObjectAnimator<>(activity.getAllAppsController(),
                 "allAppsSpringFromACH", activity.getAllAppsController().getShiftRange(),
                 SPRING_DAMPING_RATIO, SPRING_STIFFNESS, progressValues);
         shiftAnim.setInterpolator(LINEAR);
         return shiftAnim;
-    }
-
-    /**
-     * Very quickly fade the alpha of shelf content.
-     */
-    private Animator createShelfAlphaAnim(Launcher activity, LauncherState toState, long accuracy) {
-        AllAppsTransitionController allAppsController = activity.getAllAppsController();
-        AnimatorSetBuilder animBuilder = new AnimatorSetBuilder();
-        animBuilder.setInterpolator(AnimatorSetBuilder.ANIM_ALL_APPS_FADE, DEACCEL_3);
-        LauncherStateManager.AnimationConfig config = new LauncherStateManager.AnimationConfig();
-        config.duration = accuracy;
-        allAppsController.setAlphas(toState.getVisibleElements(activity), config, animBuilder);
-        return animBuilder.build();
     }
 
     /**
@@ -337,7 +329,7 @@ public final class LauncherActivityControllerHelper implements ActivityControlHe
     @Override
     public ActivityInitListener createActivityInitListener(
             BiPredicate<Launcher, Boolean> onInitListener) {
-        return new LauncherInitListener(onInitListener);
+        return new LauncherInitListenerEx(onInitListener);
     }
 
     @Nullable

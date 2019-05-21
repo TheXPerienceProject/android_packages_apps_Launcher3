@@ -16,15 +16,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := libPluginCore
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_SRC_FILES := libs/plugin_core.jar
-LOCAL_UNINSTALLABLE_MODULE := true
-LOCAL_SDK_VERSION := current
-include $(BUILD_PREBUILT)
-
 #
 # Build rule for plugin lib (needed to write a plugin).
 #
@@ -33,7 +24,11 @@ LOCAL_USE_AAPT2 := true
 LOCAL_AAPT2_ONLY := true
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_STATIC_JAVA_LIBRARIES:= libPluginCore
+ifneq (,$(wildcard frameworks/base))
+    LOCAL_STATIC_JAVA_LIBRARIES:= PluginCoreLib
+else
+    LOCAL_STATIC_JAVA_LIBRARIES:= libPluginCore
+endif
 
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src_plugins)
@@ -256,7 +251,7 @@ LOCAL_PROGUARD_ENABLED := full
 LOCAL_PACKAGE_NAME := Launcher3QuickStepGo
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PRODUCT_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep Launcher3GoIconRecents
 LOCAL_REQUIRED_MODULES := privapp_whitelist_com.android.launcher3
 
 LOCAL_FULL_LIBS_MANIFEST_FILES := \
@@ -302,7 +297,8 @@ LOCAL_PROGUARD_ENABLED := full
 
 LOCAL_PACKAGE_NAME := Launcher3GoIconRecents
 LOCAL_PRIVILEGED_MODULE := true
-LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep
+LOCAL_PRODUCT_MODULE := true
+LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep Launcher3QuickStepGo
 LOCAL_REQUIRED_MODULES := privapp_whitelist_com.android.launcher3
 
 LOCAL_FULL_LIBS_MANIFEST_FILES := \

@@ -20,6 +20,8 @@ import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static java.lang.System.exit;
+
 import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
@@ -78,9 +81,10 @@ public abstract class AbstractLauncherUiTest {
     public static final long DEFAULT_ACTIVITY_TIMEOUT = TimeUnit.SECONDS.toMillis(10);
     public static final long DEFAULT_BROADCAST_TIMEOUT_SECS = 5;
 
-    public static final long SHORT_UI_TIMEOUT= 300;
+    public static final long SHORT_UI_TIMEOUT = 300;
     public static final long DEFAULT_UI_TIMEOUT = 10000;
     protected static final int LONG_WAIT_TIME_MS = 60000;
+    private static final String TAG = "AbstractLauncherUiTest";
 
     protected MainThreadExecutor mMainThreadExecutor = new MainThreadExecutor();
     protected final UiDevice mDevice;
@@ -98,19 +102,17 @@ public abstract class AbstractLauncherUiTest {
         }
         if (TestHelpers.isInLauncherProcess()) Utilities.enableRunningInTestHarnessForTests();
         mLauncher = new LauncherInstrumentation(instrumentation);
-        try {
-            mDevice.executeShellCommand("settings delete secure assistant");
-        } catch (IOException e) {
-        }
     }
 
     @Rule
     public LauncherActivityRule mActivityMonitor = new LauncherActivityRule();
 
-    @Rule public ShellCommandRule mDefaultLauncherRule =
+    @Rule
+    public ShellCommandRule mDefaultLauncherRule =
             TestHelpers.isInLauncherProcess() ? ShellCommandRule.setDefaultLauncher() : null;
 
-    @Rule public ShellCommandRule mDisableHeadsUpNotification =
+    @Rule
+    public ShellCommandRule mDisableHeadsUpNotification =
             ShellCommandRule.disableHeadsUpNotification();
 
     // Annotation for tests that need to be run in portrait and landscape modes.
@@ -161,12 +163,22 @@ public abstract class AbstractLauncherUiTest {
     public void setUp() throws Exception {
         mTargetContext = InstrumentationRegistry.getTargetContext();
         mTargetPackage = mTargetContext.getPackageName();
+        // Unlock the phone
+        mDevice.executeShellCommand("input keyevent 82");
     }
 
     @After
-    public void tearDown() throws Exception {
-        // Limits UI tests affecting tests running after them.
-        waitForModelLoaded();
+    public void verifyLauncherState() {
+        try {
+            // Limits UI tests affecting tests running after them.
+            waitForModelLoaded();
+        } catch (Throwable t) {
+            Log.e(TAG,
+                    "Couldn't deinit after a test, exiting tests, see logs for failures that "
+                            + "could have caused this",
+                    t);
+            exit(1);
+        }
     }
 
     protected void lockRotation(boolean naturalOrientation) throws RemoteException {
@@ -189,6 +201,7 @@ public abstract class AbstractLauncherUiTest {
 
     /**
      * Scrolls the {@param container} until it finds an object matching {@param condition}.
+     *
      * @return the matching object.
      */
     protected UiObject2 scrollAndFind(UiObject2 container, BySelector condition) {
@@ -221,12 +234,8 @@ public abstract class AbstractLauncherUiTest {
 
     protected void resetLoaderState() {
         try {
-            mMainThreadExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    LauncherAppState.getInstance(mTargetContext).getModel().forceReload();
-                }
-            });
+            mMainThreadExecutor.execute(
+                    () -> LauncherAppState.getInstance(mTargetContext).getModel().forceReload());
         } catch (Throwable t) {
             throw new IllegalArgumentException(t);
         }
@@ -267,7 +276,7 @@ public abstract class AbstractLauncherUiTest {
     // the results of that gesture because the wait can hide flakeness.
     protected void waitForState(String message, LauncherState state) {
         waitForLauncherCondition(message,
-                launcher -> launcher.getStateManager().getState() == state);
+                launcher -> launcher.getStateManager().getCurrentStableState() == state);
     }
 
     protected void waitForResumed(String message) {
@@ -286,6 +295,19 @@ public abstract class AbstractLauncherUiTest {
             String message, Function<Launcher, Boolean> condition, long timeout) {
         if (!TestHelpers.isInLauncherProcess()) return;
         Wait.atMost(message, () -> getFromLauncher(condition), timeout);
+    }
+
+    // Cannot be used in TaplTests after injecting any gesture using Tapl because this can hide
+    // flakiness.
+    protected void waitForLauncherCondition(
+            String message,
+            Runnable testThreadAction, Function<Launcher, Boolean> condition,
+            long timeout) {
+        if (!TestHelpers.isInLauncherProcess()) return;
+        Wait.atMost(message, () -> {
+            testThreadAction.run();
+            return getFromLauncher(condition);
+        }, timeout);
     }
 
     protected LauncherActivityInfo getSettingsApp() {
@@ -335,7 +357,7 @@ public abstract class AbstractLauncherUiTest {
                 mDevice.wait(Until.hasObject(By.pkg(packageName).depth(0)), LONG_WAIT_TIME_MS));
     }
 
-    protected String resolveSystemApp(String category) {
+    protected static String resolveSystemApp(String category) {
         return getInstrumentation().getContext().getPackageManager().resolveActivity(
                 new Intent(Intent.ACTION_MAIN).addCategory(category),
                 PackageManager.MATCH_SYSTEM_ONLY).

@@ -18,11 +18,10 @@ package com.android.launcher3.uioverrides.states;
 import static com.android.launcher3.LauncherAnimUtils.OVERVIEW_TRANSITION_MS;
 
 import android.os.RemoteException;
+
 import com.android.launcher3.Launcher;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.quickstep.RecentsModel;
-import com.android.quickstep.SysUINavigationMode;
-import com.android.quickstep.SysUINavigationMode.Mode;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.views.RecentsView;
 import com.android.systemui.shared.recents.ISystemUiProxy;
@@ -77,10 +76,6 @@ public class BackgroundAppState extends OverviewState {
 
     @Override
     public int getVisibleElements(Launcher launcher) {
-        if (SysUINavigationMode.getMode(launcher) == Mode.NO_BUTTON) {
-            return super.getVisibleElements(launcher);
-        }
-        // Hide shelf content (e.g. QSB) because we fade it in when swiping up.
-        return ALL_APPS_HEADER_EXTRA;
+        return super.getVisibleElements(launcher) & ~RECENTS_CLEAR_ALL_BUTTON;
     }
 }

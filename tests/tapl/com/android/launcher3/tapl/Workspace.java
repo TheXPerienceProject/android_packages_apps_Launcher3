@@ -21,7 +21,9 @@ import static com.android.launcher3.TestProtocol.ALL_APPS_STATE_ORDINAL;
 import static junit.framework.TestCase.assertTrue;
 
 import android.graphics.Point;
+import android.os.SystemClock;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,8 +37,8 @@ import com.android.launcher3.TestProtocol;
  */
 public final class Workspace extends Home {
     private static final float FLING_SPEED = 3500.0F;
+    private static final int DRAG_DURACTION = 2000;
     private final UiObject2 mHotseat;
-    private final int ICON_DRAG_SPEED = LauncherInstrumentation.needSlowGestures() ? 100 : 570;
 
     Workspace(LauncherInstrumentation launcher) {
         super(launcher);
@@ -112,13 +114,16 @@ public final class Workspace extends Home {
     public void ensureWorkspaceIsScrollable() {
         final UiObject2 workspace = verifyActiveContainer();
         if (!isWorkspaceScrollable(workspace)) {
-            dragIconToWorkspace(
-                    mLauncher,
-                    getHotseatAppIcon("Play Store"),
-                    new Point(mLauncher.getDevice().getDisplayWidth(),
-                            workspace.getVisibleBounds().centerY()),
-                    (int) (ICON_DRAG_SPEED * mLauncher.getDisplayDensity()));
-            verifyActiveContainer();
+            try (LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
+                    "dragging icon to a second page of workspace to make it scrollable")) {
+                dragIconToWorkspace(
+                        mLauncher,
+                        getHotseatAppIcon("Chrome"),
+                        new Point(mLauncher.getDevice().getDisplayWidth(),
+                                workspace.getVisibleBounds().centerY()),
+                        "deep_shortcuts_container");
+                verifyActiveContainer();
+            }
         }
         assertTrue("Home screen workspace didn't become scrollable",
                 isWorkspaceScrollable(workspace));
@@ -134,12 +139,24 @@ public final class Workspace extends Home {
                 mHotseat, AppIcon.getAppIconSelector(appName, mLauncher)));
     }
 
-    static void dragIconToWorkspace(LauncherInstrumentation launcher, Launchable launchable,
-            Point dest, int icon_drag_speed) {
+    static void dragIconToWorkspace(
+            LauncherInstrumentation launcher, Launchable launchable, Point dest,
+            String longPressIndicator) {
+        launcher.getTestInfo(TestProtocol.REQUEST_ENABLE_DRAG_LOGGING);
         LauncherInstrumentation.log("dragIconToWorkspace: begin");
-        launchable.getObject().drag(dest, icon_drag_speed);
+        final Point launchableCenter = launchable.getObject().getVisibleCenter();
+        final long downTime = SystemClock.uptimeMillis();
+        launcher.sendPointer(downTime, downTime, MotionEvent.ACTION_DOWN, launchableCenter);
+        LauncherInstrumentation.log("dragIconToWorkspace: sent down");
+        launcher.waitForLauncherObject(longPressIndicator);
+        LauncherInstrumentation.log("dragIconToWorkspace: indicator");
+        launcher.movePointer(downTime, DRAG_DURACTION, launchableCenter, dest);
+        LauncherInstrumentation.log("dragIconToWorkspace: moved pointer");
+        launcher.sendPointer(
+                downTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, dest);
         LauncherInstrumentation.log("dragIconToWorkspace: end");
         launcher.waitUntilGone("drop_target_bar");
+        launcher.getTestInfo(TestProtocol.REQUEST_DISABLE_DRAG_LOGGING);
     }
 
     /**
@@ -148,8 +165,7 @@ public final class Workspace extends Home {
      */
     public void flingForward() {
         final UiObject2 workspace = verifyActiveContainer();
-        final int margin = (int) (50 * mLauncher.getDisplayDensity()) + 1;
-        workspace.setGestureMargins(0, 0, margin, 0);
+        workspace.setGestureMargins(0, 0, mLauncher.getEdgeSensitivityWidth(), 0);
         workspace.fling(Direction.RIGHT, (int) (FLING_SPEED * mLauncher.getDisplayDensity()));
         mLauncher.waitForIdle();
         verifyActiveContainer();
@@ -161,8 +177,7 @@ public final class Workspace extends Home {
      */
     public void flingBackward() {
         final UiObject2 workspace = verifyActiveContainer();
-        final int margin = (int) (50 * mLauncher.getDisplayDensity()) + 1;
-        workspace.setGestureMargins(margin, 0, 0, 0);
+        workspace.setGestureMargins(mLauncher.getEdgeSensitivityWidth(), 0, 0, 0);
         workspace.fling(Direction.LEFT, (int) (FLING_SPEED * mLauncher.getDisplayDensity()));
         mLauncher.waitForIdle();
         verifyActiveContainer();

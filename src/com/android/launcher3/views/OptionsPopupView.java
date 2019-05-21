@@ -152,9 +152,11 @@ public class OptionsPopupView extends ArrowPopup
         RectF target = new RectF(x - halfSize, y - halfSize, x + halfSize, y + halfSize);
 
         ArrayList<OptionItem> options = new ArrayList<>();
-        int res = FeatureFlags.STYLE_WALLPAPER.get() && existsStyleWallpapers(launcher) ?
+        int resString = existsStyleWallpapers(launcher) ?
                 R.string.styles_wallpaper_button_text : R.string.wallpaper_button_text;
-        options.add(new OptionItem(res, R.drawable.ic_wallpaper,
+        int resDrawable = existsStyleWallpapers(launcher) ?
+                R.drawable.ic_palette : R.drawable.ic_wallpaper;
+        options.add(new OptionItem(resString, resDrawable,
                 ControlType.WALLPAPER_BUTTON, OptionsPopupView::startWallpaperPicker));
         if (!FeatureFlags.GO_DISABLE_WIDGETS) {
             options.add(new OptionItem(R.string.widget_button_text, R.drawable.ic_widget,
@@ -210,8 +212,10 @@ public class OptionsPopupView extends ArrowPopup
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .putExtra(EXTRA_WALLPAPER_OFFSET,
                         launcher.getWorkspace().getWallpaperOffsetForCenterPage());
-        if (!FeatureFlags.STYLE_WALLPAPER.get()) {
+        if (!existsStyleWallpapers(launcher)) {
             intent.putExtra(EXTRA_WALLPAPER_FLAVOR, "wallpaper_only");
+        } else {
+            intent.putExtra(EXTRA_WALLPAPER_FLAVOR, "focus_wallpaper");
         }
         String pickerPackage = launcher.getString(R.string.wallpaper_picker_package);
         if (!TextUtils.isEmpty(pickerPackage)) {

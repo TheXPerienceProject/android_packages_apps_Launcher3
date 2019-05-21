@@ -48,9 +48,12 @@ import com.android.launcher3.BaseDraggingActivity;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.Interpolators;
+import com.android.launcher3.logging.UserEventDispatcher;
+import com.android.launcher3.userevent.nano.LauncherLogProto;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action.Direction;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action.Touch;
 import com.android.launcher3.util.PendingAnimation;
+import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.ViewPool.Reusable;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.TaskIconCache;
@@ -195,7 +198,7 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
             fromContext(context).getStatsLogManager().logTaskLaunch(getRecentsView(),
                     TaskUtils.getLaunchComponentKeyForTask(getTask().key));
         });
-        setOutlineProvider(new TaskOutlineProvider(getResources()));
+        setOutlineProvider(new TaskOutlineProvider(context, getResources()));
     }
 
     @Override
@@ -208,6 +211,10 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
 
     public TaskMenuView getMenuView() {
         return mMenuView;
+    }
+
+    public DigitalWellBeingToast getDigitalWellBeingToast() {
+        return mDigitalWellBeingToast;
     }
 
     /**
@@ -360,9 +367,11 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         }
     }
 
-    private boolean showTaskMenu() {
+    private boolean showTaskMenu(int action) {
         getRecentsView().snapToPage(getRecentsView().indexOfChild(this));
         mMenuView = TaskMenuView.showForTask(this);
+        UserEventDispatcher.newInstance(getContext()).logActionOnItem(action, Direction.NONE,
+                LauncherLogProto.ItemType.TASK_ICON);
         if (mMenuView != null) {
             mMenuView.addOnAttachStateChangeListener(mTaskMenuStateListener);
         }
@@ -372,10 +381,10 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
     private void setIcon(Drawable icon) {
         if (icon != null) {
             mIconView.setDrawable(icon);
-            mIconView.setOnClickListener(v -> showTaskMenu());
+            mIconView.setOnClickListener(v -> showTaskMenu(Touch.TAP));
             mIconView.setOnLongClickListener(v -> {
                 requestDisallowInterceptTouchEvent(true);
-                return showTaskMenu();
+                return showTaskMenu(Touch.LONGPRESS);
             });
         } else {
             mIconView.setDrawable(null);
@@ -513,9 +522,9 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         private final int mMarginTop;
         private final float mRadius;
 
-        TaskOutlineProvider(Resources res) {
+        TaskOutlineProvider(Context context, Resources res) {
             mMarginTop = res.getDimensionPixelSize(R.dimen.task_thumbnail_top_margin);
-            mRadius = res.getDimension(R.dimen.task_corner_radius);
+            mRadius = Themes.getDialogCornerRadius(context);
         }
 
         @Override

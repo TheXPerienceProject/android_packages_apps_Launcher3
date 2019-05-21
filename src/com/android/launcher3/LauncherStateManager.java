@@ -50,6 +50,7 @@ import com.android.launcher3.anim.PropertySetter;
 import com.android.launcher3.anim.PropertySetter.AnimatedPropertySetter;
 import com.android.launcher3.uioverrides.UiFactory;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -140,6 +141,19 @@ public class LauncherStateManager {
         return mState;
     }
 
+    public LauncherState getCurrentStableState() {
+        return mCurrentStableState;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        writer.println(prefix + "LauncherState");
+        writer.println(prefix + "\tmLastStableState:" + mLastStableState);
+        writer.println(prefix + "\tmCurrentStableState:" + mCurrentStableState);
+        writer.println(prefix + "\tmState:" + mState);
+        writer.println(prefix + "\tmRestState:" + mRestState);
+        writer.println(prefix + "\tisInTransition:" + (mConfig.mCurrentAnimation != null));
+    }
+
     public StateHandler[] getStateHandlers() {
         if (mStateHandlers == null) {
             mStateHandlers = UiFactory.getStateHandler(mLauncher);
@@ -218,6 +232,7 @@ public class LauncherStateManager {
 
     private void goToState(LauncherState state, boolean animated, long delay,
             final Runnable onCompleteRunnable) {
+        animated &= Utilities.areAnimationsEnabled(mLauncher);
         if (mLauncher.isInState(state)) {
             if (mConfig.mCurrentAnimation == null) {
                 // Run any queued runnable
@@ -320,8 +335,12 @@ public class LauncherStateManager {
             if (!isWorkspaceVisible) {
                 workspace.setScaleX(0.92f);
                 workspace.setScaleY(0.92f);
-                workspace.getHotseat().setScaleX(0.92f);
-                workspace.getHotseat().setScaleY(0.92f);
+            }
+            Hotseat hotseat = workspace.getHotseat();
+            boolean isHotseatVisible = hotseat.getVisibility() == VISIBLE && hotseat.getAlpha() > 0;
+            if (!isHotseatVisible) {
+                hotseat.setScaleX(0.92f);
+                hotseat.setScaleY(0.92f);
             }
         } else if (fromState == NORMAL && toState == OVERVIEW_PEEK) {
             builder.setInterpolator(ANIM_OVERVIEW_FADE, INSTANT);

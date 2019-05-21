@@ -16,7 +16,8 @@
 
 package com.android.launcher3;
 
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
+import static com.android.launcher3.userevent.nano.LauncherLogProto.Action.Touch.TAP;
+import static com.android.launcher3.userevent.nano.LauncherLogProto.ControlType.UNDO;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -64,7 +65,7 @@ public class DeleteDropTarget extends ButtonDropTarget {
      */
     @Override
     public boolean supportsAccessibilityDrop(ItemInfo info, View view) {
-        if (info instanceof ShortcutInfo) {
+        if (info instanceof WorkspaceItemInfo) {
             // Support the action unless the item is in a context menu.
             return info.screenId >= 0;
         }
@@ -123,8 +124,12 @@ public class DeleteDropTarget extends ButtonDropTarget {
             int itemPage = mLauncher.getWorkspace().getCurrentPage();
             onAccessibilityDrop(null, item);
             ModelWriter modelWriter = mLauncher.getModelWriter();
+            Runnable onUndoClicked = () -> {
+                modelWriter.abortDelete(itemPage);
+                mLauncher.getUserEventDispatcher().logActionOnControl(TAP, UNDO);
+            };
             Snackbar.show(mLauncher, R.string.item_removed, R.string.undo,
-                    modelWriter::commitDelete, () -> modelWriter.abortDelete(itemPage));
+                    modelWriter::commitDelete, onUndoClicked);
         }
     }
 

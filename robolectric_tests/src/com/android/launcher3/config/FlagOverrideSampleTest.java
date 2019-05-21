@@ -22,11 +22,9 @@ public class FlagOverrideSampleTest {
     public final FlagOverrideRule flags = new FlagOverrideRule();
 
     @FlagOverride(key = "EXAMPLE_FLAG", value = true)
-    @FlagOverride(key = "QUICK_SWITCH", value = false)
     @Test
     public void withFlagOn() {
         assertTrue(FeatureFlags.EXAMPLE_FLAG.get());
-        assertFalse(FeatureFlags.STYLE_WALLPAPER.get());
     }
 
 

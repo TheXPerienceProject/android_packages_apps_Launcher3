@@ -16,6 +16,9 @@
 
 package com.android.launcher3.tapl;
 
+import static com.android.launcher3.TestProtocol.BACKGROUND_APP_STATE_ORDINAL;
+import static com.android.launcher3.TestProtocol.NORMAL_STATE_ORDINAL;
+
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
@@ -35,7 +38,9 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.uiautomator.By;
@@ -44,15 +49,18 @@ import androidx.test.uiautomator.Configurator;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
+
 import com.android.launcher3.TestProtocol;
 import com.android.systemui.shared.system.QuickStepContract;
+
+import org.junit.Assert;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import org.junit.Assert;
 
 /**
  * The main tapl object. The only object that can be explicitly constructed by the using code. It
@@ -61,8 +69,6 @@ import org.junit.Assert;
 public final class LauncherInstrumentation {
 
     private static final String TAG = "Tapl";
-    private static final String NAV_BAR_INTERACTION_MODE_RES_NAME =
-            "config_navBarInteractionMode";
     private static final int ZERO_BUTTON_STEPS_FROM_BACKGROUND_TO_HOME = 20;
 
     // Types for launcher containers that the user is interacting with. "Background" is a
@@ -169,6 +175,7 @@ public final class LauncherInstrumentation {
             // Workaround, use constructed context because both the instrumentation context and the
             // app context are not constructed with resources that take overlays into account
             final Context ctx = baseContext.createPackageContext("android", 0);
+            log("Interaction mode = " + getCurrentInteractionMode(ctx));
             if (isGesturalMode(ctx)) {
                 return NavigationModel.ZERO_BUTTON;
             } else if (isSwipeUpMode(ctx)) {
@@ -194,13 +201,19 @@ public final class LauncherInstrumentation {
 
     Closable addContextLayer(String piece) {
         mDiagnosticContext.addLast(piece);
-        return () -> mDiagnosticContext.removeLast();
+        log("Added context: " + getContextDescription());
+        return () -> {
+            log("Removing context: " + getContextDescription());
+            mDiagnosticContext.removeLast();
+        };
     }
 
     private void fail(String message) {
-        final String ctxt = mDiagnosticContext.isEmpty() ? "" : String.join(", ",
-                mDiagnosticContext) + "; ";
-        Assert.fail("http://go/tapl : " + ctxt + message);
+        Assert.fail("http://go/tapl : " + getContextDescription() + message);
+    }
+
+    private String getContextDescription() {
+        return mDiagnosticContext.isEmpty() ? "" : String.join(", ", mDiagnosticContext) + "; ";
     }
 
     void assertTrue(String message, boolean condition) {
@@ -243,12 +256,14 @@ public final class LauncherInstrumentation {
         assertEquals("Unexpected display rotation",
                 mExpectedRotation, mDevice.getDisplayRotation());
         final NavigationModel navigationModel = getNavigationModel();
-        assertTrue("Presence of recents button doesn't match the interaction mode",
-                (navigationModel == NavigationModel.THREE_BUTTON) ==
-                        mDevice.hasObject(By.res(SYSTEMUI_PACKAGE, "recent_apps")));
-        assertTrue("Presence of home button doesn't match the interaction mode",
-                (navigationModel != NavigationModel.ZERO_BUTTON) ==
-                        mDevice.hasObject(By.res(SYSTEMUI_PACKAGE, "home")));
+        final boolean hasRecentsButton = hasSystemUiObject("recent_apps");
+        final boolean hasHomeButton = hasSystemUiObject("home");
+        assertTrue("Presence of recents button doesn't match the interaction mode, mode="
+                        + navigationModel.name() + ", hasRecents=" + hasRecentsButton,
+                (navigationModel == NavigationModel.THREE_BUTTON) == hasRecentsButton);
+        assertTrue("Presence of home button doesn't match the interaction mode, mode="
+                        + navigationModel.name() + ", hasHome=" + hasHomeButton,
+                (navigationModel != NavigationModel.ZERO_BUTTON) == hasHomeButton);
         log("verifyContainerType: " + containerType);
 
         try (Closable c = addContextLayer(
@@ -337,21 +352,17 @@ public final class LauncherInstrumentation {
         final String action;
         if (getNavigationModel() == NavigationModel.ZERO_BUTTON) {
             if (hasLauncherObject(WORKSPACE_RES_ID)) {
-                log(action = "0-button: already in workspace");
-            } else if (hasLauncherObject(OVERVIEW_RES_ID)) {
-                log(action = "0-button: from overview");
-                mDevice.pressHome();
-            } else if (hasLauncherObject(WIDGETS_RES_ID)) {
-                log(action = "0-button: from widgets");
-                mDevice.pressHome();
-            } else if (hasLauncherObject(APPS_RES_ID)) {
-                log(action = "0-button: from all apps");
-                mDevice.pressHome();
+                log(action = "already at home");
             } else {
-                log(action = "0-button: from another app");
-                assertTrue("Launcher is visible, don't know how to go home",
-                        !mDevice.hasObject(By.pkg(getLauncherPackageName())));
-                mDevice.pressHome();
+                log(action = "swiping up to home");
+                final int finalState = mDevice.hasObject(By.pkg(getLauncherPackageName()))
+                        ? NORMAL_STATE_ORDINAL : BACKGROUND_APP_STATE_ORDINAL;
+                final Point displaySize = getRealDisplaySize();
+
+                swipe(
+                        displaySize.x / 2, displaySize.y - 1,
+                        displaySize.x / 2, 0,
+                        finalState, ZERO_BUTTON_STEPS_FROM_BACKGROUND_TO_HOME);
             }
         } else {
             log(action = "clicking home button");
@@ -477,6 +488,10 @@ public final class LauncherInstrumentation {
                         WAIT_TIME_MS));
     }
 
+    private boolean hasSystemUiObject(String resId) {
+        return mDevice.hasObject(By.res(SYSTEMUI_PACKAGE, resId));
+    }
+
     @NonNull
     UiObject2 waitForSystemUiObject(String resId) {
         final UiObject2 object = mDevice.wait(
@@ -586,11 +601,12 @@ public final class LauncherInstrumentation {
 
     void movePointer(long downTime, long duration, Point from, Point to) {
         final Point point = new Point();
+        final long startTime = SystemClock.uptimeMillis();
         for (; ; ) {
             sleep(16);
 
             final long currentTime = SystemClock.uptimeMillis();
-            final float progress = (currentTime - downTime) / (float) duration;
+            final float progress = (currentTime - startTime) / (float) duration;
             if (progress > 1) return;
 
             point.x = from.x + (int) (progress * (to.x - from.x));
@@ -601,18 +617,19 @@ public final class LauncherInstrumentation {
     }
 
     public static boolean isGesturalMode(Context context) {
-        return QuickStepContract.isGesturalMode(
-                getSystemIntegerRes(context, NAV_BAR_INTERACTION_MODE_RES_NAME));
+        return QuickStepContract.isGesturalMode(getCurrentInteractionMode(context));
     }
 
     public static boolean isSwipeUpMode(Context context) {
-        return QuickStepContract.isSwipeUpMode(
-                getSystemIntegerRes(context, NAV_BAR_INTERACTION_MODE_RES_NAME));
+        return QuickStepContract.isSwipeUpMode(getCurrentInteractionMode(context));
     }
 
     public static boolean isLegacyMode(Context context) {
-        return QuickStepContract.isLegacyMode(
-                getSystemIntegerRes(context, NAV_BAR_INTERACTION_MODE_RES_NAME));
+        return QuickStepContract.isLegacyMode(getCurrentInteractionMode(context));
+    }
+
+    private static int getCurrentInteractionMode(Context context) {
+        return getSystemIntegerRes(context, "config_navBarInteractionMode");
     }
 
     private static int getSystemIntegerRes(Context context, String resName) {
@@ -627,10 +644,40 @@ public final class LauncherInstrumentation {
         }
     }
 
+    private static int getSystemDimensionResId(Context context, String resName) {
+        Resources res = context.getResources();
+        int resId = res.getIdentifier(resName, "dimen", "android");
+
+        if (resId != 0) {
+            return resId;
+        } else {
+            Log.e(TAG, "Failed to get system resource ID. Incompatible framework version?");
+            return -1;
+        }
+    }
+
     static void sleep(int duration) {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
         }
+    }
+
+    int getEdgeSensitivityWidth() {
+        try {
+            final Context context = mInstrumentation.getTargetContext().createPackageContext(
+                    "android", 0);
+            return context.getResources().getDimensionPixelSize(
+                    getSystemDimensionResId(context, "config_backGestureInset")) + 1;
+        } catch (PackageManager.NameNotFoundException e) {
+            fail("Can't get edge sensitivity: " + e);
+            return 0;
+        }
+    }
+
+    Point getRealDisplaySize() {
+        final Point size = new Point();
+        getContext().getSystemService(WindowManager.class).getDefaultDisplay().getRealSize(size);
+        return size;
     }
 }
