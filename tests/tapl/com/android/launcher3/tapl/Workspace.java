@@ -36,7 +36,8 @@ import com.android.launcher3.TestProtocol;
  * Operations on the workspace screen.
  */
 public final class Workspace extends Home {
-    private static final float FLING_SPEED = 3500.0F;
+    private static final float FLING_SPEED =
+            LauncherInstrumentation.isAvd() ? 1500.0F : 3500.0F;
     private static final int DRAG_DURACTION = 2000;
     private final UiObject2 mHotseat;
 
@@ -57,16 +58,21 @@ public final class Workspace extends Home {
             verifyActiveContainer();
             final UiObject2 hotseat = mHotseat;
             final Point start = hotseat.getVisibleCenter();
+            start.y = hotseat.getVisibleBounds().bottom - 1;
             final int swipeHeight = mLauncher.getTestInfo(
                     TestProtocol.REQUEST_HOME_TO_ALL_APPS_SWIPE_HEIGHT).
                     getInt(TestProtocol.TEST_INFO_RESPONSE_FIELD);
-            mLauncher.swipe(
+            LauncherInstrumentation.log(
+                    "switchToAllApps: swipeHeight = " + swipeHeight + ", slop = "
+                            + mLauncher.getTouchSlop());
+
+            mLauncher.swipeToState(
                     start.x,
                     start.y,
                     start.x,
                     start.y - swipeHeight - mLauncher.getTouchSlop(),
-                    ALL_APPS_STATE_ORDINAL
-            );
+                    60,
+                    ALL_APPS_STATE_ORDINAL);
 
             try (LauncherInstrumentation.Closable c1 = mLauncher.addContextLayer(
                     "swiped to all apps")) {
@@ -142,7 +148,7 @@ public final class Workspace extends Home {
     static void dragIconToWorkspace(
             LauncherInstrumentation launcher, Launchable launchable, Point dest,
             String longPressIndicator) {
-        launcher.getTestInfo(TestProtocol.REQUEST_ENABLE_DRAG_LOGGING);
+        launcher.getTestInfo(TestProtocol.REQUEST_ENABLE_DEBUG_TRACING);
         LauncherInstrumentation.log("dragIconToWorkspace: begin");
         final Point launchableCenter = launchable.getObject().getVisibleCenter();
         final long downTime = SystemClock.uptimeMillis();
@@ -150,13 +156,14 @@ public final class Workspace extends Home {
         LauncherInstrumentation.log("dragIconToWorkspace: sent down");
         launcher.waitForLauncherObject(longPressIndicator);
         LauncherInstrumentation.log("dragIconToWorkspace: indicator");
-        launcher.movePointer(downTime, DRAG_DURACTION, launchableCenter, dest);
+        launcher.movePointer(
+                downTime, SystemClock.uptimeMillis(), DRAG_DURACTION, launchableCenter, dest);
         LauncherInstrumentation.log("dragIconToWorkspace: moved pointer");
         launcher.sendPointer(
                 downTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, dest);
         LauncherInstrumentation.log("dragIconToWorkspace: end");
         launcher.waitUntilGone("drop_target_bar");
-        launcher.getTestInfo(TestProtocol.REQUEST_DISABLE_DRAG_LOGGING);
+        launcher.getTestInfo(TestProtocol.REQUEST_DISABLE_DEBUG_TRACING);
     }
 
     /**

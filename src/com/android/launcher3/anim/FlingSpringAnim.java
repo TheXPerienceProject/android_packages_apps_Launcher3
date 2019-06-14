@@ -28,33 +28,60 @@ import androidx.dynamicanimation.animation.SpringForce;
 public class FlingSpringAnim {
 
     private static final float FLING_FRICTION = 1.5f;
-    // Have the spring pull towards the target if we've slowed down too much before reaching it.
-    private static final float FLING_END_THRESHOLD_PX = 50f;
-    private static final float SPRING_STIFFNESS = 350f;
-    private static final float SPRING_DAMPING = SpringForce.DAMPING_RATIO_LOW_BOUNCY;
+    private static final float SPRING_STIFFNESS = 200;
+    private static final float SPRING_DAMPING = 0.85f;
 
     private final FlingAnimation mFlingAnim;
+    private SpringAnimation mSpringAnim;
+
+    private float mTargetPosition;
 
     public <K> FlingSpringAnim(K object, FloatPropertyCompat<K> property, float startPosition,
-            float targetPosition, float startVelocity, OnAnimationEndListener onEndListener) {
+            float targetPosition, float startVelocity, float minVisChange, float minValue,
+            float maxValue, float springVelocityFactor, OnAnimationEndListener onEndListener) {
         mFlingAnim = new FlingAnimation(object, property)
                 .setFriction(FLING_FRICTION)
-                .setMinimumVisibleChange(FLING_END_THRESHOLD_PX)
+                // Have the spring pull towards the target if we've slowed down too much before
+                // reaching it.
+                .setMinimumVisibleChange(minVisChange)
                 .setStartVelocity(startVelocity)
-                .setMinValue(Math.min(startPosition, targetPosition))
-                .setMaxValue(Math.max(startPosition, targetPosition));
+                .setMinValue(minValue)
+                .setMaxValue(maxValue);
+        mTargetPosition = targetPosition;
+
         mFlingAnim.addEndListener(((animation, canceled, value, velocity) -> {
-            SpringAnimation springAnim = new SpringAnimation(object, property)
-                    .setStartVelocity(velocity)
-                    .setSpring(new SpringForce(targetPosition)
+            mSpringAnim = new SpringAnimation(object, property)
+                    .setStartValue(value)
+                    .setStartVelocity(velocity * springVelocityFactor)
+                    .setSpring(new SpringForce(mTargetPosition)
                             .setStiffness(SPRING_STIFFNESS)
                             .setDampingRatio(SPRING_DAMPING));
-            springAnim.addEndListener(onEndListener);
-            springAnim.start();
+            mSpringAnim.addEndListener(onEndListener);
+            mSpringAnim.animateToFinalPosition(mTargetPosition);
         }));
+    }
+
+    public float getTargetPosition() {
+        return mTargetPosition;
+    }
+
+    public void updatePosition(float startPosition, float targetPosition) {
+        mFlingAnim.setMinValue(Math.min(startPosition, targetPosition))
+                .setMaxValue(Math.max(startPosition, targetPosition));
+        mTargetPosition = targetPosition;
+        if (mSpringAnim != null) {
+            mSpringAnim.animateToFinalPosition(mTargetPosition);
+        }
     }
 
     public void start() {
         mFlingAnim.start();
+    }
+
+    public void end() {
+        mFlingAnim.cancel();
+        if (mSpringAnim.canSkipToEnd()) {
+            mSpringAnim.skipToEnd();
+        }
     }
 }

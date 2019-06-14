@@ -24,16 +24,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Intent;
-import android.util.Log;
-
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
-import androidx.test.uiautomator.UiDevice;
 
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
-import com.android.launcher3.TestProtocol;
 import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.tapl.AllApps;
 import com.android.launcher3.tapl.AppIcon;
@@ -47,61 +42,13 @@ import com.android.launcher3.widget.WidgetsFullSheet;
 import com.android.launcher3.widget.WidgetsRecyclerView;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class TaplTestsLauncher3 extends AbstractLauncherUiTest {
-    private static final String TAG = "TaplTestsAosp";
     private static final String APP_NAME = "LauncherTestApp";
-
-    private static int sScreenshotCount = 0;
-
-    public static class FailureWatcher extends TestWatcher {
-        private UiDevice mDevice;
-
-        public FailureWatcher(UiDevice device) {
-            this.mDevice = device;
-        }
-
-        private void dumpViewHierarchy() {
-            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            try {
-                mDevice.dumpWindowHierarchy(stream);
-                stream.flush();
-                stream.close();
-                for (String line : stream.toString().split("\\r?\\n")) {
-                    Log.e(TAG, line.trim());
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "error dumping XML to logcat", e);
-            }
-        }
-
-        @Override
-        protected void failed(Throwable e, Description description) {
-            if (mDevice == null) return;
-            final String pathname = getInstrumentation().getTargetContext().
-                    getFilesDir().getPath() + "/TaplTestScreenshot" + sScreenshotCount++ + ".png";
-            Log.e(TAG, "Failed test " + description.getMethodName() +
-                    ", screenshot will be saved to " + pathname +
-                    ", track trace is below, UI object dump is further below:\n" +
-                    Log.getStackTraceString(e));
-            dumpViewHierarchy();
-            mDevice.takeScreenshot(new File(pathname));
-        }
-    }
-
-    @Rule
-    public TestWatcher mFailureWatcher = new FailureWatcher(mDevice);
 
     @Before
     public void setUp() throws Exception {
@@ -239,18 +186,11 @@ public class TaplTestsLauncher3 extends AbstractLauncherUiTest {
         // Test starting a workspace app.
         final AppIcon app = workspace.tryGetWorkspaceAppIcon("Chrome");
         assertNotNull("No Chrome app in workspace", app);
-        assertNotNull("AppIcon.launch returned null",
-                app.launch(resolveSystemApp(Intent.CATEGORY_APP_BROWSER)));
-        executeOnLauncher(launcher -> assertTrue(
-                "Launcher activity is the top activity; expecting another activity to be the top "
-                        + "one",
-                isInBackground(launcher)));
     }
 
     public static void runIconLaunchFromAllAppsTest(AbstractLauncherUiTest test, AllApps allApps) {
-        final AppIcon app = allApps.getAppIcon("Calculator");
-        assertNotNull("AppIcon.launch returned null", app.launch(
-                test.resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR)));
+        final AppIcon app = allApps.getAppIcon("TestActivity7");
+        assertNotNull("AppIcon.launch returned null", app.launch(getAppPackageName()));
         test.executeOnLauncher(launcher -> assertTrue(
                 "Launcher activity is the top activity; expecting another activity to be the top "
                         + "one",
@@ -329,20 +269,19 @@ public class TaplTestsLauncher3 extends AbstractLauncherUiTest {
     @Test
     @PortraitLandscape
     public void testDragAppIcon() throws Throwable {
-        try {
-            TestProtocol.sDebugTracing = true;
-            // 1. Open all apps and wait for load complete.
-            // 2. Drag icon to homescreen.
-            // 3. Verify that the icon works on homescreen.
-            mLauncher.getWorkspace().
-                    switchToAllApps().
-                    getAppIcon(APP_NAME).
-                    dragToWorkspace().
-                    getWorkspaceAppIcon(APP_NAME).
-                    launch(getAppPackageName());
-        } finally {
-            TestProtocol.sDebugTracing = false;
-        }
+        // 1. Open all apps and wait for load complete.
+        // 2. Drag icon to homescreen.
+        // 3. Verify that the icon works on homescreen.
+        mLauncher.getWorkspace().
+                switchToAllApps().
+                getAppIcon(APP_NAME).
+                dragToWorkspace().
+                getWorkspaceAppIcon(APP_NAME).
+                launch(getAppPackageName());
+        executeOnLauncher(launcher -> assertTrue(
+                "Launcher activity is the top activity; expecting another activity to be the top "
+                        + "one",
+                isInBackground(launcher)));
     }
 
     @Test

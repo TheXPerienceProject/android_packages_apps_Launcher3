@@ -49,19 +49,19 @@ public class AddWidgetTest extends AbstractLauncherUiTest {
     @Rule public ShellCommandRule mGrantWidgetRule = ShellCommandRule.grantWidgetBind();
 
     @Test
-    @Ignore // Convert test to TAPL and enable them; b/131116002
     public void testDragIcon_portrait() throws Throwable {
         lockRotation(true);
         performTest();
     }
 
     @Test
-    @Ignore // Convert test to TAPL and enable them; b/131116002
+    @Ignore // b/121280703
     public void testDragIcon_landscape() throws Throwable {
         lockRotation(false);
         performTest();
     }
 
+    // Convert to TAPL b/131116002
     private void performTest() throws Throwable {
         clearHomescreen();
         mActivityMonitor.startLauncher();
@@ -82,7 +82,8 @@ public class AddWidgetTest extends AbstractLauncherUiTest {
             @Override
             public boolean evaluate(ItemInfo info, View view) {
                 return info instanceof LauncherAppWidgetInfo &&
-                        ((LauncherAppWidgetInfo) info).providerName.equals(widgetInfo.provider);
+                        ((LauncherAppWidgetInfo) info).providerName.getClassName().equals(
+                                widgetInfo.provider.getClassName());
             }
         }).call());
     }

@@ -37,11 +37,12 @@ public final class RecentsActivity extends BaseRecentsActivity {
         mRecentsRootView = findViewById(R.id.drag_layer);
         mIconRecentsView = findViewById(R.id.overview_panel);
         mIconRecentsView.setRecentsToActivityHelper(new FallbackRecentsToActivityHelper(this));
+        mIconRecentsView.setShowStatusBarForegroundScrim(true);
     }
 
     @Override
     protected void reapplyUi() {
-        //TODO: Implement this depending on how insets will affect the view.
+        // No-op. Insets are automatically re-applied in the root view.
     }
 
     @Override
@@ -66,8 +67,8 @@ public final class RecentsActivity extends BaseRecentsActivity {
     }
 
     @Override
-    protected void onStart() {
+    protected void onResume() {
         mIconRecentsView.onBeginTransitionToOverview();
-        super.onStart();
+        super.onResume();
     }
 }

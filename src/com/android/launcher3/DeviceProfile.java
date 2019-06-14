@@ -24,14 +24,12 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.Surface;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.android.launcher3.CellLayout.ContainerType;
+import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconNormalizer;
-
-import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 
 public class DeviceProfile {
 
@@ -212,10 +210,9 @@ public class DeviceProfile {
                 + res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_bottom_padding);
         hotseatBarSidePaddingEndPx =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_side_padding);
-        // Add a bit of space between nav bar and hotseat in multi-window vertical bar layout.
-        hotseatBarSidePaddingStartPx = isMultiWindowMode && isVerticalBarLayout()
-                ? edgeMarginPx : 0;
-        hotseatBarSizePx = Utilities.pxFromDp(inv.iconSize, dm) + (isVerticalBarLayout()
+        // Add a bit of space between nav bar and hotseat in vertical bar layout.
+        hotseatBarSidePaddingStartPx = isVerticalBarLayout() ? verticalDragHandleSizePx : 0;
+        hotseatBarSizePx = ResourceUtils.pxFromDp(inv.iconSize, dm) + (isVerticalBarLayout()
                 ? (hotseatBarSidePaddingStartPx + hotseatBarSidePaddingEndPx)
                 : (res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_extra_vertical_size)
                         + hotseatBarTopPaddingPx + hotseatBarBottomPaddingPx));
@@ -240,7 +237,8 @@ public class DeviceProfile {
         updateWorkspacePadding();
 
         // This is done last, after iconSizePx is calculated above.
-        mDotRenderer = new DotRenderer(iconSizePx);
+        mDotRenderer = new DotRenderer(iconSizePx, IconShape.getShapePath(),
+                IconShape.DEFAULT_PATH_SIZE);
     }
 
     public DeviceProfile copy(Context context) {
@@ -320,7 +318,7 @@ public class DeviceProfile {
         // Workspace
         final boolean isVerticalLayout = isVerticalBarLayout();
         float invIconSizePx = isVerticalLayout ? inv.landscapeIconSize : inv.iconSize;
-        iconSizePx = Math.max(1, (int) (Utilities.pxFromDp(invIconSizePx, dm) * scale));
+        iconSizePx = Math.max(1, (int) (ResourceUtils.pxFromDp(invIconSizePx, dm) * scale));
         iconTextSizePx = (int) (Utilities.pxFromSp(inv.iconTextSize, dm) * scale);
         iconDrawablePaddingPx = (int) (iconDrawablePaddingOriginalPx * scale);
 
@@ -400,7 +398,7 @@ public class DeviceProfile {
     }
 
     private void updateFolderCellSize(float scale, DisplayMetrics dm, Resources res) {
-        folderChildIconSizePx = (int) (Utilities.pxFromDp(inv.iconSize, dm) * scale);
+        folderChildIconSizePx = (int) (ResourceUtils.pxFromDp(inv.iconSize, dm) * scale);
         folderChildTextSizePx =
                 (int) (res.getDimensionPixelSize(R.dimen.folder_child_text_size) * scale);
 
@@ -419,6 +417,10 @@ public class DeviceProfile {
         updateWorkspacePadding();
     }
 
+    /**
+     * The current device insets. This is generally same as the insets being dispatched to
+     * {@link Insettable} elements, but can differ if the element is using a different profile.
+     */
     public Rect getInsets() {
         return mInsets;
     }
@@ -579,45 +581,6 @@ public class DeviceProfile {
             default:
                 // ??
                 return 0;
-        }
-    }
-
-    /**
-     * Gets an item's location on the home screen. This is useful if the home screen
-     * is animating, otherwise use {@link View#getLocationOnScreen(int[])}.
-     * @param pageDiff The page difference relative to the current page.
-     */
-    public void getItemLocation(int cellX, int cellY, int spanX, int spanY, int container,
-            int pageDiff, Rect outBounds) {
-        outBounds.setEmpty();
-        if (container == CONTAINER_HOTSEAT) {
-            final int actualHotseatCellHeight;
-            if (isVerticalBarLayout()) {
-                actualHotseatCellHeight = availableHeightPx / inv.numRows;
-                if (mIsSeascape) {
-                    outBounds.left = mHotseatPadding.left;
-                } else {
-                    outBounds.left = availableWidthPx - hotseatBarSizePx + mHotseatPadding.left;
-                }
-                outBounds.right = outBounds.left + iconSizePx;
-                outBounds.top = mHotseatPadding.top
-                        + actualHotseatCellHeight * (inv.numRows - cellX - 1);
-                outBounds.bottom = outBounds.top + actualHotseatCellHeight;
-            } else {
-                actualHotseatCellHeight = hotseatBarSizePx - hotseatBarBottomPaddingPx
-                        - hotseatBarTopPaddingPx;
-                outBounds.left = mInsets.left + workspacePadding.left + cellLayoutPaddingLeftRightPx
-                        + (cellX * getCellSize().x);
-                outBounds.right = outBounds.left + getCellSize().x;
-                outBounds.top = mInsets.top + availableHeightPx - hotseatBarSizePx;
-                outBounds.bottom = outBounds.top + actualHotseatCellHeight;
-            }
-        } else {
-            outBounds.left = mInsets.left + workspacePadding.left + cellLayoutPaddingLeftRightPx
-                    + (cellX * getCellSize().x) + (pageDiff * availableWidthPx);
-            outBounds.right = outBounds.left + (getCellSize().x * spanX);
-            outBounds.top = mInsets.top + workspacePadding.top + (cellY * getCellSize().y);
-            outBounds.bottom = outBounds.top + (getCellSize().y * spanY);
         }
     }
 

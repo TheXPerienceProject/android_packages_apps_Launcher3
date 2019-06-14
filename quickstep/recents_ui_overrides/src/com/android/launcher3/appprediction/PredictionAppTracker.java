@@ -15,7 +15,7 @@
  */
 package com.android.launcher3.appprediction;
 
-import static com.android.launcher3.appprediction.PredictionUiStateManager.KEY_APP_SUGGESTION;
+import static com.android.launcher3.InvariantDeviceProfile.CHANGE_FLAG_GRID;
 
 import android.annotation.TargetApi;
 import android.app.prediction.AppPredictionContext;
@@ -26,20 +26,18 @@ import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import com.android.launcher3.InvariantDeviceProfile;
-import com.android.launcher3.Utilities;
+import com.android.launcher3.appprediction.PredictionUiStateManager.Client;
 import com.android.launcher3.model.AppLaunchTracker;
 import com.android.launcher3.util.UiThreadHelper;
-
-import com.android.launcher3.appprediction.PredictionUiStateManager.Client;
 
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
@@ -48,8 +46,7 @@ import androidx.annotation.WorkerThread;
  * Subclass of app tracker which publishes the data to the prediction engine and gets back results.
  */
 @TargetApi(Build.VERSION_CODES.Q)
-public class PredictionAppTracker extends AppLaunchTracker
-        implements OnSharedPreferenceChangeListener {
+public class PredictionAppTracker extends AppLaunchTracker {
 
     private static final String TAG = "PredictionAppTracker";
     private static final boolean DBG = false;
@@ -62,8 +59,6 @@ public class PredictionAppTracker extends AppLaunchTracker
     private final Context mContext;
     private final Handler mMessageHandler;
 
-    private boolean mEnabled;
-
     // Accessed only on worker thread
     private AppPredictor mHomeAppPredictor;
     private AppPredictor mRecentsOverviewPredictor;
@@ -71,24 +66,16 @@ public class PredictionAppTracker extends AppLaunchTracker
     public PredictionAppTracker(Context context) {
         mContext = context;
         mMessageHandler = new Handler(UiThreadHelper.getBackgroundLooper(), this::handleMessage);
-
-        SharedPreferences prefs = Utilities.getPrefs(context);
-        setEnabled(prefs.getBoolean(KEY_APP_SUGGESTION, true));
-        prefs.registerOnSharedPreferenceChangeListener(this);
         InvariantDeviceProfile.INSTANCE.get(mContext).addOnChangeListener(this::onIdpChanged);
+
+        mMessageHandler.sendEmptyMessage(MSG_INIT);
     }
 
     @UiThread
     private void onIdpChanged(int changeFlags, InvariantDeviceProfile profile) {
-        // Reinitialize everything
-        setEnabled(mEnabled);
-    }
-
-    @Override
-    @UiThread
-    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (KEY_APP_SUGGESTION.equals(key)) {
-            setEnabled(prefs.getBoolean(KEY_APP_SUGGESTION, true));
+        if ((changeFlags & CHANGE_FLAG_GRID) != 0) {
+            // Reinitialize everything
+            mMessageHandler.sendEmptyMessage(MSG_INIT);
         }
     }
 
@@ -112,11 +99,21 @@ public class PredictionAppTracker extends AppLaunchTracker
                 new AppPredictionContext.Builder(mContext)
                         .setUiSurface(client.id)
                         .setPredictedTargetCount(count)
+                        .setExtras(getAppPredictionContextExtras(client))
                         .build());
         predictor.registerPredictionUpdates(mContext.getMainExecutor(),
                 PredictionUiStateManager.INSTANCE.get(mContext).appPredictorCallback(client));
         predictor.requestPredictionUpdate();
         return predictor;
+    }
+
+    /**
+     * Override to add custom extras.
+     */
+    @WorkerThread
+    @Nullable
+    public Bundle getAppPredictionContextExtras(Client client){
+        return null;
     }
 
     @WorkerThread
@@ -137,13 +134,13 @@ public class PredictionAppTracker extends AppLaunchTracker
                 return true;
             }
             case MSG_LAUNCH: {
-                if (mEnabled && mHomeAppPredictor != null) {
+                if (mHomeAppPredictor != null) {
                     mHomeAppPredictor.notifyAppTargetEvent((AppTargetEvent) msg.obj);
                 }
                 return true;
             }
             case MSG_PREDICT: {
-                if (mEnabled && mHomeAppPredictor != null) {
+                if (mHomeAppPredictor != null) {
                     String client = (String) msg.obj;
                     if (Client.HOME.id.equals(client)) {
                         mHomeAppPredictor.requestPredictionUpdate();
@@ -168,27 +165,15 @@ public class PredictionAppTracker extends AppLaunchTracker
         }
     }
 
-    @UiThread
-    public void setEnabled(boolean isEnabled) {
-        mEnabled = isEnabled;
-        if (isEnabled) {
-            mMessageHandler.removeMessages(MSG_DESTROY);
-            mMessageHandler.sendEmptyMessage(MSG_INIT);
-        } else {
-            mMessageHandler.removeMessages(MSG_INIT);
-            mMessageHandler.sendEmptyMessage(MSG_DESTROY);
-        }
-    }
-
     @Override
     @UiThread
     public void onStartShortcut(String packageName, String shortcutId, UserHandle user,
             String container) {
         // TODO: Use the full shortcut info
-        AppTarget target = new AppTarget.Builder(new AppTargetId("shortcut:" + shortcutId))
-                .setTarget(packageName, user)
-                .setClassName(shortcutId)
-                .build();
+        AppTarget target = new AppTarget
+                .Builder(new AppTargetId("shortcut:" + shortcutId), packageName, user)
+                    .setClassName(shortcutId)
+                    .build();
         sendLaunch(target, container);
     }
 
@@ -196,10 +181,10 @@ public class PredictionAppTracker extends AppLaunchTracker
     @UiThread
     public void onStartApp(ComponentName cn, UserHandle user, String container) {
         if (cn != null) {
-            AppTarget target = new AppTarget.Builder(new AppTargetId("app:" + cn))
-                    .setTarget(cn.getPackageName(), user)
-                    .setClassName(cn.getClassName())
-                    .build();
+            AppTarget target = new AppTarget
+                    .Builder(new AppTargetId("app:" + cn), cn.getPackageName(), user)
+                        .setClassName(cn.getClassName())
+                        .build();
             sendLaunch(target, container);
         }
     }

@@ -33,6 +33,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -51,7 +52,6 @@ import com.android.quickstep.TaskOverlayFactory.TaskOverlay;
 import com.android.quickstep.util.TaskCornerRadius;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.ThumbnailData;
-import com.android.systemui.shared.system.QuickStepContract;
 
 /**
  * A task in the Recents view.
@@ -60,6 +60,7 @@ public class TaskThumbnailView extends View {
 
     private final static ColorMatrix COLOR_MATRIX = new ColorMatrix();
     private final static ColorMatrix SATURATION_COLOR_MATRIX = new ColorMatrix();
+    private final static RectF EMPTY_RECT_F = new RectF();
 
     public static final Property<TaskThumbnailView, Float> DIM_ALPHA =
             new FloatProperty<TaskThumbnailView>("dimAlpha") {
@@ -74,22 +75,20 @@ public class TaskThumbnailView extends View {
                 }
             };
 
-    private final float mCornerRadius;
-
     private final BaseActivity mActivity;
     private final TaskOverlay mOverlay;
     private final boolean mIsDarkTextTheme;
-    private final Paint mPaint = new Paint();
-    private final Paint mBackgroundPaint = new Paint();
+    private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mClearPaint = new Paint();
     private final Paint mDimmingPaintAfterClearing = new Paint();
-    private final float mWindowCornerRadius;
 
     private final Matrix mMatrix = new Matrix();
 
     private float mClipBottom = -1;
-    private Rect mScaledInsets = new Rect();
-    private boolean mIsRotated;
+    // Contains the portion of the thumbnail that is clipped when fullscreen progress = 0.
+    private RectF mClippedInsets = new RectF();
+    private TaskView.FullscreenDrawParams mFullscreenParams;
 
     private Task mTask;
     private ThumbnailData mThumbnailData;
@@ -109,7 +108,6 @@ public class TaskThumbnailView extends View {
 
     public TaskThumbnailView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mCornerRadius = TaskCornerRadius.get(context);
         mOverlay = TaskOverlayFactory.INSTANCE.get(context).createOverlay(this);
         mPaint.setFilterBitmap(true);
         mBackgroundPaint.setColor(Color.WHITE);
@@ -117,7 +115,7 @@ public class TaskThumbnailView extends View {
         mDimmingPaintAfterClearing.setColor(Color.BLACK);
         mActivity = BaseActivity.fromContext(context);
         mIsDarkTextTheme = Themes.getAttrBoolean(mActivity, R.attr.isWorkspaceDarkText);
-        mWindowCornerRadius = QuickStepContract.getWindowCornerRadius(context.getResources());
+        mFullscreenParams = new TaskView.FullscreenDrawParams(TaskCornerRadius.get(context));
     }
 
     public void bind(Task task) {
@@ -200,29 +198,28 @@ public class TaskThumbnailView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        TaskView taskView = (TaskView) getParent();
-        float fullscreenProgress = taskView.getFullscreenProgress();
-        if (mIsRotated) {
-            // Don't show insets in the wrong orientation.
-            fullscreenProgress = 0;
-        }
-        if (fullscreenProgress > 0) {
-            // Draw the insets if we're being drawn fullscreen (we do this for quick switch).
-            float cornerRadius = Utilities.mapRange(fullscreenProgress, mCornerRadius,
-                    mWindowCornerRadius);
-            drawOnCanvas(canvas,
-                    -mScaledInsets.left * fullscreenProgress,
-                    -mScaledInsets.top * fullscreenProgress,
-                    getMeasuredWidth() + mScaledInsets.right * fullscreenProgress,
-                    getMeasuredHeight() + mScaledInsets.bottom * fullscreenProgress,
-                    cornerRadius / taskView.getRecentsView().getScaleX());
-        } else {
-            drawOnCanvas(canvas, 0, 0, getMeasuredWidth(), getMeasuredHeight(), mCornerRadius);
-        }
+        RectF currentDrawnInsets = mFullscreenParams.mCurrentDrawnInsets;
+        canvas.save();
+        canvas.translate(currentDrawnInsets.left, currentDrawnInsets.top);
+        canvas.scale(mFullscreenParams.mScale, mFullscreenParams.mScale);
+        // Draw the insets if we're being drawn fullscreen (we do this for quick switch).
+        drawOnCanvas(canvas,
+                -currentDrawnInsets.left,
+                -currentDrawnInsets.top,
+                getMeasuredWidth() + currentDrawnInsets.right,
+                getMeasuredHeight() + currentDrawnInsets.bottom,
+                mFullscreenParams.mCurrentDrawnCornerRadius);
+        canvas.restore();
     }
 
-    public float getCornerRadius() {
-        return mCornerRadius;
+    public RectF getInsetsToDrawInFullscreen(boolean isMultiWindowMode) {
+        // Don't show insets in multi window mode.
+        return isMultiWindowMode ? EMPTY_RECT_F : mClippedInsets;
+    }
+
+    public void setFullscreenParams(TaskView.FullscreenDrawParams fullscreenParams) {
+        mFullscreenParams = fullscreenParams;
+        invalidate();
     }
 
     public void drawOnCanvas(Canvas canvas, float x, float y, float width, float height,
@@ -275,7 +272,7 @@ public class TaskThumbnailView extends View {
     }
 
     private void updateThumbnailMatrix() {
-        mIsRotated = false;
+        boolean isRotated = false;
         mClipBottom = -1;
         if (mBitmapShader != null && mThumbnailData != null) {
             float scale = mThumbnailData.scale;
@@ -296,30 +293,28 @@ public class TaskThumbnailView extends View {
                 final Configuration configuration =
                         getContext().getResources().getConfiguration();
                 // Rotate the screenshot if not in multi-window mode
-                mIsRotated = FeatureFlags.OVERVIEW_USE_SCREENSHOT_ORIENTATION &&
+                isRotated = FeatureFlags.OVERVIEW_USE_SCREENSHOT_ORIENTATION &&
                         configuration.orientation != mThumbnailData.orientation &&
                         !mActivity.isInMultiWindowMode() &&
                         mThumbnailData.windowingMode == WINDOWING_MODE_FULLSCREEN;
                 // Scale the screenshot to always fit the width of the card.
-                thumbnailScale = mIsRotated
+                thumbnailScale = isRotated
                         ? getMeasuredWidth() / thumbnailHeight
                         : getMeasuredWidth() / thumbnailWidth;
             }
 
-            mScaledInsets.set(thumbnailInsets);
-            Utilities.scaleRect(mScaledInsets, thumbnailScale);
-
-            if (mIsRotated) {
+            if (isRotated) {
                 int rotationDir = profile.isVerticalBarLayout() && !profile.isSeascape() ? -1 : 1;
                 mMatrix.setRotate(90 * rotationDir);
                 int newLeftInset = rotationDir == 1 ? thumbnailInsets.bottom : thumbnailInsets.top;
                 int newTopInset = rotationDir == 1 ? thumbnailInsets.left : thumbnailInsets.right;
-                mMatrix.postTranslate(-newLeftInset * scale, -newTopInset * scale);
+                mClippedInsets.offsetTo(newLeftInset * scale, newTopInset * scale);
                 if (rotationDir == -1) {
                     // Crop the right/bottom side of the screenshot rather than left/top
                     float excessHeight = thumbnailWidth * thumbnailScale - getMeasuredHeight();
-                    mMatrix.postTranslate(0, -excessHeight);
+                    mClippedInsets.offset(0, excessHeight);
                 }
+                mMatrix.postTranslate(-mClippedInsets.left, -mClippedInsets.top);
                 // Move the screenshot to the thumbnail window (rotation moved it out).
                 if (rotationDir == 1) {
                     mMatrix.postTranslate(mThumbnailData.thumbnail.getHeight(), 0);
@@ -327,13 +322,28 @@ public class TaskThumbnailView extends View {
                     mMatrix.postTranslate(0, mThumbnailData.thumbnail.getWidth());
                 }
             } else {
-                mMatrix.setTranslate(-mThumbnailData.insets.left * scale,
-                        -mThumbnailData.insets.top * scale);
+                mClippedInsets.offsetTo(thumbnailInsets.left * scale, thumbnailInsets.top * scale);
+                mMatrix.setTranslate(-mClippedInsets.left, -mClippedInsets.top);
             }
+
+            final float widthWithInsets;
+            final float heightWithInsets;
+            if (isRotated) {
+                widthWithInsets = mThumbnailData.thumbnail.getHeight() * thumbnailScale;
+                heightWithInsets = mThumbnailData.thumbnail.getWidth() * thumbnailScale;
+            } else {
+                widthWithInsets = mThumbnailData.thumbnail.getWidth() * thumbnailScale;
+                heightWithInsets = mThumbnailData.thumbnail.getHeight() * thumbnailScale;
+            }
+            mClippedInsets.left *= thumbnailScale;
+            mClippedInsets.top *= thumbnailScale;
+            mClippedInsets.right = widthWithInsets - mClippedInsets.left - getMeasuredWidth();
+            mClippedInsets.bottom = heightWithInsets - mClippedInsets.top - getMeasuredHeight();
+
             mMatrix.postScale(thumbnailScale, thumbnailScale);
             mBitmapShader.setLocalMatrix(mMatrix);
 
-            float bitmapHeight = Math.max((mIsRotated ? thumbnailWidth : thumbnailHeight)
+            float bitmapHeight = Math.max((isRotated ? thumbnailWidth : thumbnailHeight)
                     * thumbnailScale, 0);
             if (Math.round(bitmapHeight) < getMeasuredHeight()) {
                 mClipBottom = bitmapHeight;
@@ -341,7 +351,7 @@ public class TaskThumbnailView extends View {
             mPaint.setShader(mBitmapShader);
         }
 
-        if (mIsRotated) {
+        if (isRotated) {
             // The overlay doesn't really work when the screenshot is rotated, so don't add it.
             mOverlay.reset();
         } else {
