@@ -46,6 +46,7 @@ import com.android.launcher3.dot.DotInfo;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.DrawableFactory;
 import com.android.launcher3.graphics.IconPalette;
+import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.graphics.PreloadIconDrawable;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconCache.IconLoadRequest;
@@ -142,7 +143,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     public BubbleTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mActivity = ActivityContext.lookupContext(context);
-        DeviceProfile grid = mActivity.getDeviceProfile();
         mSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
         TypedArray a = context.obtainStyledAttributes(attrs,
@@ -150,18 +150,24 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         mLayoutHorizontal = a.getBoolean(R.styleable.BubbleTextView_layoutHorizontal, false);
 
         int display = a.getInteger(R.styleable.BubbleTextView_iconDisplay, DISPLAY_WORKSPACE);
-        int defaultIconSize = grid.iconSizePx;
+        final int defaultIconSize;
         if (display == DISPLAY_WORKSPACE) {
+            DeviceProfile grid = mActivity.getWallpaperDeviceProfile();
             setTextSize(TypedValue.COMPLEX_UNIT_PX, grid.iconTextSizePx);
             setCompoundDrawablePadding(grid.iconDrawablePaddingPx);
+            defaultIconSize = grid.iconSizePx;
         } else if (display == DISPLAY_ALL_APPS) {
+            DeviceProfile grid = mActivity.getDeviceProfile();
             setTextSize(TypedValue.COMPLEX_UNIT_PX, grid.allAppsIconTextSizePx);
             setCompoundDrawablePadding(grid.allAppsIconDrawablePaddingPx);
             defaultIconSize = grid.allAppsIconSizePx;
         } else if (display == DISPLAY_FOLDER) {
+            DeviceProfile grid = mActivity.getDeviceProfile();
             setTextSize(TypedValue.COMPLEX_UNIT_PX, grid.folderChildTextSizePx);
             setCompoundDrawablePadding(grid.folderChildDrawablePaddingPx);
             defaultIconSize = grid.folderChildIconSizePx;
+        } else {
+            defaultIconSize = mActivity.getDeviceProfile().iconSizePx;
         }
         mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, false);
 
@@ -383,7 +389,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     protected void drawDotIfNecessary(Canvas canvas) {
         if (!mForceHideDot && (hasDot() || mDotParams.scale > 0)) {
             getIconBounds(mDotParams.iconBounds);
-            mDotParams.spaceForOffset.set((getWidth() - mIconSize) / 2, getPaddingTop());
+            Utilities.scaleRectAboutCenter(mDotParams.iconBounds, IconShape.getNormalizationScale());
             final int scrollX = getScrollX();
             final int scrollY = getScrollY();
             canvas.translate(scrollX, scrollY);
@@ -554,7 +560,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
                 }
             }
             if (itemInfo.contentDescription != null) {
-                if (hasDot()) {
+                if (itemInfo.isDisabled()) {
+                    setContentDescription(getContext().getString(R.string.disabled_app_label,
+                            itemInfo.contentDescription));
+                } else if (hasDot()) {
                     int count = mDotInfo.getNotificationCount();
                     setContentDescription(getContext().getResources().getQuantityString(
                             R.plurals.dotted_app_label, count, itemInfo.contentDescription, count));

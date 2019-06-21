@@ -447,12 +447,16 @@ public class LauncherStateManager {
     }
 
     private void onStateTransitionStart(LauncherState state) {
+        if (com.android.launcher3.TestProtocol.sDebugTracing) {
+            android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
+                    "onStateTransitionStart");
+        }
         if (mState != state) {
             mState.onStateDisabled(mLauncher);
         }
         mState = state;
         mState.onStateEnabled(mLauncher);
-        mLauncher.getAppWidgetHost().setResumed(state == LauncherState.NORMAL);
+        mLauncher.onStateSet(mState);
 
         if (state.disablePageClipping) {
             // Only disable clipping if needed, otherwise leave it as previous value.
@@ -553,6 +557,8 @@ public class LauncherStateManager {
         cancelAnimation();
         if (reapplyNeeded) {
             reapplyState();
+            // Dispatch on transition end, so that any transient property is cleared.
+            onStateTransitionEnd(mState);
         }
         mConfig.setAnimation(anim, null);
     }
@@ -570,6 +576,10 @@ public class LauncherStateManager {
         private final AnimatorSet mAnim;
 
         public StartAnimRunnable(AnimatorSet anim) {
+            if (com.android.launcher3.TestProtocol.sDebugTracing) {
+                android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
+                        "StartAnimRunnable");
+            }
             mAnim = anim;
         }
 

@@ -36,6 +36,8 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.launcher3.Alarm;
 import com.android.launcher3.AppInfo;
 import com.android.launcher3.BubbleTextView;
@@ -50,11 +52,11 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.OnAlarmListener;
 import com.android.launcher3.R;
-import com.android.launcher3.WorkspaceItemInfo;
 import com.android.launcher3.SimpleOnStylusPressListener;
 import com.android.launcher3.StylusEventHelper;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
+import com.android.launcher3.WorkspaceItemInfo;
 import com.android.launcher3.anim.Interpolators;
 import com.android.launcher3.dot.FolderDotInfo;
 import com.android.launcher3.dragndrop.BaseItemDragListener;
@@ -67,8 +69,6 @@ import com.android.launcher3.widget.PendingAddShortcutInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.NonNull;
 
 /**
  * An icon that can appear on in the workspace representing an {@link Folder}.
@@ -102,7 +102,6 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     private List<BubbleTextView> mCurrentPreviewItems = new ArrayList<>();
 
     boolean mAnimating = false;
-    private Rect mTempBounds = new Rect();
 
     private float mSlop;
 
@@ -159,7 +158,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
                     "is dependent on this");
         }
 
-        DeviceProfile grid = launcher.getDeviceProfile();
+        DeviceProfile grid = launcher.getWallpaperDeviceProfile();
         FolderIcon icon = (FolderIcon) LayoutInflater.from(group.getContext())
                 .inflate(resId, group, false);
 
@@ -174,7 +173,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         icon.setOnClickListener(ItemClickHandler.INSTANCE);
         icon.mInfo = folderInfo;
         icon.mLauncher = launcher;
-        icon.mDotRenderer = launcher.getDeviceProfile().mDotRenderer;
+        icon.mDotRenderer = grid.mDotRenderer;
         icon.setContentDescription(launcher.getString(R.string.folder_name_format, folderInfo.title));
         Folder folder = Folder.fromXml(launcher);
         folder.setDragController(launcher.getDragController());
@@ -201,6 +200,10 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     public void getPreviewBounds(Rect outBounds) {
         mPreviewItemManager.recomputePreviewDrawingParams();
         mBackground.getBounds(outBounds);
+    }
+
+    public float getBackgroundStrokeWidth() {
+        return mBackground.getStrokeWidth();
     }
 
     public Folder getFolder() {
@@ -508,11 +511,13 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     public void drawDot(Canvas canvas) {
         if ((mDotInfo != null && mDotInfo.hasDot()) || mDotScale > 0) {
             Rect iconBounds = mDotParams.iconBounds;
-            BubbleTextView.getIconBounds(this, iconBounds, mLauncher.getDeviceProfile().iconSizePx);
+            BubbleTextView.getIconBounds(this, iconBounds,
+                    mLauncher.getWallpaperDeviceProfile().iconSizePx);
+            float iconScale = (float) mBackground.previewSize / iconBounds.width();
+            Utilities.scaleRectAboutCenter(iconBounds, iconScale);
 
             // If we are animating to the accepting state, animate the dot out.
             mDotParams.scale = Math.max(0, mDotScale - mBackground.getScaleProgress());
-            mDotParams.spaceForOffset.set(getWidth() - iconBounds.right, iconBounds.top);
             mDotParams.color = mBackground.getDotColor();
             mDotRenderer.draw(canvas, mDotParams);
         }

@@ -219,9 +219,6 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     private void callOnDragStart() {
-        if (com.android.launcher3.TestProtocol.sDebugTracing) {
-            android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG, "callOnDragStart");
-        }
         if (mOptions.preDragCondition != null) {
             mOptions.preDragCondition.onPreDragEnd(mDragObject, true /* dragStarted*/);
         }
@@ -476,7 +473,8 @@ public class DragController implements DragDriver.EventListener, TouchController
 
     private void handleMoveEvent(int x, int y) {
         if (com.android.launcher3.TestProtocol.sDebugTracing) {
-            android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG, "handleMoveEvent1");
+            android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
+                    "handleMoveEvent 1");
         }
         mDragObject.dragView.move(x, y);
 
@@ -496,7 +494,7 @@ public class DragController implements DragDriver.EventListener, TouchController
                 && mOptions.preDragCondition.shouldStartDrag(mDistanceSinceScroll)) {
             if (com.android.launcher3.TestProtocol.sDebugTracing) {
                 android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
-                        "handleMoveEvent2");
+                        "handleMoveEvent 2");
             }
             callOnDragStart();
         }
@@ -537,7 +535,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     public boolean onControllerTouchEvent(MotionEvent ev) {
         if (com.android.launcher3.TestProtocol.sDebugTracing) {
             android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
-                    "onControllerTouchEvent1");
+                    "onControllerTouchEvent");
         }
         if (mDragDriver == null || mOptions == null || mOptions.isAccessibleDrag) {
             return false;
@@ -559,10 +557,6 @@ public class DragController implements DragDriver.EventListener, TouchController
                 break;
         }
 
-        if (com.android.launcher3.TestProtocol.sDebugTracing) {
-            android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
-                    "onControllerTouchEvent2");
-        }
         return mDragDriver.onTouchEvent(ev);
     }
 

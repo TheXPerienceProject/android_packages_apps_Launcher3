@@ -1072,6 +1072,10 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
 
 
     public void setEnableFreeScroll(boolean freeScroll) {
+        if (mFreeScroll == freeScroll) {
+            return;
+        }
+
         boolean wasFreeScroll = mFreeScroll;
         mFreeScroll = freeScroll;
 
@@ -1088,10 +1092,8 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        super.onTouchEvent(ev);
-
         // Skip touch handling if there are no pages to swipe
-        if (getChildCount() <= 0) return super.onTouchEvent(ev);
+        if (getChildCount() <= 0) return false;
 
         acquireVelocityTrackerAndAddMovement(ev);
 

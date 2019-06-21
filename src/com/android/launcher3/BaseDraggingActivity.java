@@ -36,6 +36,7 @@ import com.android.launcher3.model.AppLaunchTracker;
 import com.android.launcher3.shortcuts.DeepShortcutManager;
 import com.android.launcher3.uioverrides.DisplayRotationListener;
 import com.android.launcher3.uioverrides.WallpaperColorInfo;
+import com.android.launcher3.util.Themes;
 
 import androidx.annotation.Nullable;
 
@@ -69,7 +70,7 @@ public abstract class BaseDraggingActivity extends BaseActivity
         // Update theme
         WallpaperColorInfo wallpaperColorInfo = WallpaperColorInfo.getInstance(this);
         wallpaperColorInfo.addOnChangeListener(this);
-        int themeRes = getThemeRes(wallpaperColorInfo);
+        int themeRes = Themes.getActivityThemeRes(this);
         if (themeRes != mThemeRes) {
             mThemeRes = themeRes;
             setTheme(themeRes);
@@ -88,28 +89,8 @@ public abstract class BaseDraggingActivity extends BaseActivity
     }
 
     private void updateTheme() {
-        WallpaperColorInfo wallpaperColorInfo = WallpaperColorInfo.getInstance(this);
-        if (mThemeRes != getThemeRes(wallpaperColorInfo)) {
+        if (mThemeRes != Themes.getActivityThemeRes(this)) {
             recreate();
-        }
-    }
-
-    protected int getThemeRes(WallpaperColorInfo wallpaperColorInfo) {
-        boolean darkTheme;
-        if (Utilities.ATLEAST_Q) {
-            Configuration configuration = getResources().getConfiguration();
-            int nightMode = configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            darkTheme = nightMode == Configuration.UI_MODE_NIGHT_YES;
-        } else {
-            darkTheme = wallpaperColorInfo.isDark();
-        }
-
-        if (darkTheme) {
-            return wallpaperColorInfo.supportsDarkText() ?
-                    R.style.AppTheme_Dark_DarkText : R.style.AppTheme_Dark;
-        } else {
-            return wallpaperColorInfo.supportsDarkText() ?
-                    R.style.AppTheme_DarkText : R.style.AppTheme;
         }
     }
 
@@ -153,6 +134,10 @@ public abstract class BaseDraggingActivity extends BaseActivity
 
     public boolean startActivitySafely(View v, Intent intent, @Nullable ItemInfo item,
             @Nullable String sourceContainer) {
+        if (com.android.launcher3.TestProtocol.sDebugTracing) {
+            android.util.Log.d(com.android.launcher3.TestProtocol.NO_START_TAG,
+                    "startActivitySafely 1");
+        }
         if (mIsSafeModeEnabled && !Utilities.isSystemApp(this, intent)) {
             Toast.makeText(this, R.string.safemode_shortcut_error, Toast.LENGTH_SHORT).show();
             return false;
@@ -176,6 +161,10 @@ public abstract class BaseDraggingActivity extends BaseActivity
                 startShortcutIntentSafely(intent, optsBundle, item, sourceContainer);
             } else if (user == null || user.equals(Process.myUserHandle())) {
                 // Could be launching some bookkeeping activity
+                if (com.android.launcher3.TestProtocol.sDebugTracing) {
+                    android.util.Log.d(com.android.launcher3.TestProtocol.NO_START_TAG,
+                            "startActivitySafely 2");
+                }
                 startActivity(intent, optsBundle);
                 AppLaunchTracker.INSTANCE.get(this).onStartApp(intent.getComponent(),
                         Process.myUserHandle(), sourceContainer);
