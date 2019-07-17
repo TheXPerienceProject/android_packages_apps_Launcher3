@@ -32,6 +32,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -42,6 +43,7 @@ import android.view.ViewDebug;
 import android.widget.TextView;
 
 import com.android.launcher3.Launcher.OnResumeCallback;
+import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.dot.DotInfo;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.DrawableFactory;
@@ -52,6 +54,7 @@ import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconCache.IconLoadRequest;
 import com.android.launcher3.icons.IconCache.ItemInfoUpdateReceiver;
 import com.android.launcher3.model.PackageItemInfo;
+import com.android.launcher3.testing.TestProtocol;
 import com.android.launcher3.views.ActivityContext;
 
 import java.text.NumberFormat;
@@ -225,6 +228,18 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         applyFromWorkspaceItem(info, false);
     }
 
+    @Override
+    public void setAccessibilityDelegate(AccessibilityDelegate delegate) {
+        if (delegate instanceof LauncherAccessibilityDelegate) {
+            super.setAccessibilityDelegate(delegate);
+        } else {
+            // NO-OP
+            // Workaround for b/129745295 where RecyclerView is setting our Accessibility
+            // delegate incorrectly. There are no cases when we shouldn't be using the
+            // LauncherAccessibilityDelegate for BubbleTextView.
+        }
+    }
+
     public void applyFromWorkspaceItem(WorkspaceItemInfo info, boolean promiseStateChanged) {
         applyIconAndLabel(info);
         setTag(info);
@@ -304,6 +319,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (TestProtocol.sDebugTracing) {
+            Log.d(TestProtocol.NO_START_TAG, "BubbleTextView.onTouchEvent " + event);
+        }
         // Call the superclass onTouchEvent first, because sometimes it changes the state to
         // isPressed() on an ACTION_UP
         boolean result = super.onTouchEvent(event);

@@ -29,7 +29,7 @@ public abstract class GoActivityControlHelper<T extends BaseDraggingActivity> im
     }
 
     @Override
-    public void onSwipeUpComplete(T activity) {
+    public void onSwipeUpToRecentsComplete(T activity) {
         // Go does not support swipe up gesture.
     }
 
@@ -60,5 +60,10 @@ public abstract class GoActivityControlHelper<T extends BaseDraggingActivity> im
     public boolean isInLiveTileMode() {
         // Go does not support live tiles.
         return false;
+    }
+
+    @Override
+    public void onLaunchTaskFailed(T activity) {
+        // Go does not support gestures from one task to another.
     }
 }

@@ -22,13 +22,11 @@ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.MotionEvent.INVALID_POINTER_ID;
+
 import static com.android.launcher3.Utilities.EDGE_NAV_BAR;
 import static com.android.launcher3.Utilities.squaredHypot;
-import static com.android.launcher3.uioverrides.RecentsUiFactory.ROTATION_LANDSCAPE;
-import static com.android.launcher3.uioverrides.RecentsUiFactory.ROTATION_SEASCAPE;
 import static com.android.launcher3.util.RaceConditionTracker.ENTER;
 import static com.android.launcher3.util.RaceConditionTracker.EXIT;
-import static com.android.quickstep.SysUINavigationMode.Mode.NO_BUTTON;
 import static com.android.quickstep.TouchInteractionService.TOUCH_INTERACTION_LOG;
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_RECENTS;
 
@@ -43,15 +41,10 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
-import android.view.WindowManager;
-
-import androidx.annotation.UiThread;
 
 import com.android.launcher3.R;
-import com.android.launcher3.graphics.RotationMode;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RaceConditionTracker;
 import com.android.launcher3.util.TraceHelper;
@@ -65,14 +58,16 @@ import com.android.quickstep.WindowTransformSwipeHandler;
 import com.android.quickstep.WindowTransformSwipeHandler.GestureEndTarget;
 import com.android.quickstep.util.CachedEventDispatcher;
 import com.android.quickstep.util.MotionPauseDetector;
+import com.android.quickstep.util.NavBarPosition;
 import com.android.quickstep.util.RecentsAnimationListenerSet;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.BackgroundExecutor;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.InputMonitorCompat;
-import com.android.systemui.shared.system.QuickStepContract;
 
 import java.util.function.Consumer;
+
+import androidx.annotation.UiThread;
 
 /**
  * Input consumer for handling events originating from an activity other than Launcher
@@ -82,6 +77,9 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
 
     public static final String DOWN_EVT = "OtherActivityInputConsumer.DOWN";
     private static final String UP_EVT = "OtherActivityInputConsumer.UP";
+
+    // TODO: Move to quickstep contract
+    public static final float QUICKSTEP_TOUCH_SLOP_RATIO = 3;
 
     private final CachedEventDispatcher mRecentsViewDispatcher = new CachedEventDispatcher();
     private final RunningTaskInfo mRunningTask;
@@ -95,7 +93,7 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
     private final SysUINavigationMode.Mode mMode;
     private final RectF mSwipeTouchRegion;
 
-    private final int mDisplayRotation;
+    private final NavBarPosition mNavBarPosition;
 
     private final Consumer<OtherActivityInputConsumer> mOnCompleteCallback;
     private final MotionPauseDetector mMotionPauseDetector;
@@ -109,13 +107,16 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
     private final PointF mLastPos = new PointF();
     private int mActivePointerId = INVALID_POINTER_ID;
 
-    private final float mDragSlop;
+    // Distance after which we start dragging the window.
+    private final float mTouchSlop;
+
     private final float mSquaredTouchSlop;
+    private final boolean mDisableHorizontalSwipe;
 
     // Slop used to check when we start moving window.
-    private boolean mPassedDragSlop;
+    private boolean mPaddedWindowMoveSlop;
     // Slop used to determine when we say that the gesture has started.
-    private boolean mPassedTouchSlop;
+    private boolean mPassedPilferInputSlop;
 
     // Might be displacement in X or Y, depending on the direction we are swiping from the nav bar.
     private float mStartDisplacement;
@@ -132,7 +133,7 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
             InputConsumerController inputConsumer,
             Consumer<OtherActivityInputConsumer> onCompleteCallback,
             SwipeSharedState swipeSharedState, InputMonitorCompat inputMonitorCompat,
-            RectF swipeTouchRegion) {
+            RectF swipeTouchRegion, boolean disableHorizontalSwipe) {
         super(base);
 
         mMainThreadHandler = new Handler(Looper.getMainLooper());
@@ -156,17 +157,26 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
         mInputConsumer = inputConsumer;
         mSwipeSharedState = swipeSharedState;
 
-        mDisplayRotation = getSystemService(WindowManager.class).getDefaultDisplay().getRotation();
-        mDragSlop = QuickStepContract.getQuickStepDragSlopPx();
-        float slop = QuickStepContract.getQuickStepTouchSlopPx();
+        mNavBarPosition = new NavBarPosition(base);
+        mTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+
+        float slop = QUICKSTEP_TOUCH_SLOP_RATIO * mTouchSlop;
         mSquaredTouchSlop = slop * slop;
 
-        mPassedTouchSlop = mPassedDragSlop = continuingPreviousGesture;
+        mPassedPilferInputSlop = mPaddedWindowMoveSlop = continuingPreviousGesture;
+        mDisableHorizontalSwipe = !mPassedPilferInputSlop && disableHorizontalSwipe;
     }
 
     @Override
     public int getType() {
         return TYPE_OTHER_ACTIVITY;
+    }
+
+    private void forceCancelGesture(MotionEvent ev) {
+        int action = ev.getAction();
+        ev.setAction(ACTION_CANCEL);
+        finishTouchTracking(ev);
+        ev.setAction(action);
     }
 
     @Override
@@ -176,12 +186,10 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
         }
 
         // Proxy events to recents view
-        if (mPassedDragSlop && mInteractionHandler != null
+        if (mPaddedWindowMoveSlop && mInteractionHandler != null
                 && !mRecentsViewDispatcher.hasConsumer()) {
             mRecentsViewDispatcher.setConsumer(mInteractionHandler.getRecentsViewDispatcher(
-                    isNavBarOnLeft()
-                            ? ROTATION_SEASCAPE
-                            : (isNavBarOnRight() ? ROTATION_LANDSCAPE : RotationMode.NORMAL)));
+                    mNavBarPosition.getRotationMode()));
         }
         int edgeFlags = ev.getEdgeFlags();
         ev.setEdgeFlags(edgeFlags | EDGE_NAV_BAR);
@@ -212,14 +220,11 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
                 break;
             }
             case ACTION_POINTER_DOWN: {
-                if (!mPassedTouchSlop) {
+                if (!mPassedPilferInputSlop) {
                     // Cancel interaction in case of multi-touch interaction
                     int ptrIdx = ev.getActionIndex();
                     if (!mSwipeTouchRegion.contains(ev.getX(ptrIdx), ev.getY(ptrIdx))) {
-                        int action = ev.getAction();
-                        ev.setAction(ACTION_CANCEL);
-                        finishTouchTracking(ev);
-                        ev.setAction(action);
+                        forceCancelGesture(ev);
                     }
                 }
                 break;
@@ -246,36 +251,45 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
                 float displacement = getDisplacement(ev);
                 float displacementX = mLastPos.x - mDownPos.x;
 
-                if (!mPassedDragSlop) {
+                if (!mPaddedWindowMoveSlop) {
                     if (!mIsDeferredDownTarget) {
                         // Normal gesture, ensure we pass the drag slop before we start tracking
                         // the gesture
-                        if (Math.abs(displacement) > mDragSlop) {
-                            mPassedDragSlop = true;
-                            mStartDisplacement = displacement;
+                        if (Math.abs(displacement) > mTouchSlop) {
+                            mPaddedWindowMoveSlop = true;
+                            mStartDisplacement = Math.min(displacement, -mTouchSlop);
                         }
                     }
                 }
 
-                if (!mPassedTouchSlop) {
-                    if (squaredHypot(displacementX, mLastPos.y - mDownPos.y) >= mSquaredTouchSlop) {
-                        mPassedTouchSlop = true;
+                if (!mPassedPilferInputSlop) {
+                    float displacementY = mLastPos.y - mDownPos.y;
+                    if (squaredHypot(displacementX, displacementY) >= mSquaredTouchSlop) {
+                        if (mDisableHorizontalSwipe
+                                && Math.abs(displacementX) > Math.abs(displacementY)) {
+                            // Horizontal gesture is not allowed in this region
+                            forceCancelGesture(ev);
+                            break;
+                        }
+
+                        mPassedPilferInputSlop = true;
 
                         if (mIsDeferredDownTarget) {
                             // Deferred gesture, start the animation and gesture tracking once
                             // we pass the actual touch slop
                             startTouchTrackingForWindowAnimation(ev.getEventTime());
                         }
-                        if (!mPassedDragSlop) {
-                            mPassedDragSlop = true;
-                            mStartDisplacement = displacement;
+                        if (!mPaddedWindowMoveSlop) {
+                            mPaddedWindowMoveSlop = true;
+                            mStartDisplacement = Math.min(displacement, -mTouchSlop);
+
                         }
                         notifyGestureStarted();
                     }
                 }
 
                 if (mInteractionHandler != null) {
-                    if (mPassedDragSlop) {
+                    if (mPaddedWindowMoveSlop) {
                         // Move
                         mInteractionHandler.updateDisplacement(displacement - mStartDisplacement);
                     }
@@ -315,14 +329,6 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
         mInteractionHandler.onGestureStarted();
     }
 
-    private boolean isNavBarOnRight() {
-        return mMode != NO_BUTTON && mDisplayRotation == Surface.ROTATION_90;
-    }
-
-    private boolean isNavBarOnLeft() {
-        return mMode != NO_BUTTON && mDisplayRotation == Surface.ROTATION_270;
-    }
-
     private void startTouchTrackingForWindowAnimation(long touchTimeMs) {
         TOUCH_INTERACTION_LOG.addLog("startRecentsAnimation");
 
@@ -360,7 +366,7 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
         RaceConditionTracker.onEvent(UP_EVT, ENTER);
         TraceHelper.endSection("TouchInt");
 
-        if (mPassedDragSlop && mInteractionHandler != null) {
+        if (mPaddedWindowMoveSlop && mInteractionHandler != null) {
             if (ev.getActionMasked() == ACTION_CANCEL) {
                 mInteractionHandler.onGestureCancelled();
             } else {
@@ -368,8 +374,8 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
                         ViewConfiguration.get(this).getScaledMaximumFlingVelocity());
                 float velocityX = mVelocityTracker.getXVelocity(mActivePointerId);
                 float velocityY = mVelocityTracker.getYVelocity(mActivePointerId);
-                float velocity = isNavBarOnRight() ? velocityX
-                        : isNavBarOnLeft() ? -velocityX
+                float velocity = mNavBarPosition.isRightEdge() ? velocityX
+                        : mNavBarPosition.isLeftEdge() ? -velocityX
                                 : velocityY;
 
                 mInteractionHandler.updateDisplacement(getDisplacement(ev) - mStartDisplacement);
@@ -430,9 +436,9 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
     }
 
     private float getDisplacement(MotionEvent ev) {
-        if (isNavBarOnRight()) {
+        if (mNavBarPosition.isRightEdge()) {
             return ev.getX() - mDownPos.x;
-        } else if (isNavBarOnLeft()) {
+        } else if (mNavBarPosition.isLeftEdge()) {
             return mDownPos.x - ev.getX();
         } else {
             return ev.getY() - mDownPos.y;
@@ -446,6 +452,6 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
 
     @Override
     public boolean allowInterceptByParent() {
-        return !mPassedTouchSlop;
+        return !mPassedPilferInputSlop;
     }
 }

@@ -17,24 +17,35 @@ package com.android.launcher3;
 
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
+import static android.view.View.VISIBLE;
 import static android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
-import static com.android.launcher3.TestProtocol.ALL_APPS_STATE_ORDINAL;
-import static com.android.launcher3.TestProtocol.BACKGROUND_APP_STATE_ORDINAL;
-import static com.android.launcher3.TestProtocol.NORMAL_STATE_ORDINAL;
-import static com.android.launcher3.TestProtocol.OVERVIEW_PEEK_STATE_ORDINAL;
-import static com.android.launcher3.TestProtocol.OVERVIEW_STATE_ORDINAL;
-import static com.android.launcher3.TestProtocol.QUICK_SWITCH_STATE_ORDINAL;
-import static com.android.launcher3.TestProtocol.SPRING_LOADED_STATE_ORDINAL;
+
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_OVERVIEW_FADE;
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_OVERVIEW_SCALE;
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_OVERVIEW_TRANSLATE_X;
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_WORKSPACE_FADE;
+import static com.android.launcher3.anim.AnimatorSetBuilder.ANIM_WORKSPACE_SCALE;
+import static com.android.launcher3.anim.Interpolators.ACCEL;
+import static com.android.launcher3.anim.Interpolators.DEACCEL;
+import static com.android.launcher3.anim.Interpolators.DEACCEL_1_7;
+import static com.android.launcher3.anim.Interpolators.clampToProgress;
+import static com.android.launcher3.testing.TestProtocol.ALL_APPS_STATE_ORDINAL;
+import static com.android.launcher3.testing.TestProtocol.BACKGROUND_APP_STATE_ORDINAL;
+import static com.android.launcher3.testing.TestProtocol.NORMAL_STATE_ORDINAL;
+import static com.android.launcher3.testing.TestProtocol.OVERVIEW_PEEK_STATE_ORDINAL;
+import static com.android.launcher3.testing.TestProtocol.OVERVIEW_STATE_ORDINAL;
+import static com.android.launcher3.testing.TestProtocol.QUICK_SWITCH_STATE_ORDINAL;
+import static com.android.launcher3.testing.TestProtocol.SPRING_LOADED_STATE_ORDINAL;
 import static com.android.launcher3.anim.Interpolators.ACCEL_2;
 import static com.android.launcher3.states.RotationHelper.REQUEST_NONE;
 
 import android.view.animation.Interpolator;
 
+import com.android.launcher3.anim.AnimatorSetBuilder;
 import com.android.launcher3.states.SpringLoadedState;
 import com.android.launcher3.uioverrides.UiFactory;
 import com.android.launcher3.uioverrides.states.AllAppsState;
 import com.android.launcher3.uioverrides.states.OverviewState;
-import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 
 import java.util.Arrays;
@@ -258,9 +269,6 @@ public class LauncherState {
      * Called when the start transition ends and the user settles on this particular state.
      */
     public void onStateTransitionEnd(Launcher launcher) {
-        if (this == NORMAL || this == SPRING_LOADED) {
-            UiFactory.resetOverview(launcher);
-        }
         if (this == NORMAL) {
             // Clear any rotation locks when going to normal state
             launcher.getRotationHelper().setCurrentStateRequest(REQUEST_NONE);
@@ -271,9 +279,47 @@ public class LauncherState {
         if (this != NORMAL) {
             LauncherStateManager lsm = launcher.getStateManager();
             LauncherState lastState = lsm.getLastState();
-            launcher.getUserEventDispatcher().logActionCommand(Action.Command.BACK,
-                    containerType, lastState.containerType);
             lsm.goToState(lastState);
+        }
+    }
+
+    /**
+     * Prepares for a non-user controlled animation from fromState to this state. Preparations
+     * include:
+     * - Setting interpolators for various animations included in the state transition.
+     * - Setting some start values (e.g. scale) for views that are hidden but about to be shown.
+     */
+    public void prepareForAtomicAnimation(Launcher launcher, LauncherState fromState,
+            AnimatorSetBuilder builder) {
+        if (this == NORMAL && fromState == OVERVIEW) {
+            builder.setInterpolator(ANIM_WORKSPACE_SCALE, DEACCEL);
+            builder.setInterpolator(ANIM_WORKSPACE_FADE, ACCEL);
+            builder.setInterpolator(ANIM_OVERVIEW_SCALE, clampToProgress(ACCEL, 0, 0.9f));
+            builder.setInterpolator(ANIM_OVERVIEW_TRANSLATE_X, ACCEL);
+            builder.setInterpolator(ANIM_OVERVIEW_FADE, DEACCEL_1_7);
+            Workspace workspace = launcher.getWorkspace();
+
+            // Start from a higher workspace scale, but only if we're invisible so we don't jump.
+            boolean isWorkspaceVisible = workspace.getVisibility() == VISIBLE;
+            if (isWorkspaceVisible) {
+                CellLayout currentChild = (CellLayout) workspace.getChildAt(
+                        workspace.getCurrentPage());
+                isWorkspaceVisible = currentChild.getVisibility() == VISIBLE
+                        && currentChild.getShortcutsAndWidgets().getAlpha() > 0;
+            }
+            if (!isWorkspaceVisible) {
+                workspace.setScaleX(0.92f);
+                workspace.setScaleY(0.92f);
+            }
+            Hotseat hotseat = launcher.getHotseat();
+            boolean isHotseatVisible = hotseat.getVisibility() == VISIBLE && hotseat.getAlpha() > 0;
+            if (!isHotseatVisible) {
+                hotseat.setScaleX(0.92f);
+                hotseat.setScaleY(0.92f);
+            }
+        } else if (this == NORMAL && fromState == OVERVIEW_PEEK) {
+            // Keep fully visible until the very end (when overview is offscreen) to make invisible.
+            builder.setInterpolator(ANIM_OVERVIEW_FADE, t -> t < 1 ? 0 : 1);
         }
     }
 

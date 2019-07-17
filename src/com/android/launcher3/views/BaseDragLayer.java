@@ -21,6 +21,7 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.launcher3.Utilities.SINGLE_FRAME_MS;
+import static com.android.launcher3.Utilities.shouldDisableGestures;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,6 +43,7 @@ import android.widget.FrameLayout;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.InsettableFrameLayout;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.testing.TestProtocol;
 import com.android.launcher3.util.MultiValueAlpha;
 import com.android.launcher3.util.MultiValueAlpha.AlphaProperty;
 import com.android.launcher3.util.TouchController;
@@ -114,9 +117,23 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
         mMultiValueAlpha = new MultiValueAlpha(this, alphaChannelCount);
     }
 
+    /**
+     * Same as {@link #isEventOverView(View, MotionEvent, View)} where evView == this drag layer.
+     */
     public boolean isEventOverView(View view, MotionEvent ev) {
         getDescendantRectRelativeToSelf(view, mHitRect);
         return mHitRect.contains((int) ev.getX(), (int) ev.getY());
+    }
+
+    /**
+     * Given a motion event in evView's coordinates, return whether the event is within another
+     * view's bounds.
+     */
+    public boolean isEventOverView(View view, MotionEvent ev, View evView) {
+        int[] xy = new int[] {(int) ev.getX(), (int) ev.getY()};
+        getDescendantCoordRelativeToSelf(evView, xy);
+        getDescendantRectRelativeToSelf(view, mHitRect);
+        return mHitRect.contains(xy[0], xy[1]);
     }
 
     @Override
@@ -135,6 +152,8 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
     }
 
     private TouchController findControllerToHandleTouch(MotionEvent ev) {
+        if (shouldDisableGestures(ev)) return null;
+
         AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(mActivity);
         if (topView != null && topView.onControllerInterceptTouchEvent(ev)) {
             return topView;
@@ -213,8 +232,8 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (com.android.launcher3.TestProtocol.sDebugTracing) {
-            android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
+        if (TestProtocol.sDebugTracing) {
+            android.util.Log.d(TestProtocol.NO_DRAG_TAG,
                     "onTouchEvent " + ev);
         }
         int action = ev.getAction();
@@ -226,8 +245,8 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
         }
 
         if (mActiveController != null) {
-            if (com.android.launcher3.TestProtocol.sDebugTracing) {
-                android.util.Log.d(com.android.launcher3.TestProtocol.NO_DRAG_TAG,
+            if (TestProtocol.sDebugTracing) {
+                android.util.Log.d(TestProtocol.NO_DRAG_TAG,
                         "onTouchEvent 1");
             }
             return mActiveController.onControllerTouchEvent(ev);
@@ -239,6 +258,9 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (TestProtocol.sDebugTracing) {
+            Log.d(TestProtocol.NO_START_TAG, "BaseDragLayer.dispatchTouchEvent " + ev);
+        }
         switch (ev.getAction()) {
             case ACTION_DOWN: {
                 float x = ev.getX();
@@ -495,12 +517,14 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
         }
     }
 
+    @Override
     @TargetApi(Build.VERSION_CODES.Q)
-    public void updateTouchExcludeRegion(WindowInsets insets) {
+    public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
         if (Utilities.ATLEAST_Q) {
             Insets gestureInsets = insets.getMandatorySystemGestureInsets();
             mSystemGestureRegion.set(gestureInsets.left, gestureInsets.top,
                     gestureInsets.right, gestureInsets.bottom);
         }
+        return super.dispatchApplyWindowInsets(insets);
     }
 }
