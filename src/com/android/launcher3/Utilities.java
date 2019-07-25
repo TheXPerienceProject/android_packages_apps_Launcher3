@@ -69,6 +69,7 @@ import com.android.launcher3.compat.ShortcutConfigActivityInfo;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.FolderAdaptiveIcon;
 import com.android.launcher3.graphics.RotationMode;
+import com.android.launcher3.graphics.TintedDrawableSpan;
 import com.android.launcher3.icons.LauncherIcons;
 import com.android.launcher3.shortcuts.DeepShortcutManager;
 import com.android.launcher3.shortcuts.ShortcutKey;
@@ -125,6 +126,16 @@ public final class Utilities {
      * Set on a motion event dispatched from the nav bar. See {@link MotionEvent#setEdgeFlags(int)}.
      */
     public static final int EDGE_NAV_BAR = 1 << 8;
+
+    /**
+     * Set on a motion event do disallow any gestures and only handle touch.
+     * See {@link MotionEvent#setEdgeFlags(int)}.
+     */
+    public static final int FLAG_NO_GESTURES = 1 << 9;
+
+    public static boolean shouldDisableGestures(MotionEvent ev) {
+        return (ev.getEdgeFlags() & FLAG_NO_GESTURES) == FLAG_NO_GESTURES;
+    }
 
     /**
      * Indicates if the device has a debug build. Should only be used to store additional info or
@@ -559,6 +570,20 @@ public final class Utilities {
         SpannableString spanned = new SpannableString(msg);
         spanned.setSpan(new TtsSpan.TextBuilder(ttsMsg).build(),
                 0, spanned.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        return spanned;
+    }
+
+    /**
+     * Prefixes a text with the provided icon
+     */
+    public static CharSequence prefixTextWithIcon(Context context, int iconRes, CharSequence msg) {
+        // Update the hint to contain the icon.
+        // Prefix the original hint with two spaces. The first space gets replaced by the icon
+        // using span. The second space is used for a singe space character between the hint
+        // and the icon.
+        SpannableString spanned = new SpannableString("  " + msg);
+        spanned.setSpan(new TintedDrawableSpan(context, iconRes),
+                0, 1, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
         return spanned;
     }
 

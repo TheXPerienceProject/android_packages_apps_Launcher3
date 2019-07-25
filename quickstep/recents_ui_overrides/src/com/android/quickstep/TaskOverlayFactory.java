@@ -24,6 +24,7 @@ import com.android.launcher3.BaseDraggingActivity;
 import com.android.launcher3.R;
 import com.android.launcher3.util.MainThreadInitializedObject;
 import com.android.launcher3.util.ResourceBasedOverride;
+import com.android.quickstep.views.TaskThumbnailView;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.ThumbnailData;
@@ -35,8 +36,6 @@ import java.util.List;
  * Factory class to create and add an overlays on the TaskView
  */
 public class TaskOverlayFactory implements ResourceBasedOverride {
-
-    public static final String AIAI_PACKAGE = "com.google.android.as";
 
     /** Note that these will be shown in order from top to bottom, if available for the task. */
     private static final TaskSystemShortcut[] MENU_OPTIONS = new TaskSystemShortcut[]{
@@ -51,29 +50,33 @@ public class TaskOverlayFactory implements ResourceBasedOverride {
             new MainThreadInitializedObject<>(c -> Overrides.getObject(TaskOverlayFactory.class,
                     c, R.string.task_overlay_factory_class));
 
-    public TaskOverlay createOverlay(View thumbnailView) {
+    public List<TaskSystemShortcut> getEnabledShortcuts(TaskView taskView) {
+        final ArrayList<TaskSystemShortcut> shortcuts = new ArrayList<>();
+        final BaseDraggingActivity activity = BaseActivity.fromContext(taskView.getContext());
+        for (TaskSystemShortcut menuOption : MENU_OPTIONS) {
+            View.OnClickListener onClickListener =
+                    menuOption.getOnClickListener(activity, taskView);
+            if (onClickListener != null) {
+                shortcuts.add(menuOption);
+            }
+        }
+        return shortcuts;
+    }
+
+    public TaskOverlay createOverlay(TaskThumbnailView thumbnailView) {
         return new TaskOverlay();
     }
 
     public static class TaskOverlay {
 
-        public void setTaskInfo(Task task, ThumbnailData thumbnail, Matrix matrix) {
-        }
+        /**
+         * Called when the current task is interactive for the user
+         */
+        public void initOverlay(Task task, ThumbnailData thumbnail, Matrix matrix) { }
 
-        public void reset() {
-        }
-
-        public List<TaskSystemShortcut> getEnabledShortcuts(TaskView taskView) {
-            final ArrayList<TaskSystemShortcut> shortcuts = new ArrayList<>();
-            final BaseDraggingActivity activity = BaseActivity.fromContext(taskView.getContext());
-            for (TaskSystemShortcut menuOption : MENU_OPTIONS) {
-                View.OnClickListener onClickListener =
-                        menuOption.getOnClickListener(activity, taskView);
-                if (onClickListener != null) {
-                    shortcuts.add(menuOption);
-                }
-            }
-            return shortcuts;
-        }
+        /**
+         * Called when the overlay is no longer used.
+         */
+        public void reset() { }
     }
 }

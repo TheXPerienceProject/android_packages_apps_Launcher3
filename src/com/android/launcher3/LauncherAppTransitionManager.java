@@ -17,6 +17,7 @@
 package com.android.launcher3;
 
 
+import android.animation.Animator;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.graphics.Rect;
@@ -50,5 +51,20 @@ public class LauncherAppTransitionManager implements ResourceBasedOverride {
             }
         }
         return ActivityOptions.makeClipRevealAnimation(v, left, top, width, height);
+    }
+
+    public boolean supportsAdaptiveIconAnimation() {
+        return false;
+    }
+
+    /**
+     * Number of animations which run on state properties.
+     */
+    public int getStateElementAnimationsCount() {
+        return 0;
+    }
+
+    public Animator createStateElementAnimation(int index, float... values) {
+        throw new RuntimeException("Unknown gesture animation " + index);
     }
 }

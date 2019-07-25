@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.quickstep.hints;
 
-public final class UiHintListenerConstants {
+package com.android.launcher3.tapl;
 
-    private UiHintListenerConstants() {}
+import androidx.test.uiautomator.UiObject2;
 
-    // Operations
-    public static final int ON_HINTS_RETURNED_CODE = 5;
-
-    // Keys
-    public static final String SESSION_ID_KEY = "session_id";
-    public static final String HINTS_KEY = "hints";
+public class Widget {
+    Widget(LauncherInstrumentation launcher, UiObject2 widget) {
+    }
 }

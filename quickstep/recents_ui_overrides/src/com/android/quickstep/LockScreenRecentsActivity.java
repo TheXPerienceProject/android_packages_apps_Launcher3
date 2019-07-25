@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.quickstep;
 
-package com.android.launcher3;
+import android.app.Activity;
+import android.os.Bundle;
 
 /**
- * Progress is defined as a value with range [0, 1], and is specific to each implementor.
- * It is used when there is a transition from one state of the UI to another.
+ * Empty activity to start a recents transition
  */
-public interface ProgressInterface {
-    void setProgress(float progress);
-    float getProgress();
+public class LockScreenRecentsActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        finish();
+    }
 }

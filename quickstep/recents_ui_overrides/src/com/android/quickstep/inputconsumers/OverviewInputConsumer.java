@@ -27,7 +27,6 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.BaseDraggingActivity;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.views.BaseDragLayer;
-import com.android.quickstep.ActivityControlHelper;
 import com.android.quickstep.OverviewCallbacks;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputMonitorCompat;
@@ -51,7 +50,7 @@ public class OverviewInputConsumer<T extends BaseDraggingActivity>
     private final boolean mStartingInActivityBounds;
     private boolean mTargetHandledTouch;
 
-    OverviewInputConsumer(T activity, @Nullable InputMonitorCompat inputMonitor,
+    public OverviewInputConsumer(T activity, @Nullable InputMonitorCompat inputMonitor,
             boolean startingInActivityBounds) {
         mActivity = activity;
         mInputMonitor = inputMonitor;
@@ -114,13 +113,5 @@ public class OverviewInputConsumer<T extends BaseDraggingActivity>
             mActivity.dispatchKeyEvent(ev);
         }
     }
-
-    public static InputConsumer newInstance(ActivityControlHelper activityHelper,
-            @Nullable InputMonitorCompat inputMonitor, boolean startingInActivityBounds) {
-        BaseDraggingActivity activity = activityHelper.getCreatedActivity();
-        if (activity == null) {
-            return InputConsumer.NO_OP;
-        }
-        return new OverviewInputConsumer(activity, inputMonitor, startingInActivityBounds);
-    }
 }
+

@@ -35,7 +35,6 @@ import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.By;
@@ -54,22 +53,20 @@ import com.android.launcher3.MainThreadExecutor;
 import com.android.launcher3.ResourceUtils;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.compat.LauncherAppsCompat;
+import com.android.launcher3.model.AppLaunchTracker;
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.Wait;
+import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.rule.LauncherActivityRule;
 import com.android.launcher3.util.rule.ShellCommandRule;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -91,13 +88,12 @@ public abstract class AbstractLauncherUiTest {
 
     public static final long SHORT_UI_TIMEOUT = 300;
     public static final long DEFAULT_UI_TIMEOUT = 10000;
-    protected static final int LONG_WAIT_TIME_MS = 60000;
     private static final String TAG = "AbstractLauncherUiTest";
-    private static int sScreenshotCount = 0;
 
     protected MainThreadExecutor mMainThreadExecutor = new MainThreadExecutor();
     protected final UiDevice mDevice = UiDevice.getInstance(getInstrumentation());
-    protected final LauncherInstrumentation mLauncher;
+    protected final LauncherInstrumentation mLauncher =
+            new LauncherInstrumentation(getInstrumentation());
     protected Context mTargetContext;
     protected String mTargetPackage;
 
@@ -108,11 +104,9 @@ public abstract class AbstractLauncherUiTest {
             throw new RuntimeException(e);
         }
         if (TestHelpers.isInLauncherProcess()) Utilities.enableRunningInTestHarnessForTests();
-        mLauncher = new LauncherInstrumentation(getInstrumentation());
     }
 
-    @Rule
-    public LauncherActivityRule mActivityMonitor = new LauncherActivityRule();
+    protected final LauncherActivityRule mActivityMonitor = new LauncherActivityRule();
 
     @Rule
     public ShellCommandRule mDefaultLauncherRule =
@@ -128,76 +122,26 @@ public abstract class AbstractLauncherUiTest {
     protected @interface PortraitLandscape {
     }
 
-    @Rule
-    public TestRule mPortraitLandscapeExecutor =
-            (base, description) -> false && description.getAnnotation(PortraitLandscape.class)
-                    != null ? new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    try {
-                        // Create launcher activity if necessary and bring it to the front.
-                        mLauncher.pressHome();
-                        waitForLauncherCondition("Launcher activity wasn't created",
-                                launcher -> launcher != null);
-
-                        executeOnLauncher(launcher ->
-                                launcher.getRotationHelper().forceAllowRotationForTesting(true));
-
-                        evaluateInPortrait();
-                        evaluateInLandscape();
-                    } finally {
-                        mDevice.setOrientationNatural();
-                        executeOnLauncher(launcher ->
-                                launcher.getRotationHelper().forceAllowRotationForTesting(false));
-                        mLauncher.setExpectedRotation(Surface.ROTATION_0);
-                    }
-                }
-
-                private void evaluateInPortrait() throws Throwable {
-                    mDevice.setOrientationNatural();
-                    mLauncher.setExpectedRotation(Surface.ROTATION_0);
-                    base.evaluate();
-                }
-
-                private void evaluateInLandscape() throws Throwable {
-                    mDevice.setOrientationLeft();
-                    mLauncher.setExpectedRotation(Surface.ROTATION_90);
-                    base.evaluate();
-                }
-            } : base;
+    protected TestRule getRulesInsideActivityMonitor() {
+        return RuleChain.
+                outerRule(new PortraitLandscapeRunner(this)).
+                around(new FailureWatcher(mDevice));
+    }
 
     @Rule
-    public TestWatcher mFailureWatcher = new TestWatcher() {
-        private void dumpViewHierarchy() {
-            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            try {
-                mDevice.dumpWindowHierarchy(stream);
-                stream.flush();
-                stream.close();
-                for (String line : stream.toString().split("\\r?\\n")) {
-                    Log.e(TAG, line.trim());
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "error dumping XML to logcat", e);
-            }
-        }
+    public TestRule mOrderSensitiveRules = RuleChain.
+            outerRule(mActivityMonitor).
+            around(getRulesInsideActivityMonitor());
 
-        @Override
-        protected void failed(Throwable e, Description description) {
-            if (mDevice == null) return;
-            final String pathname = getInstrumentation().getTargetContext().
-                    getFilesDir().getPath() + "/TaplTestScreenshot" + sScreenshotCount++ + ".png";
-            Log.e(TAG, "Failed test " + description.getMethodName() +
-                    ", screenshot will be saved to " + pathname +
-                    ", track trace is below, UI object dump is further below:\n" +
-                    Log.getStackTraceString(e));
-            dumpViewHierarchy();
-            mDevice.takeScreenshot(new File(pathname));
-        }
-    };
+    public UiDevice getDevice() {
+        return mDevice;
+    }
 
     @Before
     public void setUp() throws Exception {
+        // Disable app tracker
+        AppLaunchTracker.INSTANCE.initializeForTesting(new AppLaunchTracker());
+
         mTargetContext = InstrumentationRegistry.getTargetContext();
         mTargetPackage = mTargetContext.getPackageName();
         // Unlock the phone
@@ -243,7 +187,7 @@ public abstract class AbstractLauncherUiTest {
      */
     protected UiObject2 scrollAndFind(UiObject2 container, BySelector condition) {
         final int margin = ResourceUtils.getNavbarSize(
-                ResourceUtils.NAVBAR_PORTRAIT_BOTTOM_SIZE, mLauncher.getResources()) + 1;
+                ResourceUtils.NAVBAR_BOTTOM_GESTURE_SIZE, mLauncher.getResources()) + 1;
         container.setGestureMargins(0, 0, 0, margin);
 
         int i = 0;
@@ -394,7 +338,7 @@ public abstract class AbstractLauncherUiTest {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         instrumentation.getTargetContext().startActivity(intent);
         assertTrue(packageName + " didn't start",
-                mDevice.wait(Until.hasObject(By.pkg(packageName).depth(0)), LONG_WAIT_TIME_MS));
+                mDevice.wait(Until.hasObject(By.pkg(packageName).depth(0)), DEFAULT_UI_TIMEOUT));
     }
 
     protected void startTestActivity(int activityNumber) {
@@ -410,10 +354,10 @@ public abstract class AbstractLauncherUiTest {
         assertTrue(packageName + " didn't start",
                 mDevice.wait(
                         Until.hasObject(By.pkg(packageName).text("TestActivity" + activityNumber)),
-                        LONG_WAIT_TIME_MS));
+                        DEFAULT_UI_TIMEOUT));
     }
 
-    protected static String resolveSystemApp(String category) {
+    public static String resolveSystemApp(String category) {
         return getInstrumentation().getContext().getPackageManager().resolveActivity(
                 new Intent(Intent.ACTION_MAIN).addCategory(category),
                 PackageManager.MATCH_SYSTEM_ONLY).

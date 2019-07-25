@@ -27,6 +27,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.res.Resources;
@@ -39,7 +41,7 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
-import android.util.Property;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -52,6 +54,7 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.Interpolators;
 import com.android.launcher3.logging.UserEventDispatcher;
+import com.android.launcher3.testing.TestProtocol;
 import com.android.launcher3.userevent.nano.LauncherLogProto;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action.Direction;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action.Touch;
@@ -150,7 +153,7 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
     private TaskThumbnailView mSnapshotView;
     private TaskMenuView mMenuView;
     private IconView mIconView;
-    private DigitalWellBeingToast mDigitalWellBeingToast;
+    private final DigitalWellBeingToast mDigitalWellBeingToast;
     private float mCurveScale;
     private float mFullscreenProgress;
     private final FullscreenDrawParams mCurrentFullscreenParams;
@@ -161,12 +164,21 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
     private ObjectAnimator mIconAndDimAnimator;
     private float mIconScaleAnimStartProgress = 0;
     private float mFocusTransitionProgress = 1;
+    private float mStableAlpha = 1;
 
     private boolean mShowScreenshot;
 
     // The current background requests to load the task thumbnail and icon
     private TaskThumbnailCache.ThumbnailLoadRequest mThumbnailLoadRequest;
     private TaskIconCache.IconLoadRequest mIconLoadRequest;
+
+    // Order in which the footers appear. Lower order appear below higher order.
+    public static final int INDEX_DIGITAL_WELLBEING_TOAST = 0;
+    public static final int INDEX_PROACTIVE_SUGGEST = 1;
+    private final FooterWrapper[] mFooters = new FooterWrapper[2];
+    private float mFooterVerticalOffset = 0;
+    private float mFooterAlpha = 1;
+    private int mStackHeight;
 
     public TaskView(Context context) {
         this(context, null);
@@ -180,6 +192,9 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         super(context, attrs, defStyleAttr);
         mActivity = BaseDraggingActivity.fromContext(context);
         setOnClickListener((view) -> {
+            if (com.android.launcher3.testing.TestProtocol.sDebugTracing) {
+                android.util.Log.d(TestProtocol.NO_START_TASK_TAG, "TaskView onClick");
+            }
             if (getTask() == null) {
                 return;
             }
@@ -202,6 +217,8 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         mCornerRadius = TaskCornerRadius.get(context);
         mWindowCornerRadius = QuickStepContract.getWindowCornerRadius(context.getResources());
         mCurrentFullscreenParams = new FullscreenDrawParams(mCornerRadius);
+        mDigitalWellBeingToast = new DigitalWellBeingToast(mActivity, this);
+
         mOutlineProvider = new TaskOutlineProvider(getResources(), mCurrentFullscreenParams);
         setOutlineProvider(mOutlineProvider);
     }
@@ -211,7 +228,6 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         super.onFinishInflate();
         mSnapshotView = findViewById(R.id.snapshot);
         mIconView = findViewById(R.id.icon);
-        mDigitalWellBeingToast = findViewById(R.id.digital_well_being_toast);
     }
 
     public TaskMenuView getMenuView() {
@@ -241,10 +257,6 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
 
     public IconView getIconView() {
         return mIconView;
-    }
-
-    public TaskOverlayFactory.TaskOverlay getTaskOverlay() {
-        return mSnapshotView.getTaskOverlay();
     }
 
     public AnimatorPlaybackController createLaunchAnimationForRunningTask() {
@@ -279,6 +291,9 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
 
     public void launchTask(boolean animate, boolean freezeTaskList, Consumer<Boolean> resultCallback,
             Handler resultCallbackHandler) {
+        if (com.android.launcher3.testing.TestProtocol.sDebugTracing) {
+            android.util.Log.d(TestProtocol.NO_START_TASK_TAG, "launchTask");
+        }
         if (ENABLE_QUICKSTEP_LIVE_TILE.get()) {
             if (isRunningTask()) {
                 getRecentsView().finishRecentsAnimation(false /* toRecents */,
@@ -293,6 +308,9 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
 
     private void launchTaskInternal(boolean animate, boolean freezeTaskList,
             Consumer<Boolean> resultCallback, Handler resultCallbackHandler) {
+        if (com.android.launcher3.testing.TestProtocol.sDebugTracing) {
+            android.util.Log.d(TestProtocol.NO_START_TASK_TAG, "launchTaskInternal");
+        }
         if (mTask != null) {
             final ActivityOptions opts;
             if (animate) {
@@ -342,21 +360,17 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
             mIconLoadRequest = iconCache.updateIconInBackground(mTask,
                     (task) -> {
                         setIcon(task.icon);
-                        if (isRunningTask()) {
+                        if (ENABLE_QUICKSTEP_LIVE_TILE.get() && isRunningTask()) {
                             getRecentsView().updateLiveTileIcon(task.icon);
                         }
-                        mDigitalWellBeingToast.initialize(
-                                mTask,
-                                contentDescription -> {
-                                    setContentDescription(contentDescription);
-                                    if (mDigitalWellBeingToast.getVisibility() == VISIBLE) {
-                                        getRecentsView().onDigitalWellbeingToastShown();
-                                    }
-                                });
+                        mDigitalWellBeingToast.initialize(mTask);
                     });
         } else {
             mSnapshotView.setThumbnail(null, null);
             setIcon(null);
+            // Reset the task thumbnail reference as well (it will be fetched from the cache or
+            // reloaded next time we need it)
+            mTask.thumbnail = null;
         }
     }
 
@@ -410,6 +424,13 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
                 .getInterpolation(progress);
         mIconView.setScaleX(scale);
         mIconView.setScaleY(scale);
+
+        mFooterVerticalOffset = 1.0f - scale;
+        for (FooterWrapper footer : mFooters) {
+            if (footer != null) {
+                footer.updateFooterOffset();
+            }
+        }
     }
 
     public void setIconScaleAnimStartProgress(float startProgress) {
@@ -448,7 +469,7 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         setTranslationX(0f);
         setTranslationY(0f);
         setTranslationZ(0);
-        setAlpha(1f);
+        setAlpha(mStableAlpha);
         setIconScaleAndDim(1);
     }
 
@@ -457,15 +478,19 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         setFullscreenProgress(0);
     }
 
+    public void setStableAlpha(float parentAlpha) {
+        mStableAlpha = parentAlpha;
+        setAlpha(mStableAlpha);
+    }
+
     @Override
     public void onRecycle() {
         resetViewTransforms();
         // Clear any references to the thumbnail (it will be re-read either from the cache or the
         // system on next bind)
         mSnapshotView.setThumbnail(mTask, null);
-        if (mTask != null) {
-            mTask.thumbnail = null;
-        }
+        setOverlayEnabled(false);
+        onTaskListVisibilityChanged(false);
     }
 
     @Override
@@ -476,11 +501,68 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         mSnapshotView.setDimAlpha(curveInterpolation * MAX_PAGE_SCRIM_ALPHA);
         setCurveScale(getCurveScaleForCurveInterpolation(curveInterpolation));
 
+        mFooterAlpha = Utilities.boundToRange(1.0f - 2 * scrollState.linearInterpolation, 0f, 1f);
+        for (FooterWrapper footer : mFooters) {
+            if (footer != null) {
+                footer.mView.setAlpha(mFooterAlpha);
+            }
+        }
+
         if (mMenuView != null) {
             mMenuView.setPosition(getX() - getRecentsView().getScrollX(), getY());
             mMenuView.setScaleX(getScaleX());
             mMenuView.setScaleY(getScaleY());
         }
+    }
+
+
+    /**
+     * Sets the footer at the specific index and returns the previously set footer.
+     */
+    public View setFooter(int index, View view) {
+        View oldFooter = null;
+
+        // If the footer are is already collapsed, do not animate entry
+        boolean shouldAnimateEntry = mFooterVerticalOffset <= 0;
+
+        if (mFooters[index] != null) {
+            oldFooter = mFooters[index].mView;
+            mFooters[index].release();
+            removeView(oldFooter);
+
+            // If we are replacing an existing footer, do not animate entry
+            shouldAnimateEntry = false;
+        }
+        if (view != null) {
+            int indexToAdd = getChildCount();
+            for (int i = index - 1; i >= 0; i--) {
+                if (mFooters[i] != null) {
+                    indexToAdd = indexOfChild(mFooters[i].mView);
+                    break;
+                }
+            }
+
+            addView(view, indexToAdd);
+            ((LayoutParams) view.getLayoutParams()).gravity =
+                    Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+            view.setAlpha(mFooterAlpha);
+            mFooters[index] = new FooterWrapper(view);
+            if (shouldAnimateEntry) {
+                mFooters[index].animateEntry();
+            }
+        } else {
+            mFooters[index] = null;
+        }
+
+        mStackHeight = 0;
+        for (FooterWrapper footer : mFooters) {
+            if (footer != null) {
+                footer.setVerticalShift(mStackHeight);
+                mStackHeight += footer.mExpectedHeight;
+            }
+        }
+
+        return oldFooter;
     }
 
     @Override
@@ -491,6 +573,18 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         if (Utilities.ATLEAST_Q) {
             SYSTEM_GESTURE_EXCLUSION_RECT.get(0).set(0, 0, getWidth(), getHeight());
             setSystemGestureExclusionRects(SYSTEM_GESTURE_EXCLUSION_RECT);
+        }
+
+        mStackHeight = 0;
+        for (FooterWrapper footer : mFooters) {
+            if (footer != null) {
+                mStackHeight += footer.mView.getHeight();
+            }
+        }
+        for (FooterWrapper footer : mFooters) {
+            if (footer != null) {
+                footer.updateFooterOffset();
+            }
         }
     }
 
@@ -550,6 +644,77 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         }
     }
 
+    private class FooterWrapper extends ViewOutlineProvider {
+
+        final View mView;
+        final ViewOutlineProvider mOldOutlineProvider;
+        final ViewOutlineProvider mDelegate;
+
+        final int mExpectedHeight;
+        final int mOldPaddingBottom;
+
+        int mAnimationOffset = 0;
+        int mEntryAnimationOffset = 0;
+
+        public FooterWrapper(View view) {
+            mView = view;
+            mOldOutlineProvider = view.getOutlineProvider();
+            mDelegate = mOldOutlineProvider == null
+                    ? ViewOutlineProvider.BACKGROUND : mOldOutlineProvider;
+
+            int h = view.getLayoutParams().height;
+            if (h > 0) {
+                mExpectedHeight = h;
+            } else {
+                int m = MeasureSpec.makeMeasureSpec(MeasureSpec.EXACTLY - 1, MeasureSpec.AT_MOST);
+                view.measure(m, m);
+                mExpectedHeight = view.getMeasuredHeight();
+            }
+            mOldPaddingBottom = view.getPaddingBottom();
+
+            if (mOldOutlineProvider != null) {
+                view.setOutlineProvider(this);
+                view.setClipToOutline(true);
+            }
+        }
+
+        public void setVerticalShift(int shift) {
+            mView.setPadding(mView.getPaddingLeft(), mView.getPaddingTop(),
+                    mView.getPaddingRight(), mOldPaddingBottom + shift);
+        }
+
+        @Override
+        public void getOutline(View view, Outline outline) {
+            mDelegate.getOutline(view, outline);
+            outline.offset(0, -mAnimationOffset - mEntryAnimationOffset);
+        }
+
+        void updateFooterOffset() {
+            mAnimationOffset = Math.round(mStackHeight * mFooterVerticalOffset);
+            mView.setTranslationY(mAnimationOffset + mEntryAnimationOffset
+                    + mCurrentFullscreenParams.mCurrentDrawnInsets.bottom
+                    + mCurrentFullscreenParams.mCurrentDrawnInsets.top);
+            mView.invalidateOutline();
+        }
+
+        void release() {
+            mView.setOutlineProvider(mOldOutlineProvider);
+            setVerticalShift(0);
+        }
+
+        void animateEntry() {
+            ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+            animator.addUpdateListener(anim -> {
+               float factor = 1 - anim.getAnimatedFraction();
+               int totalShift = mExpectedHeight + mView.getPaddingBottom() - mOldPaddingBottom;
+                mEntryAnimationOffset = Math.round(factor * totalShift);
+                updateFooterOffset();
+            });
+            animator.setDuration(100);
+            animator.start();
+        }
+    }
+
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
@@ -560,7 +725,7 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
 
         final Context context = getContext();
         final List<TaskSystemShortcut> shortcuts =
-                mSnapshotView.getTaskOverlay().getEnabledShortcuts(this);
+                TaskOverlayFactory.INSTANCE.get(getContext()).getEnabledShortcuts(this);
         final int count = shortcuts.size();
         for (int i = 0; i < count; ++i) {
             final TaskSystemShortcut menuOption = shortcuts.get(i);
@@ -570,7 +735,7 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
             }
         }
 
-        if (mDigitalWellBeingToast.getVisibility() == VISIBLE) {
+        if (mDigitalWellBeingToast.hasLimit()) {
             info.addAction(
                     new AccessibilityNodeInfo.AccessibilityAction(
                             R.string.accessibility_app_usage_settings,
@@ -594,12 +759,12 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
         }
 
         if (action == R.string.accessibility_app_usage_settings) {
-            mDigitalWellBeingToast.openAppUsageSettings();
+            mDigitalWellBeingToast.openAppUsageSettings(this);
             return true;
         }
 
         final List<TaskSystemShortcut> shortcuts =
-                mSnapshotView.getTaskOverlay().getEnabledShortcuts(this);
+                TaskOverlayFactory.INSTANCE.get(getContext()).getEnabledShortcuts(this);
         final int count = shortcuts.size();
         for (int i = 0; i < count; ++i) {
             final TaskSystemShortcut menuOption = shortcuts.get(i);
@@ -633,12 +798,12 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
      * @param progress: 0 = show icon and no insets; 1 = don't show icon and show full insets.
      */
     public void setFullscreenProgress(float progress) {
+        progress = Utilities.boundToRange(progress, 0, 1);
         if (progress == mFullscreenProgress) {
             return;
         }
         mFullscreenProgress = progress;
         boolean isFullscreen = mFullscreenProgress > 0;
-        setIconScaleAndDim(progress, true /* invert */);
         mIconView.setVisibility(progress < 1 ? VISIBLE : INVISIBLE);
         setClipChildren(!isFullscreen);
         setClipToPadding(!isFullscreen);
@@ -662,12 +827,18 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
                     / (getWidth() + currentInsetsLeft + currentInsetsRight));
         }
 
+        // Some of the items in here are dependent on the current fullscreen params
+        setIconScaleAndDim(progress, true /* invert */);
+
         thumbnail.setFullscreenParams(mCurrentFullscreenParams);
         mOutlineProvider.setFullscreenParams(mCurrentFullscreenParams);
         invalidateOutline();
     }
 
     public boolean isRunningTask() {
+        if (getRecentsView() == null) {
+            return false;
+        }
         return this == getRecentsView().getRunningTaskView();
     }
 
@@ -680,6 +851,10 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
             return true;
         }
         return mShowScreenshot;
+    }
+
+    public void setOverlayEnabled(boolean overlayEnabled) {
+        mSnapshotView.setOverlayEnabled(overlayEnabled);
     }
 
     /**

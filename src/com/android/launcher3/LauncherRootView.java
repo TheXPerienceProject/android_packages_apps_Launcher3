@@ -8,6 +8,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
@@ -20,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class LauncherRootView extends InsettableFrameLayout {
+
+    private final Rect mTempRect = new Rect();
 
     private final Launcher mLauncher;
 
@@ -57,9 +60,7 @@ public class LauncherRootView extends InsettableFrameLayout {
         super.onFinishInflate();
     }
 
-    @TargetApi(23)
-    @Override
-    protected boolean fitSystemWindows(Rect insets) {
+    private void handleSystemWindowInsets(Rect insets) {
         mConsumedInsets.setEmpty();
         boolean drawInsetBar = false;
         if (mLauncher.isInMultiWindowMode()
@@ -67,13 +68,13 @@ public class LauncherRootView extends InsettableFrameLayout {
             mConsumedInsets.left = insets.left;
             mConsumedInsets.right = insets.right;
             mConsumedInsets.bottom = insets.bottom;
-            insets = new Rect(0, insets.top, 0, 0);
+            insets.set(0, insets.top, 0, 0);
             drawInsetBar = true;
         } else  if ((insets.right > 0 || insets.left > 0) &&
                 getContext().getSystemService(ActivityManager.class).isLowRamDevice()) {
             mConsumedInsets.left = insets.left;
             mConsumedInsets.right = insets.right;
-            insets = new Rect(0, insets.top, 0, insets.bottom);
+            insets.set(0, insets.top, 0, insets.bottom);
             drawInsetBar = true;
         }
 
@@ -100,8 +101,19 @@ public class LauncherRootView extends InsettableFrameLayout {
         if (resetState) {
             mLauncher.getStateManager().reapplyState(true /* cancelCurrentAnimation */);
         }
+    }
 
-        return true; // I'll take it from here
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        mTempRect.set(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+        handleSystemWindowInsets(mTempRect);
+        if (Utilities.ATLEAST_Q) {
+            return insets.inset(mConsumedInsets.left, mConsumedInsets.top,
+                    mConsumedInsets.right, mConsumedInsets.bottom);
+        } else {
+            return insets.replaceSystemWindowInsets(mTempRect);
+        }
     }
 
     @Override
@@ -154,12 +166,6 @@ public class LauncherRootView extends InsettableFrameLayout {
         if (mWindowStateListener != null) {
             mWindowStateListener.onWindowVisibilityChanged(visibility);
         }
-    }
-
-    @Override
-    public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
-        mLauncher.getDragLayer().updateTouchExcludeRegion(insets);
-        return super.dispatchApplyWindowInsets(insets);
     }
 
     @Override

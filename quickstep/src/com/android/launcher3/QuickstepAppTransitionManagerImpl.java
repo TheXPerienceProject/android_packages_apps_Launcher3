@@ -59,6 +59,7 @@ import android.view.View;
 import com.android.launcher3.DeviceProfile.OnDeviceProfileChangeListener;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.anim.Interpolators;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.util.MultiValueAlpha;
@@ -108,7 +109,7 @@ public abstract class QuickstepAppTransitionManagerImpl extends LauncherAppTrans
     // Use a shorter duration for x or y translation to create a curve effect
     private static final long APP_LAUNCH_CURVED_DURATION = 250;
     private static final long APP_LAUNCH_ALPHA_DURATION = 50;
-    private static final long APP_LAUNCH_ALPHA_START_DELAY = 50;
+    private static final long APP_LAUNCH_ALPHA_START_DELAY = 25;
 
     // We scale the durations for the downward app launch animations (minus the scale animation).
     private static final float APP_LAUNCH_DOWN_DUR_SCALE_FACTOR = 0.8f;
@@ -118,6 +119,9 @@ public abstract class QuickstepAppTransitionManagerImpl extends LauncherAppTrans
             (long) (APP_LAUNCH_CURVED_DURATION * APP_LAUNCH_DOWN_DUR_SCALE_FACTOR);
     private static final long APP_LAUNCH_ALPHA_DOWN_DURATION =
             (long) (APP_LAUNCH_ALPHA_DURATION * APP_LAUNCH_DOWN_DUR_SCALE_FACTOR);
+
+    private static final long CROP_DURATION = 375;
+    private static final long RADIUS_DURATION = 375;
 
     public static final int RECENTS_LAUNCH_DURATION = 336;
     private static final int LAUNCHER_RESUME_START_DELAY = 100;
@@ -177,6 +181,12 @@ public abstract class QuickstepAppTransitionManagerImpl extends LauncherAppTrans
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
         mDeviceProfile = dp;
+    }
+
+    @Override
+    public boolean supportsAdaptiveIconAnimation() {
+        return hasControlRemoteAppTransitionPermission()
+                && FeatureFlags.ADAPTIVE_ICON_WINDOW_ANIM.get();
     }
 
     /**
@@ -278,7 +288,7 @@ public abstract class QuickstepAppTransitionManagerImpl extends LauncherAppTrans
         if (launcherClosing) {
             Pair<AnimatorSet, Runnable> launcherContentAnimator =
                     getLauncherContentAnimator(true /* isAppOpening */,
-                            new float[] {0, mContentTransY});
+                            new float[] {0, -mContentTransY});
             anim.play(launcherContentAnimator.first);
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override
@@ -494,10 +504,10 @@ public abstract class QuickstepAppTransitionManagerImpl extends LauncherAppTrans
                     EXAGGERATED_EASE);
             FloatProp mIconAlpha = new FloatProp(1f, 0f, APP_LAUNCH_ALPHA_START_DELAY,
                     alphaDuration, LINEAR);
-            FloatProp mCroppedSize = new FloatProp(startCrop, endCrop, 0, APP_LAUNCH_DURATION,
+            FloatProp mCroppedSize = new FloatProp(startCrop, endCrop, 0, CROP_DURATION,
                     EXAGGERATED_EASE);
             FloatProp mWindowRadius = new FloatProp(startCrop / 2f, windowRadius, 0,
-                    APP_LAUNCH_DURATION, EXAGGERATED_EASE);
+                    RADIUS_DURATION, EXAGGERATED_EASE);
 
             @Override
             public void onUpdate(float percent) {
@@ -755,7 +765,7 @@ public abstract class QuickstepAppTransitionManagerImpl extends LauncherAppTrans
                 LauncherAnimationRunner.AnimationResult result) {
             if (!mLauncher.hasBeenResumed()) {
                 // If launcher is not resumed, wait until new async-frame after resume
-                mLauncher.setOnResumeCallback(() ->
+                mLauncher.addOnResumeCallback(() ->
                         postAsyncCallback(mHandler, () ->
                                 onCreateAnimation(targetCompats, result)));
                 return;

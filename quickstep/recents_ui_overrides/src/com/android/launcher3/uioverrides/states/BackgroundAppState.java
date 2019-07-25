@@ -21,7 +21,6 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.userevent.nano.LauncherLogProto;
-import com.android.quickstep.util.ClipAnimationHelper;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.TaskView;
@@ -32,7 +31,8 @@ import com.android.quickstep.views.TaskView;
 public class BackgroundAppState extends OverviewState {
 
     private static final int STATE_FLAGS =
-            FLAG_DISABLE_RESTORE | FLAG_OVERVIEW_UI | FLAG_DISABLE_ACCESSIBILITY;
+            FLAG_DISABLE_RESTORE | FLAG_OVERVIEW_UI | FLAG_DISABLE_ACCESSIBILITY
+                    | FLAG_DISABLE_INTERACTION;
 
     public BackgroundAppState(int id) {
         this(id, LauncherLogProto.ContainerType.TASKSWITCHER);
@@ -44,8 +44,6 @@ public class BackgroundAppState extends OverviewState {
 
     @Override
     public void onStateEnabled(Launcher launcher) {
-        RecentsView rv = launcher.getOverviewPanel();
-        rv.setOverviewStateEnabled(true);
         AbstractFloatingView.closeAllOpenViews(launcher, false);
     }
 
@@ -66,10 +64,12 @@ public class BackgroundAppState extends OverviewState {
     public ScaleAndTranslation getOverviewScaleAndTranslation(Launcher launcher) {
         // Initialize the recents view scale to what it would be when starting swipe up
         RecentsView recentsView = launcher.getOverviewPanel();
-        if (recentsView.getTaskViewCount() == 0) {
+        int taskCount = recentsView.getTaskViewCount();
+        if (taskCount == 0) {
             return super.getOverviewScaleAndTranslation(launcher);
         }
-        TaskView dummyTask = recentsView.getTaskViewAt(recentsView.getCurrentPage());
+        TaskView dummyTask = recentsView.getTaskViewAt(Math.max(taskCount - 1,
+                recentsView.getCurrentPage()));
         return recentsView.getTempClipAnimationHelper().updateForFullscreenOverview(dummyTask)
                 .getScaleAndTranslation();
     }
@@ -81,6 +81,19 @@ public class BackgroundAppState extends OverviewState {
 
     @Override
     public int getVisibleElements(Launcher launcher) {
-        return super.getVisibleElements(launcher) & ~RECENTS_CLEAR_ALL_BUTTON;
+        return super.getVisibleElements(launcher)
+                & ~RECENTS_CLEAR_ALL_BUTTON & ~VERTICAL_SWIPE_INDICATOR;
+    }
+
+    @Override
+    public ScaleAndTranslation getHotseatScaleAndTranslation(Launcher launcher) {
+        if ((getVisibleElements(launcher) & HOTSEAT_ICONS) != 0) {
+            // Translate hotseat offscreen if we show it in overview.
+            ScaleAndTranslation scaleAndTranslation = super.getHotseatScaleAndTranslation(launcher);
+            scaleAndTranslation.translationY = LayoutUtils.getShelfTrackingDistance(launcher,
+                    launcher.getDeviceProfile());
+            return scaleAndTranslation;
+        }
+        return super.getHotseatScaleAndTranslation(launcher);
     }
 }

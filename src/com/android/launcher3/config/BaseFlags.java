@@ -105,11 +105,11 @@ abstract class BaseFlags {
             "ENABLE_QUICKSTEP_LIVE_TILE", false, "Enable live tile in Quickstep overview");
 
     public static final TogglableFlag ENABLE_HINTS_IN_OVERVIEW = new TogglableFlag(
-            "ENABLE_HINTS_IN_OVERVIEW", false,
+            "ENABLE_HINTS_IN_OVERVIEW", true,
             "Show chip hints and gleams on the overview screen");
 
     public static final TogglableFlag FAKE_LANDSCAPE_UI = new TogglableFlag(
-            "FAKE_LANDSCAPE_UI", true,
+            "FAKE_LANDSCAPE_UI", false,
             "Rotate launcher UI instead of using transposed layout");
 
     public static void initialize(Context context) {

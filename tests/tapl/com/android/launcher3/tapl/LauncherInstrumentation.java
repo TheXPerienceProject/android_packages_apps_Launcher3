@@ -16,16 +16,23 @@
 
 package com.android.launcher3.tapl;
 
-import static com.android.launcher3.TestProtocol.BACKGROUND_APP_STATE_ORDINAL;
-import static com.android.launcher3.TestProtocol.NORMAL_STATE_ORDINAL;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.DONT_KILL_APP;
+import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+
 import static com.android.launcher3.tapl.TestHelpers.getOverviewPackageName;
+import static com.android.launcher3.testing.TestProtocol.BACKGROUND_APP_STATE_ORDINAL;
+import static com.android.launcher3.testing.TestProtocol.NORMAL_STATE_ORDINAL;
 
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -53,7 +60,7 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
-import com.android.launcher3.TestProtocol;
+import com.android.launcher3.testing.TestProtocol;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import org.junit.Assert;
@@ -149,9 +156,10 @@ public final class LauncherInstrumentation {
                 getLauncherPackageName() :
                 targetPackage;
 
+        String testProviderAuthority = authorityPackage + ".TestInfo";
         mTestProviderUri = new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(authorityPackage + ".TestInfo")
+                .authority(testProviderAuthority)
                 .build();
 
         try {
@@ -159,6 +167,25 @@ public final class LauncherInstrumentation {
                     " android.permission.WRITE_SECURE_SETTINGS");
         } catch (IOException e) {
             fail(e.toString());
+        }
+
+
+        PackageManager pm = getContext().getPackageManager();
+        ProviderInfo pi = pm.resolveContentProvider(
+                testProviderAuthority, MATCH_ALL | MATCH_DISABLED_COMPONENTS);
+        ComponentName cn = new ComponentName(pi.packageName, pi.name);
+
+        if (pm.getComponentEnabledSetting(cn) != COMPONENT_ENABLED_STATE_ENABLED) {
+            if (TestHelpers.isInLauncherProcess()) {
+                getContext().getPackageManager().setComponentEnabledSetting(
+                        cn, COMPONENT_ENABLED_STATE_ENABLED, DONT_KILL_APP);
+            } else {
+                try {
+                    mDevice.executeShellCommand("pm enable " + cn.flattenToString());
+                } catch (IOException e) {
+                    fail(e.toString());
+                }
+            }
         }
     }
 
@@ -181,14 +208,10 @@ public final class LauncherInstrumentation {
             // app context are not constructed with resources that take overlays into account
             final Context ctx = baseContext.createPackageContext("android", 0);
             for (int i = 0; i < 100; ++i) {
-                log("Interaction mode = " + getCurrentInteractionMode(ctx));
-                if (isGesturalMode(ctx)) {
-                    return NavigationModel.ZERO_BUTTON;
-                } else if (isSwipeUpMode(ctx)) {
-                    return NavigationModel.TWO_BUTTON;
-                } else if (isLegacyMode(ctx)) {
-                    return NavigationModel.THREE_BUTTON;
-                }
+                final int currentInteractionMode = getCurrentInteractionMode(ctx);
+                final NavigationModel model = getNavigationModel(currentInteractionMode);
+                log("Interaction mode = " + currentInteractionMode + " (" + model + ")");
+                if (model != null) return model;
                 Thread.sleep(100);
             }
             fail("Can't detect navigation mode");
@@ -196,6 +219,17 @@ public final class LauncherInstrumentation {
             fail(e.toString());
         }
         return NavigationModel.THREE_BUTTON;
+    }
+
+    public static NavigationModel getNavigationModel(int currentInteractionMode) {
+        if (QuickStepContract.isGesturalMode(currentInteractionMode)) {
+            return NavigationModel.ZERO_BUTTON;
+        } else if (QuickStepContract.isSwipeUpMode(currentInteractionMode)) {
+            return NavigationModel.TWO_BUTTON;
+        } else if (QuickStepContract.isLegacyMode(currentInteractionMode)) {
+            return NavigationModel.THREE_BUTTON;
+        }
+        return null;
     }
 
     public static boolean isAvd() {
@@ -230,6 +264,7 @@ public final class LauncherInstrumentation {
     }
 
     private void fail(String message) {
+        log("Hierarchy dump for: " + getContextDescription() + message);
         dumpViewHierarchy();
         Assert.fail("http://go/tapl : " + getContextDescription() + message);
     }
@@ -264,6 +299,12 @@ public final class LauncherInstrumentation {
         }
     }
 
+    void assertEquals(String message, long expected, long actual) {
+        if (expected != actual) {
+            fail(message + " expected: " + expected + " but was: " + actual);
+        }
+    }
+
     void assertNotEquals(String message, int unexpected, int actual) {
         if (unexpected == actual) {
             failEquals(message, actual);
@@ -274,25 +315,37 @@ public final class LauncherInstrumentation {
         mExpectedRotation = expectedRotation;
     }
 
-    private UiObject2 verifyContainerType(ContainerType containerType) {
-        assertEquals("Unexpected display rotation",
-                mExpectedRotation, mDevice.getDisplayRotation());
+    public String getNavigationModeMismatchError() {
         final NavigationModel navigationModel = getNavigationModel();
         final boolean hasRecentsButton = hasSystemUiObject("recent_apps");
         final boolean hasHomeButton = hasSystemUiObject("home");
-        assertTrue("Presence of recents button doesn't match the interaction mode, mode="
-                        + navigationModel.name() + ", hasRecents=" + hasRecentsButton,
-                (navigationModel == NavigationModel.THREE_BUTTON) == hasRecentsButton);
-        assertTrue("Presence of home button doesn't match the interaction mode, mode="
-                        + navigationModel.name() + ", hasHome=" + hasHomeButton,
-                (navigationModel != NavigationModel.ZERO_BUTTON) == hasHomeButton);
+        if ((navigationModel == NavigationModel.THREE_BUTTON) != hasRecentsButton) {
+            return "Presence of recents button doesn't match the interaction mode, mode="
+                    + navigationModel.name() + ", hasRecents=" + hasRecentsButton;
+        }
+        if ((navigationModel != NavigationModel.ZERO_BUTTON) != hasHomeButton) {
+            return "Presence of home button doesn't match the interaction mode, mode="
+                    + navigationModel.name() + ", hasHome=" + hasHomeButton;
+        }
+        return null;
+    }
+
+    private UiObject2 verifyContainerType(ContainerType containerType) {
+        assertEquals("Unexpected display rotation",
+                mExpectedRotation, mDevice.getDisplayRotation());
+        final String error = getNavigationModeMismatchError();
+        assertTrue(error, error == null);
         log("verifyContainerType: " + containerType);
 
         try (Closable c = addContextLayer(
                 "but the current state is not " + containerType.name())) {
             switch (containerType) {
                 case WORKSPACE: {
-                    waitForLauncherObject(APPS_RES_ID);
+                    if (mDevice.isNaturalOrientation()) {
+                        waitForLauncherObject(APPS_RES_ID);
+                    } else {
+                        waitUntilGone(APPS_RES_ID);
+                    }
                     waitUntilGone(OVERVIEW_RES_ID);
                     waitUntilGone(WIDGETS_RES_ID);
                     return waitForLauncherObject(WORKSPACE_RES_ID);
@@ -337,7 +390,7 @@ public final class LauncherInstrumentation {
         }
     }
 
-    private Parcelable executeAndWaitForEvent(Runnable command,
+    Parcelable executeAndWaitForEvent(Runnable command,
             UiAutomation.AccessibilityEventFilter eventFilter, String message) {
         try {
             final AccessibilityEvent event =
@@ -373,13 +426,22 @@ public final class LauncherInstrumentation {
         // accessibility events prior to pressing Home.
         final String action;
         if (getNavigationModel() == NavigationModel.ZERO_BUTTON) {
+            final Point displaySize = getRealDisplaySize();
+
+            if (hasLauncherObject("deep_shortcuts_container")) {
+                linearGesture(
+                        displaySize.x / 2, displaySize.y - 1,
+                        displaySize.x / 2, 0,
+                        ZERO_BUTTON_STEPS_FROM_BACKGROUND_TO_HOME);
+                assertTrue("Context menu is still visible afterswiping up to home",
+                        !hasLauncherObject("deep_shortcuts_container"));
+            }
             if (hasLauncherObject(WORKSPACE_RES_ID)) {
                 log(action = "already at home");
             } else {
                 log(action = "swiping up to home");
                 final int finalState = mDevice.hasObject(By.pkg(getLauncherPackageName()))
                         ? NORMAL_STATE_ORDINAL : BACKGROUND_APP_STATE_ORDINAL;
-                final Point displaySize = getRealDisplaySize();
 
                 swipeToState(
                         displaySize.x / 2, displaySize.y - 1,
@@ -440,6 +502,13 @@ public final class LauncherInstrumentation {
         }
     }
 
+    @NonNull
+    public AddToHomeScreenPrompt getAddToHomeScreenPrompt() {
+        try (LauncherInstrumentation.Closable c = addContextLayer("want to get widget cell")) {
+            return new AddToHomeScreenPrompt(this);
+        }
+    }
+
     /**
      * Gets the Overview object if the current state is showing the overview panel. Fails if the
      * launcher is not in that state.
@@ -451,17 +520,6 @@ public final class LauncherInstrumentation {
         try (LauncherInstrumentation.Closable c = addContextLayer("want to get overview")) {
             return new Overview(this);
         }
-    }
-
-    /**
-     * Gets the Base overview object if either Launcher is in overview state or the fallback
-     * overview activity is showing. Fails otherwise.
-     *
-     * @return BaseOverview object.
-     */
-    @NonNull
-    public BaseOverview getBaseOverview() {
-        return new BaseOverview(this);
     }
 
     /**
@@ -534,6 +592,16 @@ public final class LauncherInstrumentation {
         return object;
     }
 
+    @NonNull
+    UiObject2 waitForObjectInContainer(UiObject2 container, BySelector selector) {
+        final UiObject2 object = container.wait(
+                Until.findObject(selector),
+                WAIT_TIME_MS);
+        assertNotNull("Can't find a launcher object id: " + selector + " in container: " +
+                container.getResourceName(), object);
+        return object;
+    }
+
     @Nullable
     private boolean hasLauncherObject(String resId) {
         return mDevice.hasObject(getLauncherObjectSelector(resId));
@@ -541,34 +609,36 @@ public final class LauncherInstrumentation {
 
     @NonNull
     UiObject2 waitForLauncherObject(String resName) {
-        final BySelector selector = getLauncherObjectSelector(resName);
-        final UiObject2 object = mDevice.wait(Until.findObject(selector), WAIT_TIME_MS);
-        assertNotNull("Can't find a launcher object; selector: " + selector, object);
-        return object;
+        return waitForObjectBySelector(getLauncherObjectSelector(resName));
     }
 
     @NonNull
-    UiObject2 waitForLauncherObjectByClass(String clazz) {
-        final BySelector selector = getLauncherObjectSelectorByClass(clazz);
-        final UiObject2 object = mDevice.wait(Until.findObject(selector), WAIT_TIME_MS);
-        assertNotNull("Can't find a launcher object; selector: " + selector, object);
-        return object;
+    UiObject2 waitForLauncherObject(BySelector selector) {
+        return waitForObjectBySelector(selector.pkg(getLauncherPackageName()));
+    }
+
+    @NonNull
+    UiObject2 tryWaitForLauncherObject(BySelector selector, long timeout) {
+        return tryWaitForObjectBySelector(selector.pkg(getLauncherPackageName()), timeout);
     }
 
     @NonNull
     UiObject2 waitForFallbackLauncherObject(String resName) {
-        final BySelector selector = getFallbackLauncherObjectSelector(resName);
+        return waitForObjectBySelector(getFallbackLauncherObjectSelector(resName));
+    }
+
+    private UiObject2 waitForObjectBySelector(BySelector selector) {
         final UiObject2 object = mDevice.wait(Until.findObject(selector), WAIT_TIME_MS);
-        assertNotNull("Can't find a fallback launcher object; selector: " + selector, object);
+        assertNotNull("Can't find a launcher object; selector: " + selector, object);
         return object;
+    }
+
+    private UiObject2 tryWaitForObjectBySelector(BySelector selector, long timeout) {
+        return mDevice.wait(Until.findObject(selector), timeout);
     }
 
     BySelector getLauncherObjectSelector(String resName) {
         return By.res(getLauncherPackageName(), resName);
-    }
-
-    BySelector getLauncherObjectSelectorByClass(String clazz) {
-        return By.pkg(getLauncherPackageName()).clazz(clazz);
     }
 
     BySelector getFallbackLauncherObjectSelector(String resName) {
@@ -640,7 +710,7 @@ public final class LauncherInstrumentation {
 
     // Inject a swipe gesture. Inject exactly 'steps' motion points, incrementing event time by a
     // fixed interval each time.
-    private void linearGesture(int startX, int startY, int endX, int endY, int steps) {
+    void linearGesture(int startX, int startY, int endX, int endY, int steps) {
         final long downTime = SystemClock.uptimeMillis();
         final Point start = new Point(startX, startY);
         final Point end = new Point(endX, endY);
@@ -707,19 +777,7 @@ public final class LauncherInstrumentation {
         return currentTime;
     }
 
-    public static boolean isGesturalMode(Context context) {
-        return QuickStepContract.isGesturalMode(getCurrentInteractionMode(context));
-    }
-
-    public static boolean isSwipeUpMode(Context context) {
-        return QuickStepContract.isSwipeUpMode(getCurrentInteractionMode(context));
-    }
-
-    public static boolean isLegacyMode(Context context) {
-        return QuickStepContract.isLegacyMode(getCurrentInteractionMode(context));
-    }
-
-    private static int getCurrentInteractionMode(Context context) {
+    public static int getCurrentInteractionMode(Context context) {
         return getSystemIntegerRes(context, "config_navBarInteractionMode");
     }
 
