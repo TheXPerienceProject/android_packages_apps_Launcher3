@@ -75,7 +75,8 @@
         android:label="@string/derived_app_name"
         android:largeHeap="@bool/config_largeHeap"
         android:restoreAnyVersion="true"
-        android:supportsRtl="true" >
+        android:supportsRtl="true"
+        tools:ignore="GoogleAppIndexingWarning">
 
         <!-- Intent received used to install shortcuts from other applications -->
         <receiver
