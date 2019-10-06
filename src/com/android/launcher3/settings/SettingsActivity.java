@@ -36,6 +36,10 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+
+import com.paranoid.launcher.ParanoidLauncherCallbacks;
+import com.paranoid.launcher.ParanoidUtils;
+
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceFragment.OnPreferenceStartFragmentCallback;
@@ -72,6 +76,8 @@ public class SettingsActivity extends Activity
     public static final String SAVE_HIGHLIGHTED_KEY = "android:preference_highlighted";
 
     public static final String GRID_OPTIONS_PREFERENCE_KEY = "pref_grid_options";
+
+    public static final String MINUS_ONE_KEY = "pref_enable_minus_one";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,6 +241,9 @@ public class SettingsActivity extends Activity
                     // Show if plugins are enabled or flag UI is enabled.
                     return FeatureFlags.showFlagTogglerUi(getContext()) ||
                             PluginManagerWrapper.hasPlugins(getContext());
+                case MINUS_ONE_KEY:
+                    return ParanoidUtils.hasPackageInstalled(getActivity(),
+                            ParanoidLauncherCallbacks.SEARCH_PACKAGE);
                 case GRID_OPTIONS_PREFERENCE_KEY:
                     return Utilities.isDevelopersOptionsEnabled(getContext()) &&
                             Utilities.IS_DEBUG_DEVICE &&
