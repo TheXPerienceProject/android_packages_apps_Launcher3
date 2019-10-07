@@ -65,6 +65,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_ANDROID_LIBRARIES := Launcher3CommonDepsLib
 
 LOCAL_SRC_FILES := \
+    $(call all-java-files-under, src_base) \
     $(call all-java-files-under, src) \
     $(call all-java-files-under, src_shortcuts_overrides) \
     $(call all-java-files-under, src_ui_overrides) \
@@ -177,7 +178,7 @@ else
   LOCAL_SDK_VERSION := system_current
   LOCAL_MIN_SDK_VERSION := 26
 endif
-LOCAL_PACKAGE_NAME := Launcher3QuickStep
+LOCAL_PACKAGE_NAME := NightFallQuickStep
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_SYSTEM_EXT_MODULE := true
 LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 XPeriaHome
@@ -231,7 +232,7 @@ LOCAL_RESOURCE_DIR := \
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 LOCAL_PROGUARD_ENABLED := full
 
-LOCAL_PACKAGE_NAME := Launcher3QuickStepGo
+LOCAL_PACKAGE_NAME := NightFallQuickStepGo
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_SYSTEM_EXT_MODULE := true
 LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep Launcher3Go XPeriaHome
