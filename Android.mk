@@ -197,7 +197,7 @@ else
   LOCAL_SDK_VERSION := system_current
   LOCAL_MIN_SDK_VERSION := 26
 endif
-LOCAL_PACKAGE_NAME := Launcher3QuickStep
+LOCAL_PACKAGE_NAME := NightFallQuickStep
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PRODUCT_MODULE := true
 LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 XPeriaHome
@@ -248,7 +248,7 @@ LOCAL_RESOURCE_DIR := \
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 LOCAL_PROGUARD_ENABLED := full
 
-LOCAL_PACKAGE_NAME := Launcher3QuickStepGo
+LOCAL_PACKAGE_NAME := NightFallQuickStepGo
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PRODUCT_MODULE := true
 LOCAL_OVERRIDES_PACKAGES := Home Launcher2 Launcher3 Launcher3QuickStep Launcher3GoIconRecents XPeriaHome
