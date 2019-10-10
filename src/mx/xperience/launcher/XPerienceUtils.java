@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.paranoid.launcher;
+package mx.xperience.launcher;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
-public class ParanoidUtils {
+public class XPerienceUtils {
 
     public static boolean hasPackageInstalled(Context context, String pkgName) {
         try {

@@ -34,7 +34,7 @@ public class NightFallLauncherCallbacks implements LauncherCallbacks,
         SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String SEARCH_PACKAGE = "com.google.android.googlequicksearchbox";
 
-    private final ParanoidLauncher mLauncher;
+    private final NightFallLauncher mLauncher;
 
     private OverlayCallbackImpl mOverlayCallbacks;
     private LauncherClient mLauncherClient;
@@ -43,7 +43,7 @@ public class NightFallLauncherCallbacks implements LauncherCallbacks,
     private boolean mResumed;
     private boolean mAlreadyOnHome;
 
-    public NightFallLauncherCallbacks(ParanoidLauncher launcher) {
+    public NightFallLauncherCallbacks(NightFallLauncher launcher) {
         mLauncher = launcher;
     }
 
@@ -158,7 +158,7 @@ public class NightFallLauncherCallbacks implements LauncherCallbacks,
     }
 
     private LauncherClient.ClientOptions getClientOptions(SharedPreferences prefs) {
-        boolean hasPackage = ParanoidUtils.hasPackageInstalled(mLauncher, SEARCH_PACKAGE);
+        boolean hasPackage = XPerienceUtils.hasPackageInstalled(mLauncher, SEARCH_PACKAGE);
         boolean isEnabled = prefs.getBoolean(SettingsActivity.MINUS_ONE_KEY, true);
         return new LauncherClient.ClientOptions(hasPackage && isEnabled,
                 true, /* enableHotword */
