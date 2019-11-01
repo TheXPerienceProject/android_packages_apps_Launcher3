@@ -27,7 +27,7 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.BackgroundExecutor;
 import com.android.systemui.shared.system.KeyguardManagerCompat;
-import com.android.systemui.shared.system.RecentTaskInfoCompat;
+import com.android.systemui.shared.system.TaskInfoCompat;
 import com.android.systemui.shared.system.TaskDescriptionCompat;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import java.util.ArrayList;
@@ -166,7 +166,7 @@ public class RecentTasksList extends TaskStackChangeListener {
         int taskCount = rawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo rawTask = rawTasks.get(i);
-            RecentTaskInfoCompat t = new RecentTaskInfoCompat(rawTask);
+            TaskInfoCompat t = new TaskInfoCompat(rawTask);
             Task.TaskKey taskKey = new Task.TaskKey(rawTask);
             Task task;
             if (!loadKeysOnly) {
