@@ -462,7 +462,7 @@ public class AllAppsQsbContainer extends FrameLayout implements Insettable, OnCl
     }
 
     protected void updateQsbType() {
-        boolean useDefaultQsb = !ParanoidUtils.hasPackageInstalled(Launcher.getLauncher(mContext), NightFallLauncherCallbacks.SEARCH_PACKAGE);
+        boolean useDefaultQsb = !XPerienceUtils.hasPackageInstalled(Launcher.getLauncher(mContext), NightFallLauncherCallbacks.SEARCH_PACKAGE);
         if (useDefaultQsb != mUseDefaultQsb) {
             removeDefaultQsb();
             mUseDefaultQsb = useDefaultQsb;
