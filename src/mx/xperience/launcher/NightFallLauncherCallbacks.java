@@ -15,9 +15,13 @@
  */
 package mx.xperience.launcher;
 
+import static com.android.launcher3.config.FeatureFlags.GRID_OPTIONS;
+
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.core.graphics.ColorUtils;
@@ -25,6 +29,7 @@ import androidx.core.graphics.ColorUtils;
 import com.android.launcher3.AppInfo;
 import com.android.launcher3.LauncherCallbacks;
 import com.android.launcher3.R;
+import com.android.launcher3.graphics.GridOptionsProvider;
 import com.android.launcher3.settings.SettingsActivity;
 import com.android.launcher3.uioverrides.WallpaperColorInfo;
 import com.android.launcher3.uioverrides.WallpaperColorInfo.OnChangeListener;
@@ -75,6 +80,7 @@ public class NightFallLauncherCallbacks implements LauncherCallbacks,
         instance.addOnChangeListener(this);
         onExtractedColorsChanged(instance);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
+        updateGridOptionsProvider();
     }
 
     @Override
@@ -236,6 +242,24 @@ public class NightFallLauncherCallbacks implements LauncherCallbacks,
         boolean isEnabled = prefs.getBoolean(SettingsActivity.MINUS_ONE_KEY, true);
         int canUse = hasPackage && isEnabled ? 1 : 0;
         return new ClientOptions(canUse | 2 | 4 | 8);
+    }
+
+    private void updateGridOptionsProvider() {
+        final ComponentName cn = new ComponentName(mLauncher,
+                GridOptionsProvider.class);
+        Context c = mLauncher;
+        int oldValue = c.getPackageManager().getComponentEnabledSetting(cn);
+        int newValue;
+        if (GRID_OPTIONS.get()) {
+            newValue = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        } else {
+            newValue = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        }
+
+        if (oldValue != newValue) {
+            c.getPackageManager().setComponentEnabledSetting(cn, newValue,
+                    PackageManager.DONT_KILL_APP);
+        }
     }
 
     public static int primaryColor(WallpaperColorInfo wallpaperColorInfo, Context context, int alpha) {
