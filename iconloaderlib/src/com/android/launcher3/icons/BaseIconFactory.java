@@ -215,10 +215,8 @@ public class BaseIconFactory implements AutoCloseable {
             return null;
         }
         float scale = 1f;
-        SharedPreferences prefs = mContext.getSharedPreferences(
-                "com.android.launcher3.prefs", Context.MODE_PRIVATE);
-        boolean defaultIcons = prefs.getString("pref_iconPackPackage", "").isEmpty();
-        if (shrinkNonAdaptiveIcons && ATLEAST_OREO && defaultIcons) {
+
+        if (shrinkNonAdaptiveIcons && ATLEAST_OREO) {
             if (mWrapperIcon == null) {
                 mWrapperIcon = mContext.getDrawable(R.drawable.adaptive_icon_drawable_wrapper)
                         .mutate();
