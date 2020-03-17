@@ -35,9 +35,6 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.paranoid.launcher.ParanoidLauncherCallbacks;
-import com.paranoid.launcher.ParanoidUtils;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceFragment.OnPreferenceStartFragmentCallback;
@@ -70,8 +67,6 @@ public class SettingsActivity extends Activity
     public static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final int DELAY_HIGHLIGHT_DURATION_MILLIS = 600;
     public static final String SAVE_HIGHLIGHTED_KEY = "android:preference_highlighted";
-
-    public static final String MINUS_ONE_KEY = "pref_enable_minus_one";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,9 +208,6 @@ public class SettingsActivity extends Activity
                     // Show if plugins are enabled or flag UI is enabled.
                     return FeatureFlags.showFlagTogglerUi(getContext()) ||
                             PluginManagerWrapper.hasPlugins(getContext());
-                case MINUS_ONE_KEY:
-                    return ParanoidUtils.hasPackageInstalled(getActivity(),
-                            ParanoidLauncherCallbacks.SEARCH_PACKAGE);
             }
 
             return true;

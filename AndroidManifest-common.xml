@@ -173,7 +173,7 @@
         The settings activity. To extend point settings_fragment_name to appropriate fragment class
         -->
         <activity
-            android:name="com.android.launcher3.settings.SettingsActivity"
+            android:name="mx.xperience.launcher.settings.NightFallSettingsActivity"
             android:label="@string/settings_button_text"
             android:theme="@style/HomeSettingsTheme"
             android:autoRemoveFromRecents="true">
