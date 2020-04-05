@@ -27,4 +27,10 @@
     <!-- QSB -->
     <string name="label_search">Search</string>
     <string name="label_voice_search">Voice search</string>
+
+    <!-- Icon pack -->
+    <string name="icon_pack_title">Icon pack</string>
+    <string name="icon_pack_summary">Current icon pack is %1$s</string>
+    <string name="icon_pack_apply">Apply</string>
+    <string name="icon_pack_settings_class">mx.xperience.launcher.settings.IconPackSettingsActivity$IconPackFragment</string>
 </resources>
