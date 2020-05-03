@@ -15,6 +15,7 @@
  */
 package mx.xperience.launcher.search;
 
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
 import android.content.ComponentName;
@@ -47,6 +48,8 @@ import com.android.launcher3.allapps.AppInfoComparator;
 import com.android.launcher3.allapps.search.DefaultAppSearchAlgorithm;
 import com.android.launcher3.allapps.search.DefaultAppSearchAlgorithm.StringMatcher;
 import com.android.launcher3.compat.UserManagerCompat;
+import com.android.launcher3.LauncherModel;
+import com.android.launcher3.LauncherModel.ModelUpdateTask;
 import com.android.launcher3.model.AllAppsList;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.LoaderResults;
