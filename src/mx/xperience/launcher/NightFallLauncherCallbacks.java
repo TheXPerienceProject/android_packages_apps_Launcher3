@@ -51,7 +51,7 @@ public class NightFallLauncherCallbacks implements LauncherCallbacks,
 
     public static final String SEARCH_PACKAGE = "com.google.android.googlequicksearchbox";
 
-    private final NighFallLauncher mLauncher;
+    private final NightFallLauncher mLauncher;
 
     private OverlayCallbackImpl mOverlayCallbacks;
     private LauncherClient mLauncherClient;

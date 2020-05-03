@@ -15,6 +15,8 @@
  */
 package mx.xperience.launcher.search;
 
+import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
+
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentProvider.PipeDataWriter;
@@ -33,16 +35,19 @@ import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.Parcelable;
 import android.util.Log;
 
-import com.android.launcher3.AllAppsList;
+import androidx.annotation.MainThread;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+import androidx.annotation.WorkerThread;
+
 import com.android.launcher3.AppFilter;
 import com.android.launcher3.AppInfo;
 import com.android.launcher3.LauncherAppState;
-import com.android.launcher3.LauncherModel;
-import com.android.launcher3.LauncherModel.ModelUpdateTask;
 import com.android.launcher3.allapps.AppInfoComparator;
 import com.android.launcher3.allapps.search.DefaultAppSearchAlgorithm;
 import com.android.launcher3.allapps.search.DefaultAppSearchAlgorithm.StringMatcher;
 import com.android.launcher3.compat.UserManagerCompat;
+import com.android.launcher3.model.AllAppsList;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.LoaderResults;
 import com.android.launcher3.util.ComponentKey;
@@ -158,7 +163,7 @@ public class AppSearchProvider extends ContentProvider {
     }
 
     public boolean onCreate() {
-        mLooper = new LooperExecutor(LauncherModel.getWorkerLooper());
+        mLooper = new LooperExecutor(MODEL_EXECUTOR.getLooper());
         mApp = LauncherAppState.getInstance(getContext());
         return true;
     }
