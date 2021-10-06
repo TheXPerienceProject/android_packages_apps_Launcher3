@@ -22,6 +22,15 @@
     <icon drawable="@drawable/themed_icon_photos" package="com.google.android.apps.photos" />
     <icon drawable="@drawable/themed_icon_sheets" package="com.google.android.apps.docs.editors.sheets" />
     <icon drawable="@drawable/themed_icon_camera" package="com.google.android.GoogleCamera" />
+    <icon drawable="@drawable/themed_icon_camera" package="org.codeaurora.snapcam" />
+    <icon drawable="@drawable/themed_icon_camera" package="com.android.MGC" />
+    <icon drawable="@drawable/themed_icon_camera" package="com.google.android.GoogleCameraEng" />
+    <icon drawable="@drawable/themed_icon_camera" package="com.google.android.GoogleCameraPixelX" />
+    <icon drawable="@drawable/themed_icon_camera" package="com.google.android.apps.cameralite" />
+    <icon drawable="@drawable/themed_icon_camera" package="com.footej.camera2" />
+    <icon drawable="@drawable/themed_icon_camera" package="com.android.camera2" />
+    <icon drawable="@drawable/themed_icon_camera" package="net.sourceforge.opencamera" />
+    <icon drawable="@drawable/themed_icon_camera" package="org.codeaurora.snapcam" />
     <icon drawable="@drawable/themed_icon_find_my_device" package="com.google.android.apps.adm" />
     <icon drawable="@drawable/themed_icon_google_tv" package="com.google.android.videos" />
     <icon drawable="@drawable/themed_icon_play_books" package="com.google.android.apps.books" />
@@ -36,11 +45,13 @@
     <icon drawable="@drawable/themed_icon_home" package="com.google.android.apps.chromecast.app" />
     <icon drawable="@drawable/themed_icon_play_services" package="com.google.android.ims" />
     <icon drawable="@drawable/themed_icon_youtube" package="com.google.android.youtube" />
+    <icon drawable="@drawable/themed_icon_youtube" package="com.vanced.android.youtube" />
     <icon drawable="@drawable/themed_icon_dialer" package="com.google.android.dialer" />
     <icon drawable="@drawable/themed_icon_gfit_health" package="com.google.android.apps.fitness" />
     <icon drawable="@drawable/themed_icon_keep" package="com.google.android.keep" />
     <icon drawable="@drawable/themed_icon_play_store" package="com.android.vending" />
     <icon drawable="@drawable/themed_icon_youtube_music" package="com.google.android.apps.youtube.music" />
+    <icon drawable="@drawable/themed_icon_youtube_music" package="com.vanced.android.apps.youtube.music" />
     <icon drawable="@drawable/themed_icon_docs_editors" package="com.google.android.apps.docs.editors.docs" />
     <icon drawable="@drawable/themed_icon_gmail" package="com.google.android.gm" />
     <icon drawable="@drawable/themed_icon_maps" package="com.google.android.apps.maps" />
@@ -52,17 +63,6 @@
     <icon drawable="@drawable/themed_icon_tasks" package="com.google.android.apps.tasks" />
     <icon drawable="@drawable/themed_icon_pixeltips" package="com.google.android.apps.tips" />
     <icon drawable="@drawable/themed_icon_wear_os" package="com.google.android.wearable.app" />
-    <icon drawable="@drawable/themed_icon_youtube_music" package="com.vanced.android.apps.youtube.music" />
-    <icon drawable="@drawable/themed_icon_youtube" package="com.vanced.android.youtube" />
-    <icon drawable="@drawable/themed_icon_vanced_manager" package="com.vanced.manager" />
-    <icon drawable="@drawable/themed_icon_camera" package="org.codeaurora.snapcam" />
-    <icon drawable="@drawable/themed_icon_camera" package="com.google.android.GoogleCameraEng" />
-    <icon drawable="@drawable/themed_icon_camera" package="com.android.MGC" />
-    <icon drawable="@drawable/themed_icon_camera" package="com.google.android.GoogleCameraPixelX" />
-    <icon drawable="@drawable/themed_icon_camera" package="com.google.android.apps.cameralite" />
-    <icon drawable="@drawable/themed_icon_camera" package="com.footej.camera2" />
-    <icon drawable="@drawable/themed_icon_camera" package="com.android.camera2" />
-    <icon drawable="@drawable/themed_icon_camera" package="net.sourceforge.opencamera" />
     <icon drawable="@drawable/themed_icon_photos" package="com.google.android.apps.photosgo" />
     <icon drawable="@drawable/themed_icon_files" package="com.google.android.documentsui" />
     <icon drawable="@drawable/themed_icon_mtmanager" package="bin.mt.plus" />
@@ -214,4 +214,73 @@
     <icon drawable="@drawable/themed_icon_zarchiver" package="ru.zdevs.zarchiver" />
     <icon drawable="@drawable/themed_icon_wall_x" package="com.stresscodes.wallp" />
     <icon drawable="@drawable/themed_icon_dolby" package="com.motorola.dolby.dolbyui" />
+    <icon drawable="@drawable/themed_icon_boost" package="com.rubenmayayo.reddit" />
+    <icon drawable="@drawable/themed_icon_adaway" package="org.adaway" />
+    <icon drawable="@drawable/themed_icon_adguard" package="com.adguard.android.contentblocker" />
+    <icon drawable="@drawable/themed_icon_aimp" package="com.aimp.player" />
+    <icon drawable="@drawable/themed_icon_automatag" package="com.fillobotto.mp3tagger" />
+    <icon drawable="@drawable/themed_icon_binance" package="com.binance.dev" />
+    <icon drawable="@drawable/themed_icon_bkash" package="com.bKash.customerapp" />
+    <icon drawable="@drawable/themed_icon_brave" package="com.brave.browser" />
+    <icon drawable="@drawable/themed_icon_brave" package="com.brave.browser_beta" />
+    <icon drawable="@drawable/themed_icon_brave" package="com.brave.browser_nightly" />
+    <icon drawable="@drawable/themed_icon_busuu" package="com.busuu.android.enc" />
+    <icon drawable="@drawable/themed_icon_catogram" package="ua.itaysonlab.messenger" />
+    <icon drawable="@drawable/themed_icon_cpu_z" package="com.cpuid.cpu_z" />
+    <icon drawable="@drawable/themed_icon_cricbuzz" package="com.cricbuzz.android" />
+    <icon drawable="@drawable/themed_icon_dolphin_emulator" package="org.dolphinemu.dolphinemu" />
+    <icon drawable="@drawable/themed_icon_duolingo" package="com.duolingo" />
+    <icon drawable="@drawable/themed_icon_eon" package="qijaz221.github.io.musicplayer.premium" />
+    <icon drawable="@drawable/themed_icon_firefox" package="org.mozilla.firefox" />
+    <icon drawable="@drawable/themed_icon_firefox" package="org.mozilla.firefox_beta" />
+    <icon drawable="@drawable/themed_icon_firefox" package="org.mozilla.fenix" />
+    <icon drawable="@drawable/themed_icon_food_panda" package="com.global.foodpanda.android" />
+    <icon drawable="@drawable/themed_icon_github" package="com.github.android" />
+    <icon drawable="@drawable/themed_icon_gojek" package="com.gojek.app" />
+    <icon drawable="@drawable/themed_icon_google_rewards" package="com.google.android.apps.paidtasks" />
+    <icon drawable="@drawable/themed_icon_grab" package="com.grabtaxi.passenger" />
+    <icon drawable="@drawable/themed_icon_graph_messenger" package="ir.ilmili.telegraph" />
+    <icon drawable="@drawable/themed_icon_iqiyi" package="com.iqiyi.i18n" />
+    <icon drawable="@drawable/themed_icon_juice_ssh" package="com.sonelli.juicessh" />
+    <icon drawable="@drawable/themed_icon_kate_mobile" package="com.perm.kate_new_6" />
+    <icon drawable="@drawable/themed_icon_kinemaster" package="com.nexstreaming.app.kinemasterfree" />
+    <icon drawable="@drawable/themed_icon_kiwi_browser" package="com.kiwibrowser.browser" />
+    <icon drawable="@drawable/themed_icon_kwgt" package="org.kustom.widget" />
+    <icon drawable="@drawable/themed_icon_line" package="jp.never.line.android" />
+    <icon drawable="@drawable/themed_icon_my_jio" package="com.jio.myjio" />
+    <icon drawable="@drawable/themed_icon_newpipe" package="org.schabi.newpipe" />
+    <icon drawable="@drawable/themed_icon_newpipe" package="org.schabi.newpipelegacy" />
+    <icon drawable="@drawable/themed_icon_opera" package="com.opera.browser" />
+    <icon drawable="@drawable/themed_icon_opera" package="com.opera.browser.beta" />
+    <icon drawable="@drawable/themed_icon_opera" package="com.opera.mini.native" />
+    <icon drawable="@drawable/themed_icon_opera" package="com.opera.mini.native.beta" />
+    <icon drawable="@drawable/themed_icon_opera" package="com.opera.touch" />
+    <icon drawable="@drawable/themed_icon_opera_gx" package="com.opera.gx" />
+    <icon drawable="@drawable/themed_icon_phonepe" package="com.phonepe.app" />
+    <icon drawable="@drawable/themed_icon_phonograph" package="com.kabouzeid.gramophone" />
+    <icon drawable="@drawable/themed_icon_picsart" package="com.picsart.studio" />
+    <icon drawable="@drawable/themed_icon_pixellab" package="com.imaginstudio.imagetools.pixellab" />
+    <icon drawable="@drawable/themed_icon_pokemon_unite" package="jp.pokemon.pokemonunite" />
+    <icon drawable="@drawable/themed_icon_powerdirector" package="com.cyberlink.powerdirector.DRA140225_01" />
+    <icon drawable="@drawable/themed_icon_psn" package="com.scee.psxandroid" />
+    <icon drawable="@drawable/themed_icon_rboard_manager" package="de.dertyp7214.rboardthememanager" />
+    <icon drawable="@drawable/themed_icon_sai" package="com.aefyr.sai" />
+    <icon drawable="@drawable/themed_icon_samsung_internet" package="com.sec.android.app.sbrowser" />
+    <icon drawable="@drawable/themed_icon_sd_maid" package="eu.thedarken.sdm" />
+    <icon drawable="@drawable/themed_icon_shareit" package="com.lenovo.anyshare.gps" />
+    <icon drawable="@drawable/themed_icon_signal" package="org.thoughtcrime.securesms" />
+    <icon drawable="@drawable/themed_icon_smartpack_kernelmanager" package="com.smartpack.kernelmanager.release" />
+    <icon drawable="@drawable/themed_icon_snapseed" package="com.niksoftware.snapseed" />
+    <icon drawable="@drawable/themed_icon_spark" package="com.readdle.spark" />
+    <icon drawable="@drawable/themed_icon_speedtest" package="org.zwanoo.android.speedtest" />
+    <icon drawable="@drawable/themed_icon_teams" package="com.microsoft.teams" />
+    <icon drawable="@drawable/themed_icon_termius" package="com.server.auditor.ssh.client" />
+    <icon drawable="@drawable/themed_icon_tidal" package="com.aspiro.tidal" />
+    <icon drawable="@drawable/themed_icon_tinder" package="com.tinder" />
+    <icon drawable="@drawable/themed_icon_tumblr" package="com.tumblr" />
+    <icon drawable="@drawable/themed_icon_twitch" package="tv.twitch.android.app" />
+    <icon drawable="@drawable/themed_icon_viettelpay" package="com.bplus.vtpay" />
+    <icon drawable="@drawable/themed_icon_wikipedia" package="org.wikipedia" />
+    <icon drawable="@drawable/themed_icon_xiaomi_wear" package="com.xiaomi.wearable" />
+    <icon drawable="@drawable/themed_icon_yandex_music" package="ru.yandex.music" />
 </icons>
