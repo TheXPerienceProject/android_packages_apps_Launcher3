@@ -33,6 +33,7 @@ import android.app.Person;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -169,6 +170,10 @@ public final class Utilities {
 
     @IntDef({TRANSLATE_UP, TRANSLATE_DOWN, TRANSLATE_LEFT, TRANSLATE_RIGHT})
     public @interface AdjustmentDirection{}
+    public static final String GSA_PACKAGE = "com.google.android.googlequicksearchbox";
+    public static final String LENS_ACTIVITY = "com.google.android.apps.lens.MainActivity";
+    public static final String LENS_URI = "google://lens";
+    public static final String LENS_SHARE_ACTIVITY = "com.google.android.apps.search.lens.LensShareEntryPointActivity";
 
     public static final String GSA_PACKAGE = "com.google.android.googlequicksearchbox";
     public static final String LENS_ACTIVITY = "com.google.android.apps.lens.MainActivity";
@@ -1102,5 +1107,18 @@ public final class Utilities {
         SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
         return prefs.getInt(KEY_BLUR_DEPTH,
                 (int) context.getResources().getDimension(R.dimen.max_depth_blur_radius));
+    }
+
+    public static boolean isGSAEnabled(Context context) {
+        PackageManager pm = context.getPackageManager();
+        if (pm == null) {
+            return false;
+        }
+        try {
+            ApplicationInfo ai = pm.getApplicationInfo(GSA_PACKAGE, 0);
+            return ai.enabled && ai.isProduct();
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 }
