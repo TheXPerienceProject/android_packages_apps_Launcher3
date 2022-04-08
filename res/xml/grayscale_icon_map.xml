@@ -29,6 +29,8 @@
     <icon drawable="@drawable/themed_icon_camera" package="com.google.android.apps.cameralite" />
     <icon drawable="@drawable/themed_icon_camera" package="com.footej.camera2" />
     <icon drawable="@drawable/themed_icon_camera" package="com.android.camera2" />
+    <icon drawable="@drawable/themed_icon_miuicamera" package="com.android.camera" />
+    <icon drawable="@drawable/themed_icon_camera" package="app.grapheneos.camera" />
     <icon drawable="@drawable/themed_icon_camera" package="net.sourceforge.opencamera" />
     <icon drawable="@drawable/themed_icon_camera" package="org.codeaurora.snapcam" />
     <icon drawable="@drawable/themed_icon_find_my_device" package="com.google.android.apps.adm" />
