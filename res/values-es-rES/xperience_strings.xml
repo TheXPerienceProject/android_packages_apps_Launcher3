@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+* Copyright (C) 2016 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+-->
+<resources>
+    <string name="google_folder_title">Google</string>
+    <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
+    <string name="title_show_google_app">Desliza para acceder al Feed de Google</string>
+    <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_left">Cuando deslizas a la izquierda desde la pantalla principal</string>
+    <!-- Settings message explaining when the -1 screen is available on an RTL device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_right">Cuando deslizas a la derecha desde la pantalla de inicio</string>
+    <string name="pref_suggestions_title">Sugerencias</string>
+    <string name="pref_suggestions_summary">Para todas las aplicaciones y pantalla de inicio</string>
+    <string name="pref_allow_phone_taskbar">Usar barra de tareas</string>
+    <string name="pref_allow_phone_taskbar_desc">Para abrir y cambiar de aplicaciones en cualquier lugar</string>
+    <string name="pref_allow_phone_overview_grid">Mostrar cuadrícula de aplicaciones recientes</string>
+    <string name="pref_allow_phone_overview_grid_desc">Aplicaciones más recientes en Resumen</string>
+    <!-- Gestures -->
+    <string name="pref_dt_gesture_title">Gestos de doble toque</string>
+    <string name="pref_dt_gesture_summary">Toca dos veces en un espacio vacío para apagar la pantalla</string>
+    <!-- Edit workspace -->
+    <string name="settings_lock_layout_title">Bloquear diseño</string>
+    <string name="settings_lock_layout_summary_on">Los iconos y widgets no se pueden añadir, eliminar y mover en la pantalla principal</string>
+    <string name="settings_lock_layout_summary_off">Los iconos y widgets se pueden añadir, eliminar y mover en la pantalla principal</string>
+    <string name="settings_edit_widgets_error">No es posible añadir widgets en la pantalla de inicio</string>
+    <!-- Hide labels -->
+    <string name="desktop_show_labels">Mostrar etiquetas de iconos en el escritorio</string>
+    <string name="drawer_show_labels">Mostrar etiquetas en los iconos del cajón de aplicaciones</string>
+    <string name="label_search">Búscar</string>
+    <string name="label_lens">Google lens</string>
+    <string name="label_voice_search">Búsqueda por voz</string>
+    <string name="dock_search_title">Barra de búsqueda de Google</string>
+    <string name="dock_search_summary">Mostrar la barra de búsqueda en la parte inferior</string>
+    <string name="dock_theme_title">Iconos tematizados del dock</string>
+    <string name="dock_theme_summary">Usar iconos temáticos para la barra de búsqueda</string>
+</resources>
