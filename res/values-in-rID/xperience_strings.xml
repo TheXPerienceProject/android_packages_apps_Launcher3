@@ -23,4 +23,6 @@
     <!-- Gestures -->
     <!-- Edit workspace -->
     <!-- Hide labels -->
+    <string name="label_search">Cari</string>
+    <string name="label_voice_search">Pencarian suara</string>
 </resources>
