@@ -27,6 +27,7 @@ import android.appwidget.AppWidgetHostView;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -68,7 +69,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class InvariantDeviceProfile implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener {
 
     public static final String TAG = "IDP";
     // We do not need any synchronization for this variable as its only written on UI thread.
@@ -214,6 +215,8 @@ public class InvariantDeviceProfile implements SharedPreferences.OnSharedPrefere
             onConfigChanged(mContext, true);
         } else if (DeviceProfile.KEY_PHONE_OVERVIEW_GRID.equals(key)) {
             onConfigChanged(mContext, false);
+        } else if (KEY_SHOW_DESKTOP_LABELS.equals(key) || KEY_SHOW_DRAWER_LABELS.equals(key)) {
+            onConfigChanged(mContext);
         }
     }
 
@@ -301,13 +304,6 @@ public class InvariantDeviceProfile implements SharedPreferences.OnSharedPrefere
             return TYPE_TABLET;
         } else {
             return TYPE_PHONE;
-        }
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (KEY_SHOW_DESKTOP_LABELS.equals(key) || KEY_SHOW_DRAWER_LABELS.equals(key)) {
-            onConfigChanged(mContext);
         }
     }
 
