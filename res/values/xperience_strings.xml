@@ -158,4 +158,9 @@
     <string name="recents_clear_all_title">Clear all</string>
     <string name="recents_lens_title">Lens</string>
 
+    <string name="intent_no_app_clock_found">Unable to find calendar or clock activity</string>
+    
+    <!-- Background blur -->
+    <string name="background_blur_title">Background blur depth</string>
+    <string name="background_blur_summary">Set blur depth level for recents and app drawer</string>
 </resources>
