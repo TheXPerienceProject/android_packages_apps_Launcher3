@@ -182,6 +182,7 @@ public final class Utilities {
     public static final String KEY_HOTSEAT_QSB_OPACITY = "pref_hotseat_qsb_opacity";
     public static final String KEY_HOTSEAT_QSB_STROKE_WIDTH = "pref_hotseat_qsb_stroke_width";
     public static final String KEY_RECENTS_CHIPS = "pref_recents_chips";
+    public static final String KEY_BLUR_DEPTH = "pref_blur_depth";
 
     /**
      * Returns true if theme is dark.
@@ -1098,5 +1099,11 @@ public final class Utilities {
     public static int getHotseatQsbStrokeWidth(Context context) {
         SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
         return prefs.getInt(KEY_HOTSEAT_QSB_STROKE_WIDTH, 0);
+    }
+
+    public static int getBlurRadius(Context context) {
+        SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
+        return prefs.getInt(KEY_BLUR_DEPTH,
+                (int) context.getResources().getDimension(R.dimen.max_depth_blur_radius));
     }
 }
