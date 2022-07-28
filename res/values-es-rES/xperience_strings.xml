@@ -41,7 +41,7 @@
     <!-- Hide labels -->
     <string name="desktop_show_labels">Mostrar etiquetas de iconos en el escritorio</string>
     <string name="drawer_show_labels">Mostrar etiquetas en los iconos del cajón de aplicaciones</string>
-    <string name="label_search">Búscar</string>
+    <string name="label_search">Búsqueda</string>
     <string name="label_lens">Google lens</string>
     <string name="label_voice_search">Búsqueda por voz</string>
     <string name="dock_search_title">Barra de búsqueda de Google</string>

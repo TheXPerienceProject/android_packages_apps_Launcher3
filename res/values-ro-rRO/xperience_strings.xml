@@ -23,6 +23,4 @@
     <!-- Gestures -->
     <!-- Edit workspace -->
     <!-- Hide labels -->
-    <string name="label_search">Căutare</string>
-    <string name="label_voice_search">Căutare vocală</string>
 </resources>
