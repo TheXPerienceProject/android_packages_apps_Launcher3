@@ -48,4 +48,6 @@
     <string name="dock_search_summary">Mostrar la barra de búsqueda en la parte inferior</string>
     <string name="dock_theme_title">Iconos tematizados del dock</string>
     <string name="dock_theme_summary">Usar iconos temáticos para la barra de búsqueda</string>
+    <!-- Show top shadow -->
+    <string name="show_top_shadow">Mostrar una sombra en la barra superior</string>
 </resources>
