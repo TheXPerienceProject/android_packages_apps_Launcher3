@@ -49,4 +49,5 @@
     <string name="dock_theme_title">Ikon bertema</string>
     <string name="dock_theme_summary">Gunakan ikon bertema untuk bilah pencarian</string>
     <!-- Show top shadow -->
+    <string name="show_top_shadow">Tampilkan bayangan atas</string>
 </resources>
