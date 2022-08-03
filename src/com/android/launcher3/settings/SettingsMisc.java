@@ -57,6 +57,8 @@ import com.android.launcher3.util.SettingsCache;
 
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
 
+import com.android.systemui.shared.system.BlurUtils;
+
 /**
  * Settings activity for Launcher.
  */
@@ -249,6 +251,9 @@ public class SettingsMisc extends CollapsingToolbarBaseActivity
                         preference.setOrder(0);
                     }
                     return mDeveloperOptionsEnabled;
+
+                case Utilities.KEY_BLUR_DEPTH:
+                    return BlurUtils.supportsBlursOnWindows();
             }
 
             return true;
