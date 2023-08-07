@@ -199,7 +199,8 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         mPersonalMatcher = ItemInfoMatcher.ofCurrentOrDualUser(userManager, Process.myUserHandle());
         mAllAppsStore = new AllAppsStore<>(mActivityContext);
 
-        mScrimColor = Themes.getAttrColor(context, R.attr.allAppsScrimColor);
+        mScrimColor = ColorUtils.setAlphaComponent(Themes.getAttrColor(context,
+                R.attr.allAppsScrimColor), Utilities.getAllAppsOpacity(context) * 255 / 100);
         mHeaderThreshold = getResources().getDimensionPixelSize(
                 R.dimen.dynamic_grid_cell_border_spacing);
         mHeaderProtectionColor = Themes.getAttrColor(context, R.attr.allappsHeaderProtectionColor);
