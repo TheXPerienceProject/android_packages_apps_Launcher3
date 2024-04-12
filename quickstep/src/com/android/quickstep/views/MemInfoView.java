@@ -75,6 +75,8 @@ public class MemInfoView extends TextView {
 
     private Context mContext;
 
+    String mTotalResult;
+
     private final MemoryWorker mWorker = new MemoryWorker(this);
 
     public MemInfoView(Context context, AttributeSet attrs) {
@@ -86,6 +88,7 @@ public class MemInfoView extends TextView {
         mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         memInfo = new ActivityManager.MemoryInfo();
         mMemInfoReader = new MemInfoReader();
+        mTotalResult = formatTotalMemory();
 
         mMemInfoText = context.getResources().getString(R.string.meminfo_text);
         setListener(context);
@@ -135,6 +138,22 @@ public class MemInfoView extends TextView {
 
         lp.setMargins(lp.leftMargin, lp.topMargin, lp.rightMargin, bottomMargin);
         lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+    }
+
+    private String formatTotalMemory() {
+        mActivityManager.getMemoryInfo(memInfo);
+        double totalMemoryGB = memInfo.totalMem / (1024.0 * 1024.0 * 1024.0);
+        int roundedMemoryGB = roundToNearestKnownRamSize(totalMemoryGB);
+        return roundedMemoryGB + " GB";
+    }
+
+    private int roundToNearestKnownRamSize(double memoryGB) {
+        int[] knownSizes = {1, 2, 3, 4, 6, 8, 10, 12, 16, 32, 48, 64};
+        if (memoryGB <= 0) return 1;
+        for (int size : knownSizes) {
+            if (memoryGB <= size) return size;
+        }
+        return knownSizes[knownSizes.length - 1];
     }
 
     public void setListener(Context context) {
@@ -204,12 +223,10 @@ public class MemInfoView extends TextView {
             long freeMemory = view.mMemInfoReader.getFreeSize()
                     + view.mMemInfoReader.getCachedSize()
                     + view.getTotalBackgroundMemory();
-            view.mActivityManager.getMemoryInfo(view.memInfo);
 
             String availResult = Formatter.formatShortFileSize(view.mContext, freeMemory);
-            String totalResult = Formatter.formatShortFileSize(view.mContext, view.memInfo.totalMem);
             String text = String.format(Locale.getDefault(), view.mMemInfoText, availResult,
-                    totalResult);
+                    view.mTotalResult);
 
             // Post to the view's UI thread (pre-relax; later switched to MAIN_EXECUTOR).
             view.post(() -> view.setText(text));
