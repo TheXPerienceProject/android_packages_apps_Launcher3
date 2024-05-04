@@ -11,8 +11,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import co.aospa.launcher.ParanoidLauncher;
-import co.aospa.launcher.ParanoidLauncherModelDelegate;
+import mx.xperience.launcher.XPerienceLauncher;
+import mx.xperience.launcher.XPerienceLauncherModelDelegate;
 
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;;
 import com.android.launcher3.DeviceProfile;
@@ -47,10 +47,10 @@ public class SmartspaceViewContainer extends FrameLayout implements PluginListen
         layoutParams.setMarginStart(getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_margin_start_launcher));
         addView(mView, layoutParams);
 
-        ParanoidLauncher launcher = (ParanoidLauncher) ActivityContext.lookupContext(context);
+        XPerienceLauncher launcher = (XPerienceLauncher) ActivityContext.lookupContext(context);
         launcher.getLauncherUnlockAnimationController().setSmartspaceView(mView);
 
-        ParanoidLauncherModelDelegate delegate = (ParanoidLauncherModelDelegate) launcher.getModel().getModelDelegate();
+        XPerienceLauncherModelDelegate delegate = (XPerienceLauncherModelDelegate) launcher.getModel().getModelDelegate();
         BcSmartspaceDataProvider plugin = launcher.getSmartspacePlugin();
         plugin.registerSmartspaceEventNotifier(event -> delegate.notifySmartspaceEvent(event));
         mView.registerDataProvider(plugin);
@@ -63,7 +63,7 @@ public class SmartspaceViewContainer extends FrameLayout implements PluginListen
 
     @Override
     public void onPluginDisconnected(BcSmartspaceDataPlugin plugin) {
-        ParanoidLauncher launcher = (ParanoidLauncher) ActivityContext.lookupContext(getContext());
+        XPerienceLauncher launcher = (XPerienceLauncher) ActivityContext.lookupContext(getContext());
         mView.registerDataProvider(launcher.getSmartspacePlugin());
     }
 
