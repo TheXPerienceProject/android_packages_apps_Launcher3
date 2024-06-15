@@ -20,10 +20,17 @@
 <resources>
     <!-- Folder titles -->
     <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
+    <string name="title_show_google_feed">Google-feed elérése csúsztatással</string>
     <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_left">A főképernyőn balra húzással indítható a Google feed</string>
     <!-- Settings message explaining when the -1 screen is available on an RTL device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_right">A főképernyőn jobbra húzással indítható a Google feed</string>
     <!-- Gestures -->
+    <string name="pref_dt_gesture_title">Dupla érintésre alvómód</string>
+    <string name="pref_dt_gesture_summary">Képernyő kikapcsoláshoz dupla érintés egy üres területen</string>
     <!-- Suggestions -->
+    <string name="suggestion_pref_screen_title">Javaslatok</string>
+    <string name="suggestion_pref_screen_desc">Javaslatok a Kezdőképernyőhöz és minden alkalmazáshoz</string>
     <!-- Edit workspace -->
     <string name="settings_lock_layout_title">Elrendezés-zárolás</string>
     <string name="settings_lock_layout_summary_on">A kezdőképernyőn nem engedélyezett az ikon- és modulhozzáadás, eltávolítás és mozgatás</string>
@@ -33,11 +40,20 @@
     <string name="desktop_show_labels">Alkalmazások ikonfeliratainak megjelenítése a kezdőképernyőn</string>
     <string name="drawer_show_labels">Alkalmazások ikonfeliratainak megjelenítése az alkalmazásindítóban</string>
     <!-- Settings Categories -->
+    <string name="category_google">Google</string>
+    <string name="category_icon">Ikonok</string>
+    <string name="category_recents">Előzmények</string>
     <!-- Hotseat searchbar -->
     <string name="label_search">Keresés</string>
     <string name="label_lens">Google Lens</string>
     <string name="label_voice_search">Hangalapú keresés</string>
     <string name="dock_search_title">Google keresősáv</string>
+    <string name="dock_search_summary">Alsódokki keresősáv</string>
     <!-- Recents icons -->
+    <string name="recents_screenshot_title">Képernyőkép</string>
+    <string name="recents_clear_all_title">Az Összes törlése</string>
+    <string name="recents_lens_title">Google Lens</string>
     <!-- Smartspace -->
+    <string name="smartspace_pref_title">Betekintő</string>
+    <string name="smartspace_pref_summary">Betekintő megjelenítése a kezdőképernyő tetején</string>
 </resources>
