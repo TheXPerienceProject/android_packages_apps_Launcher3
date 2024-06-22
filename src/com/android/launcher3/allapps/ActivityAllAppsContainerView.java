@@ -580,6 +580,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         }
         // Header keeps track of active recycler view to properly render header protection.
         mHeader.setActiveRV(currentActivePage);
+
         mWorkManager.onActivePageChanged(currentActivePage);
     }
 
