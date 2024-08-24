@@ -340,6 +340,7 @@ object TaskOverlayModule {
             TaskShortcutFactory.PIN,
             TaskShortcutFactory.INSTALL,
             TaskShortcutFactory.FREE_FORM,
+            TaskShortcutFactory.FLOATING,
             desktopShortcutFactory,
             externalDisplayShortcutFactory,
             aspectRatioSystemShortcutFactory,
