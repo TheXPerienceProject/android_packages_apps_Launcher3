@@ -120,10 +120,6 @@ public class DeviceProfile {
     private final BottomSheetProfile mBottomSheetProfile;
     private FolderProfile mFolderProfile;
 
-    // Meminfo in overview
-    public int memInfoMarginGesturePx;
-    public int memInfoMarginTransientTaskbarPx;
-    public int memInfoMarginThreeButtonPx;
 
     private AllAppsProfile mAllAppsProfile;
     private final OverviewProfile overviewProfile;
@@ -142,6 +138,10 @@ public class DeviceProfile {
 
     // Taskbar
     private TaskbarProfile mTaskbarProfile;
+
+    // Meminfo in overview
+    public int memInfoHeight;
+
 
     /** Used only as an alternative to mocking when null values cannot be used. */
     @VisibleForTesting
@@ -196,8 +196,7 @@ public class DeviceProfile {
         mTypeIndex = 0;
         mIsResponsiveGrid = false;
         mDropTargetProfile = new DropTargetProfile(0, 0, 0, 0, 0, 0, 0, 0, 0);
-        memInfoMarginGesturePx = 0;
-        memInfoMarginThreeButtonPx = 0;
+        memInfoHeight = 0;
         mViewScaleProvider = null;
         mAllAppsProfile = new AllAppsProfile(new Point(0, 0), 0, 0, 0f, 0, 0, 0, 0, 0, 0,
                 new Rect(), 0, 0);
@@ -303,12 +302,6 @@ public class DeviceProfile {
                         qsbHeight
                 );
 
-        memInfoMarginGesturePx = res.getDimensionPixelSize(
-                R.dimen.meminfo_bottom_margin_gesture);
-        memInfoMarginTransientTaskbarPx = res.getDimensionPixelSize(
-                R.dimen.meminfo_bottom_margin_transient_taskbar);
-        memInfoMarginThreeButtonPx = res.getDimensionPixelSize(
-                R.dimen.meminfo_bottom_margin_three_button);
 
         int allAppsTopPadding = mDeviceProperties.getInsets().top;
 
@@ -376,6 +369,9 @@ public class DeviceProfile {
                     mResponsiveAllAppsHeightSpec.getAvailableSpace(),
                     mResponsiveWorkspaceCellSpec);
         }
+
+        memInfoHeight = LauncherPrefs.RECENTS_MEMINFO.get(context) ? res.getDimensionPixelSize(
+                R.dimen.meminfo_claimed_height) : 0;
 
         mWorkspaceProfile = WorkspaceProfile.Factory.createWorkspaceProfile(
                 /*context*/ context,
@@ -1118,7 +1114,7 @@ public class DeviceProfile {
         int overviewActionsSpace = mDeviceProperties.isLargeScreen()
                 ? 0
                 : (overviewProfile.getActionsTopMarginPx() + overviewProfile.getActionsHeight());
-        return overviewActionsSpace + getOverviewActionsClaimedSpaceBelow();
+        return overviewActionsSpace + memInfoHeight + getOverviewActionsClaimedSpaceBelow();
     }
 
     /**
