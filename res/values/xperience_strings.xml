@@ -72,5 +72,5 @@
     <string name="trust_apps_info_protected">Protected apps require authentication to be opened from the launcher</string>
 
     <!-- LMOFreeform -->
-    <string name="floating_window">Floating</string>
+    <string name="floating_window">Floating window</string>
 </resources>
