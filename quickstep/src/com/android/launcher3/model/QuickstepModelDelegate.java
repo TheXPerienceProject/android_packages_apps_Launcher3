@@ -206,6 +206,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
         mActive = true;
     }
 
+    @WorkerThread
     @Override
     public void workspaceLoadComplete() {
         super.workspaceLoadComplete();
@@ -324,6 +325,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
         }
     }
 
+    @WorkerThread
     @Override
     public void destroy() {
         super.destroy();

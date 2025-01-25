@@ -279,7 +279,9 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
     }
 
     private void updateActionButtonsVisibility() {
-        assert mDp != null;
+        if (mDp == null) {
+            return;
+        }
         boolean showSingleTaskActions = !mIsGroupedTask;
         boolean showGroupActions = mIsGroupedTask && mDp.isTablet && mCanSaveAppPair &&
                 !getContext().getSystemService(ActivityManager.class).isLowRamDevice();

@@ -34,7 +34,7 @@ public class WallpaperOffsetInterpolator implements
     private static final String KEY_WALLPAPER_SCROLLING = "pref_allow_wallpaper_scrolling";
 
     private final SimpleBroadcastReceiver mWallpaperChangeReceiver =
-            new SimpleBroadcastReceiver(i -> onWallpaperChanged());
+            new SimpleBroadcastReceiver(UI_HELPER_EXECUTOR, i -> onWallpaperChanged());
     private final Workspace<?> mWorkspace;
     private final boolean mIsRtl;
     private final Handler mHandler;
@@ -226,7 +226,8 @@ public class WallpaperOffsetInterpolator implements
             mWallpaperChangeReceiver.unregisterReceiverSafely(mWorkspace.getContext());
             mRegistered = false;
         } else if (mWindowToken != null && !mRegistered) {
-            mWallpaperChangeReceiver.register(mWorkspace.getContext(), ACTION_WALLPAPER_CHANGED);
+            mWallpaperChangeReceiver.register(
+                    mWorkspace.getContext(), ACTION_WALLPAPER_CHANGED);
             onWallpaperChanged();
             mRegistered = true;
         }
