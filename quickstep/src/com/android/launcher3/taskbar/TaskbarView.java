@@ -190,35 +190,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             mQsb = LayoutInflater.from(context).inflate(R.layout.empty_view, this, false);
         }
 
-        // Default long press (touch) delay = 400ms
-        mAllAppsButtonTouchDelayMs = ViewConfiguration.getLongPressTimeout();
-    }
-
-    @DrawableRes
-    private int getAllAppsButton(boolean isTransientTaskbar) {
-        boolean shouldSelectTransientIcon =
-                (isTransientTaskbar || enableTaskbarPinning())
-                && !mActivityContext.isThreeButtonNav();
-        if (ENABLE_ALL_APPS_SEARCH_IN_TASKBAR.get()) {
-            return shouldSelectTransientIcon
-                    ? R.drawable.ic_transient_taskbar_all_apps_search_button
-                    : R.drawable.ic_taskbar_all_apps_search_button;
-        } else {
-            return shouldSelectTransientIcon
-                    ? R.drawable.ic_transient_taskbar_all_apps_button
-                    : R.drawable.ic_taskbar_all_apps_button;
-        }
-    }
-
-    @DimenRes
-    public int getAllAppsButtonTranslationXOffset(boolean isTransientTaskbar) {
-        if (isTransientTaskbar) {
-            return R.dimen.transient_taskbar_all_apps_button_translation_x_offset;
-        } else {
-            return ENABLE_ALL_APPS_SEARCH_IN_TASKBAR.get()
-                    ? R.dimen.taskbar_all_apps_search_button_translation_x_offset
-                    : R.dimen.taskbar_all_apps_button_translation_x_offset;
-        }
     }
 
     @Override
