@@ -537,12 +537,6 @@ public abstract class AbsSwipeUpHandler<
             if (snapshots != null) {
                 mRecentsView.switchToScreenshot(snapshots, () -> {});
                 mRecentsView.onRecentsAnimationComplete();
-                if (mRecentsAnimationController != null) {
-                    mRecentsAnimationController.cleanupScreenshot();
-                } else if (mDeferredCleanupRecentsAnimationController != null) {
-                    mDeferredCleanupRecentsAnimationController.cleanupScreenshot();
-                    mDeferredCleanupRecentsAnimationController = null;
-                }
             }
         });
 
