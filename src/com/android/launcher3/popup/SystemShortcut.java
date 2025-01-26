@@ -81,7 +81,6 @@ import java.util.Arrays;
  */
 public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         implements View.OnClickListener {
-    private static final String TAG = "SystemShortcut";
 
     private static final String TAG = SystemShortcut.class.getSimpleName();
     private final int mIconResId;
