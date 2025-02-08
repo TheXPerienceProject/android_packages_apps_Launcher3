@@ -208,6 +208,7 @@ public class LauncherAppState implements SafeCloseable {
                 PackageManagerHelper.INSTANCE.get(context), iconCacheFileName != null);
         mOnTerminateCallback.add(mIconCache::close);
         mOnTerminateCallback.add(mModel::destroy);
+
     }
 
     private void onNotificationSettingsChanged(boolean areNotificationDotsEnabled) {
@@ -238,7 +239,7 @@ public class LauncherAppState implements SafeCloseable {
         // so we force a restart now if needed without waiting for home button press
         if (mNeedsRestart.compareAndSet(true, false)) {
             Toast.makeText(mContext, R.string.restarting_launcher_changes, Toast.LENGTH_SHORT).show();
-            Utilities.restart(mContext);
+            Utilities.restart();
         }
     }
 
