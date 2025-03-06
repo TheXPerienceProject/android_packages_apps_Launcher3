@@ -136,4 +136,7 @@
     <!-- Taskbar -->
     <string name="pref_allow_phone_taskbar_title">A Feladatkezelő használata</string>
     <string name="pref_allow_phone_taskbar_summary">Alkalmazásinditáshoz és váltáshoz bárhol</string>
+    <!-- Settings Categories -->
+    <string name="category_icon">Ikonok</string>
+    <!-- Recents -->
 </resources>

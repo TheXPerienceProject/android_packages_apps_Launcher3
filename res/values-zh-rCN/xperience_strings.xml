@@ -47,4 +47,7 @@
     <!-- Memory info -->
     <!-- Background blur -->
     <!-- Taskbar -->
+    <!-- Settings Categories -->
+    <string name="category_icon">图标</string>
+    <!-- Recents -->
 </resources>
