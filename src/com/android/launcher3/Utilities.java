@@ -1093,7 +1093,7 @@ public final class Utilities {
 
     public static boolean isShowMeminfo(Context context) {
         SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
-        return prefs.getBoolean(KEY_RECENTS_MEMINFO, false);
+        return prefs.getBoolean(KEY_RECENTS_MEMINFO, true);
    }
 
     public static int getRecentsOpacity(Context context) {
