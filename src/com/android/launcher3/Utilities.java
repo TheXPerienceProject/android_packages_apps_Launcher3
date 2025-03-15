@@ -1088,7 +1088,7 @@ public final class Utilities {
 
     public static boolean isSinglePageCentered(Context context) {
         SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
-        return prefs.getBoolean(KEY_SINGLE_PAGE_CENTER, false);
+        return prefs.getBoolean(KEY_SINGLE_PAGE_CENTER, true);
     }
 
     public static boolean isShowMeminfo(Context context) {
