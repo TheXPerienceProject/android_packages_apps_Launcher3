@@ -1467,6 +1467,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     public int getDefaultTaskbarWindowSize() {
         Resources resources = getResources();
 
+        if (isGestureNav() && !SettingsCache.INSTANCE.get(this).getValue(NAVIGATION_BAR_HINT_URI)) {
+            return 0;
+        }
+
         if (isPhoneMode()) {
             return isThreeButtonNav() ?
                     resources.getDimensionPixelSize(R.dimen.taskbar_phone_size) :
