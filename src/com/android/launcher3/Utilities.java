@@ -985,6 +985,8 @@ public final class Utilities {
     public static void restart(final Context context) {
         MODEL_EXECUTOR.execute(() -> {
             try {
+                //clear the icon cache
+                LauncherIcons.clearPool(context);
                 Thread.sleep(WAIT_BEFORE_RESTART);
             } catch (Exception ignored) {
             }

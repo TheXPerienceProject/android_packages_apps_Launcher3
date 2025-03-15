@@ -67,6 +67,7 @@ import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.TraceHelper;
 import com.android.launcher3.widget.custom.CustomWidgetManager;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -87,7 +88,7 @@ public class LauncherAppState implements SafeCloseable {
 
     private final RunnableList mOnTerminateCallback = new RunnableList();
 
-    private boolean mNeedsRestart;
+    private final AtomicBoolean mNeedsRestart = new AtomicBoolean(false);
 
     public static LauncherAppState getInstance(Context context) {
         return INSTANCE.get(context);
@@ -229,13 +230,13 @@ public class LauncherAppState implements SafeCloseable {
     }
 
     public void setNeedsRestart() {
-        mNeedsRestart = true;
+        mNeedsRestart.set(true);
     }
 
     public void checkIfRestartNeeded() {
         // we destroyed Settings activity with the back button
         // so we force a restart now if needed without waiting for home button press
-        if (mNeedsRestart) {
+        if (mNeedsRestart.compareAndSet(true, false)) {
             Toast.makeText(mContext, R.string.restarting_launcher_changes, Toast.LENGTH_SHORT).show();
             Utilities.restart(mContext);
         }
