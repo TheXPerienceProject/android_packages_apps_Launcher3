@@ -222,6 +222,7 @@ public class LauncherAppState implements SafeCloseable {
                     mModel.forceReload();
                     if ((flags & CHANGE_OVERLAYS) != 0) {
                         Utilities.restart();
+                        mModel.forceReload();
                     }
                 }
             }
@@ -260,6 +261,7 @@ public class LauncherAppState implements SafeCloseable {
         if (mNeedsRestart) {
             Toast.makeText(mContext, R.string.restarting_launcher_changes, Toast.LENGTH_SHORT).show();
             Utilities.restart();
+            mModel.forceReload();
         }
     }
 
@@ -315,13 +317,14 @@ public class LauncherAppState implements SafeCloseable {
         @Override
         public void onAppIconChanged(String packageName, UserHandle user) {
             mModel.onAppIconChanged(packageName, user);
+            refreshAndReloadLauncher();
         }
 
         @Override
         public void onSystemIconStateChanged(String iconState) {
             IconShape.INSTANCE.get(mContext).pickBestShape(mContext);
-            refreshAndReloadLauncher();
             LauncherPrefs.get(mContext).put(ICON_STATE, iconState);
+            refreshAndReloadLauncher();
         }
 
         void verifyIconChanged() {
@@ -340,6 +343,7 @@ public class LauncherAppState implements SafeCloseable {
                 }
                 verifyIconChanged();
             }
+            refreshAndReloadLauncher();
         }
     }
 }
