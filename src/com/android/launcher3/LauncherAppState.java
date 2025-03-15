@@ -222,7 +222,7 @@ public class LauncherAppState implements SafeCloseable {
                     MODEL_EXECUTOR.execute(() -> mIconCache.clearDb());
                     mModel.forceReload();
                     if ((flags & CHANGE_OVERLAYS) != 0) {
-                        Utilities.restart(mContext);
+                        Utilities.restart();
                     }
                 }
             }
