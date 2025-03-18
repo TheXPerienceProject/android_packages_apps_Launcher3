@@ -175,6 +175,11 @@ public class OverviewState extends LauncherState {
     }
 
     @Override
+    public boolean detachDesktopCarousel() {
+        return false;
+    }
+
+    @Override
     public boolean disallowTaskbarGlobalDrag() {
         // Disable global drag in overview
         return true;

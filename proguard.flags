@@ -58,6 +58,6 @@
   *;
 }
 
--keep class com.android.launcher3.lineage.trust.** {
+-keep class com.android.internal.protolog.** {
   *;
 }

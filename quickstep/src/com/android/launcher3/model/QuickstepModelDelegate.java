@@ -60,7 +60,6 @@ import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.config.FeatureFlags;
-import com.android.launcher3.lineage.trust.db.TrustDatabaseHelper;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
@@ -78,6 +77,7 @@ import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.PersistedItemArray;
 import com.android.quickstep.logging.SettingsChangeLogger;
 import com.android.quickstep.logging.StatsLogCompatManager;
+import com.android.quickstep.util.ContextualSearchStateManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 
 import java.util.ArrayList;
@@ -156,9 +156,6 @@ public class QuickstepModelDelegate extends ModelDelegate {
                         state.containerId);
         FixedContainerItems fci = new FixedContainerItems(state.containerId,
                 state.storage.read(mApp.getContext(), factory, ums.allUsers::get));
-        if (FeatureFlags.CHANGE_MODEL_DELEGATE_LOADING_ORDER.get()) {
-            bindPredictionItems(callbacks, fci);
-        }
         mDataModel.extraItems.put(state.containerId, fci);
     }
 
@@ -210,6 +207,8 @@ public class QuickstepModelDelegate extends ModelDelegate {
     @Override
     public void workspaceLoadComplete() {
         super.workspaceLoadComplete();
+        // Initialize ContextualSearchStateManager.
+        ContextualSearchStateManager.INSTANCE.get(mContext);
         recreatePredictors();
     }
 
@@ -238,7 +237,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
             InstanceId instanceId = new InstanceIdSequence().newInstanceId();
             for (ItemInfo info : itemsIdMap) {
                 CollectionInfo parent = getContainer(info, itemsIdMap);
-                StatsLogCompatManager.writeSnapshot(info.buildProto(parent), instanceId);
+                StatsLogCompatManager.writeSnapshot(info.buildProto(parent, mContext), instanceId);
             }
             additionalSnapshotEvents(instanceId);
             prefs.put(LAST_SNAPSHOT_TIME_MILLIS, now);
@@ -275,7 +274,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
 
                         for (ItemInfo info : itemsIdMap) {
                             CollectionInfo parent = getContainer(info, itemsIdMap);
-                            LauncherAtom.ItemInfo itemInfo = info.buildProto(parent);
+                            LauncherAtom.ItemInfo itemInfo = info.buildProto(parent, mContext);
                             Log.d(TAG, itemInfo.toString());
                             StatsEvent statsEvent = StatsLogCompatManager.buildStatsEvent(itemInfo,
                                     instanceId);

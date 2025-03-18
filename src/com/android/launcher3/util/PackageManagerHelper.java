@@ -24,13 +24,10 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Process;
@@ -42,10 +39,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.launcher3.Flags;
 import com.android.launcher3.PendingAddItemInfo;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.dagger.ApplicationContext;
+import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.dagger.LauncherBaseAppComponent;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
@@ -56,16 +55,19 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 /**
  * Utility methods using package manager
  */
-public class PackageManagerHelper implements SafeCloseable{
+@LauncherAppSingleton
+public class PackageManagerHelper {
 
     private static final String TAG = "PackageManagerHelper";
 
     @NonNull
-    public static final MainThreadInitializedObject<PackageManagerHelper> INSTANCE =
-            new MainThreadInitializedObject<>(PackageManagerHelper::new);
+    public static DaggerSingletonObject<PackageManagerHelper> INSTANCE =
+            new DaggerSingletonObject<>(LauncherBaseAppComponent::getPackageManagerHelper);
 
     @NonNull
     private final Context mContext;
@@ -78,78 +80,13 @@ public class PackageManagerHelper implements SafeCloseable{
 
     private final String[] mLegacyMultiInstanceSupportedApps;
 
-    public PackageManagerHelper(@NonNull final Context context) {
+    @Inject
+    public PackageManagerHelper(@ApplicationContext final Context context) {
         mContext = context;
         mPm = context.getPackageManager();
         mLauncherApps = Objects.requireNonNull(context.getSystemService(LauncherApps.class));
         mLegacyMultiInstanceSupportedApps = mContext.getResources().getStringArray(
-                R.array.config_appsSupportMultiInstancesSplit);
-    }
-
-    @Override
-    public void close() { }
-
-    /**
-     * Returns true if the app can possibly be on the SDCard. This is just a workaround and doesn't
-     * guarantee that the app is on SD card.
-     */
-    public boolean isAppOnSdcard(@NonNull final String packageName,
-            @NonNull final UserHandle user) {
-        final ApplicationInfo info = getApplicationInfo(
-                packageName, user, PackageManager.MATCH_UNINSTALLED_PACKAGES);
-        return info != null && (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
-    }
-
-    /**
-     * Returns whether the target app is suspended for a given user as per
-     * {@link android.app.admin.DevicePolicyManager#isPackageSuspended}.
-     */
-    public boolean isAppSuspended(@NonNull final String packageName,
-            @NonNull final UserHandle user) {
-        final ApplicationInfo info = getApplicationInfo(packageName, user, 0);
-        return info != null && isAppSuspended(info);
-    }
-
-    /**
-     * Returns whether the target app is installed for a given user
-     */
-    public boolean isAppInstalled(@NonNull final String packageName,
-            @NonNull final UserHandle user) {
-        final ApplicationInfo info = getApplicationInfo(packageName, user, 0);
-        return info != null;
-    }
-
-    /**
-     * Returns whether the target app is archived for a given user
-     */
-    @SuppressWarnings("NewApi")
-    public boolean isAppArchivedForUser(@NonNull final String packageName,
-            @NonNull final UserHandle user) {
-        if (!Flags.enableSupportForArchiving()) {
-            return false;
-        }
-        final ApplicationInfo info = getApplicationInfo(
-                // LauncherApps does not support long flags currently. Since archived apps are
-                // subset of uninstalled apps, this filter also includes archived apps.
-                packageName, user, PackageManager.MATCH_UNINSTALLED_PACKAGES);
-        return info != null && info.isArchived;
-    }
-
-    /**
-     * Returns whether the target app is in archived state
-     */
-    @SuppressWarnings("NewApi")
-    public boolean isAppArchived(@NonNull final String packageName) {
-        final ApplicationInfo info;
-        try {
-            info = mPm.getPackageInfo(packageName,
-                    PackageManager.PackageInfoFlags.of(
-                            PackageManager.MATCH_ARCHIVED_PACKAGES)).applicationInfo;
-            return info.isArchived;
-        } catch (NameNotFoundException e) {
-            Log.e(TAG, "Failed to get applicationInfo for package: " + packageName, e);
-            return false;
-        }
+                    R.array.config_appsSupportMultiInstancesSplit);
     }
 
     /**
@@ -160,20 +97,6 @@ public class PackageManagerHelper implements SafeCloseable{
             return mPm.getInstallSourceInfo(packageName).getInstallingPackageName();
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Failed to get installer package for app package:" + packageName, e);
-            return null;
-        }
-    }
-
-    /**
-     * Returns the application info for the provided package or null
-     */
-    @Nullable
-    public ApplicationInfo getApplicationInfo(@NonNull final String packageName,
-            @NonNull final UserHandle user, final int flags) {
-        try {
-            ApplicationInfo info = mLauncherApps.getApplicationInfo(packageName, flags, user);
-            return !isPackageInstalledOrArchived(info) || !info.enabled ? null : info;
-        } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
     }
@@ -333,13 +256,6 @@ public class PackageManagerHelper implements SafeCloseable{
     /** Returns the incremental download progress for the given shortcut's app. */
     public static int getLoadingProgress(LauncherActivityInfo info) {
         return (int) (100 * info.getLoadingProgress());
-    }
-
-    /** Returns true in case app is installed on the device or in archived state. */
-    @SuppressWarnings("NewApi")
-    private boolean isPackageInstalledOrArchived(ApplicationInfo info) {
-        return (info.flags & ApplicationInfo.FLAG_INSTALLED) != 0 || (
-                Flags.enableSupportForArchiving() && info.isArchived);
     }
 
     /**

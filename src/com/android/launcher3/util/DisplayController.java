@@ -36,7 +36,6 @@ import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -52,6 +51,7 @@ import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.InvariantDeviceProfile.DeviceType;
+import com.android.launcher3.LauncherPrefChangeListener;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.logging.FileLog;
@@ -121,8 +121,7 @@ public class DisplayController implements ComponentCallbacks, SafeCloseable {
     private boolean mDestroyed = false;
     private int mUiMode = -1;
 
-    private SharedPreferences.OnSharedPreferenceChangeListener
-            mTaskbarPinningPreferenceChangeListener;
+    private LauncherPrefChangeListener mTaskbarPinningPreferenceChangeListener;
 
     @VisibleForTesting
     protected DisplayController(Context context) {
@@ -147,19 +146,18 @@ public class DisplayController implements ComponentCallbacks, SafeCloseable {
     }
 
     private void attachTaskbarPinningSharedPreferenceChangeListener(Context context) {
-        mTaskbarPinningPreferenceChangeListener =
-                (sharedPreferences, key) -> {
-                    LauncherPrefs prefs = LauncherPrefs.get(mContext);
-                    boolean isTaskbarPinningChanged = TASKBAR_PINNING_KEY.equals(key)
-                            && mInfo.mIsTaskbarPinned != prefs.get(TASKBAR_PINNING);
-                    boolean isTaskbarPinningDesktopModeChanged =
-                            TASKBAR_PINNING_DESKTOP_MODE_KEY.equals(key)
-                                    && mInfo.mIsTaskbarPinnedInDesktopMode != prefs.get(
-                                    TASKBAR_PINNING_IN_DESKTOP_MODE);
-                    if (isTaskbarPinningChanged || isTaskbarPinningDesktopModeChanged) {
-                        notifyConfigChange();
-                    }
-                };
+        mTaskbarPinningPreferenceChangeListener = key -> {
+            LauncherPrefs prefs = LauncherPrefs.get(mContext);
+            boolean isTaskbarPinningChanged = TASKBAR_PINNING_KEY.equals(key)
+                    && mInfo.mIsTaskbarPinned != prefs.get(TASKBAR_PINNING);
+            boolean isTaskbarPinningDesktopModeChanged =
+                    TASKBAR_PINNING_DESKTOP_MODE_KEY.equals(key)
+                            && mInfo.mIsTaskbarPinnedInDesktopMode != prefs.get(
+                            TASKBAR_PINNING_IN_DESKTOP_MODE);
+            if (isTaskbarPinningChanged || isTaskbarPinningDesktopModeChanged) {
+                notifyConfigChange();
+            }
+        };
 
         LauncherPrefs.get(context).addListener(
                 mTaskbarPinningPreferenceChangeListener, TASKBAR_PINNING);
@@ -275,8 +273,9 @@ public class DisplayController implements ComponentCallbacks, SafeCloseable {
                 || !mInfo.mScreenSizeDp.equals(
                         new PortraitSize(config.screenHeightDp, config.screenWidthDp))
                 || mWindowContext.getDisplay().getRotation() != mInfo.rotation
-                || mUiMode != config.uiMode) {
-            notifyConfigChange(false, mUiMode != config.uiMode);
+                || WindowManagerProxy.INSTANCE.get(mContext).showLockedTaskbarOnHome(mWindowContext)
+                        != mInfo.showLockedTaskbarOnHome()) {
+            notifyConfigChange();
         }
         mUiMode = config.uiMode;
     }

@@ -69,6 +69,8 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
 
     private static final String TRACE_METHOD_NAME = "appwidget load-widget ";
 
+    private static final Integer NO_LAYOUT_ID = Integer.valueOf(0);
+
     private final CheckLongPressHelper mLongPressHelper;
     protected final ActivityContext mActivityContext;
 
@@ -123,7 +125,7 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     @Override
     public void setAppWidget(int appWidgetId, AppWidgetProviderInfo info) {
         super.setAppWidget(appWidgetId, info);
-        if (!mTrackingWidgetUpdate) {
+        if (!mTrackingWidgetUpdate && appWidgetId != -1) {
             mTrackingWidgetUpdate = true;
             Trace.beginAsyncSection(TRACE_METHOD_NAME + info.provider, appWidgetId);
             Log.i(TAG, "App widget created with id: " + appWidgetId);
@@ -161,6 +163,21 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
                         return true;
                     }
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean isTaggedAsScrollable() {
+        // TODO: Introduce new api in AppWidgetHostView to indicate whether the widget is
+        // scrollable.
+        for (int i = 0; i < this.getChildCount(); i++) {
+            View child = this.getChildAt(i);
+            final Integer layoutId = (Integer) child.getTag(android.R.id.widget_frame);
+            if (layoutId != null) {
+                // The layout id is only set to 0 when RemoteViews is created from
+                // DrawInstructions.
+                return NO_LAYOUT_ID.equals(layoutId);
             }
         }
         return false;
@@ -240,16 +257,6 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     }
 
     @Override
-    public AppWidgetProviderInfo getAppWidgetInfo() {
-        AppWidgetProviderInfo info = super.getAppWidgetInfo();
-        if (info != null && !(info instanceof LauncherAppWidgetProviderInfo)) {
-            throw new IllegalStateException("Launcher widget must have"
-                    + " LauncherAppWidgetProviderInfo");
-        }
-        return info;
-    }
-
-    @Override
     public void getFocusedRect(Rect r) {
         super.getFocusedRect(r);
         // Outset to a larger rect for drawing a padding between focus outline and widget
@@ -268,7 +275,7 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mIsScrollable = checkScrollableRecursively(this);
+        mIsScrollable = isTaggedAsScrollable() || checkScrollableRecursively(this);
     }
 
     /**

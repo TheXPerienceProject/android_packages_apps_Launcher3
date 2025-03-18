@@ -30,6 +30,7 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
+import com.android.launcher3.Flags;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.config.FeatureFlags;
@@ -37,11 +38,13 @@ import com.android.launcher3.desktop.DesktopRecentsTransitionController;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateListener;
+import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
+import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.FallbackActivityInterface;
+import com.android.quickstep.FallbackWindowInterface;
 import com.android.quickstep.GestureState;
-import com.android.quickstep.RecentsActivity;
 import com.android.quickstep.RotationTouchHelper;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SplitSelectStateController;
@@ -49,6 +52,7 @@ import com.android.quickstep.util.TaskViewSimulator;
 import com.android.quickstep.views.MemInfoView;
 import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsView;
+import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
 
@@ -56,7 +60,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class FallbackRecentsView extends RecentsView<RecentsActivity, RecentsState>
+public class FallbackRecentsView<CONTAINER_TYPE extends Context & RecentsViewContainer
+        & StatefulContainer<RecentsState>> extends RecentsView<CONTAINER_TYPE, RecentsState>
         implements StateListener<RecentsState> {
 
     private static final int TASK_DISMISS_DURATION = 150;
@@ -69,8 +74,14 @@ public class FallbackRecentsView extends RecentsView<RecentsActivity, RecentsSta
     }
 
     public FallbackRecentsView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr, FallbackActivityInterface.INSTANCE);
+        super(context, attrs, defStyleAttr, getContainerInterface());
         mContainer.getStateManager().addStateListener(this);
+    }
+
+    private static BaseContainerInterface<RecentsState, ?> getContainerInterface() {
+        return (Flags.enableFallbackOverviewInWindow() || Flags.enableLauncherOverviewInWindow())
+                ? FallbackWindowInterface.getInstance()
+                : FallbackActivityInterface.INSTANCE;
     }
 
     @Override
@@ -94,7 +105,7 @@ public class FallbackRecentsView extends RecentsView<RecentsActivity, RecentsSta
     }
 
     @Override
-    public StateManager<RecentsState, RecentsActivity> getStateManager() {
+    public StateManager<RecentsState, ?> getStateManager() {
         return mContainer.getStateManager();
     }
 
@@ -284,7 +295,9 @@ public class FallbackRecentsView extends RecentsView<RecentsActivity, RecentsSta
             }
         }
 
-        if (isOverlayEnabled) {
+        // disabling this so app icons aren't drawn on top of recent tasks.
+        if (isOverlayEnabled && !(Flags.enableFallbackOverviewInWindow()
+                || Flags.enableLauncherOverviewInWindow())) {
             runActionOnRemoteHandles(remoteTargetHandle ->
                     remoteTargetHandle.getTaskViewSimulator().setDrawsBelowRecents(true));
         }
@@ -313,7 +326,7 @@ public class FallbackRecentsView extends RecentsView<RecentsActivity, RecentsSta
     }
 
     @Override
-    protected boolean canLaunchFullscreenTask() {
+    public boolean canLaunchFullscreenTask() {
         return !mContainer.isInState(OVERVIEW_SPLIT_SELECT);
     }
 

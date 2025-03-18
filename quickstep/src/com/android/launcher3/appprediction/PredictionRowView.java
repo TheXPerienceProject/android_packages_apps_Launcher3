@@ -58,7 +58,7 @@ public class PredictionRowView<T extends Context & ActivityContext>
     // Vertical padding of the icon that contributes to the expected cell height.
     private final int mVerticalPadding;
     // Extra padding that is used in the top app rows (prediction and search) that is not used in
-    // the regular A-Z list. This only applies to single line label.
+    // the regular A-Z list.
     private final int mTopRowExtraHeight;
 
     // Helper to drawing the focus indicator.
@@ -140,7 +140,7 @@ public class PredictionRowView<T extends Context & ActivityContext>
         // Prediction row height will be 4dp bigger than the regular apps in A-Z list when two line
         // is not enabled. Otherwise, the extra height will increase by just the textHeight.
         int extraHeight = LauncherPrefs.ENABLE_TWOLINE_ALLAPPS_TOGGLE.get(getContext())
-                ? textHeight : mTopRowExtraHeight;
+                ? (textHeight + mTopRowExtraHeight) : mTopRowExtraHeight;
         totalHeight += extraHeight;
         return getVisibility() == GONE ? 0 : totalHeight + getPaddingTop() + getPaddingBottom();
     }
