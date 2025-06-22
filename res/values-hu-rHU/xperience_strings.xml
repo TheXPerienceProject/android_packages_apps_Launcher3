@@ -141,4 +141,7 @@
     <string name="category_misc">Egyebek</string>
     <!-- Recents -->
     <string name="action_lens">Google Lens</string>
+    <!-- App drawer searchbar -->
+    <!-- AppInfo -->
+    <!-- Icon pack -->
 </resources>

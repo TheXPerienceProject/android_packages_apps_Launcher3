@@ -50,4 +50,7 @@
     <!-- Settings Categories -->
     <string name="category_icon">图标</string>
     <!-- Recents -->
+    <!-- App drawer searchbar -->
+    <!-- AppInfo -->
+    <!-- Icon pack -->
 </resources>
