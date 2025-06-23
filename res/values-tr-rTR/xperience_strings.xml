@@ -61,6 +61,17 @@
     <!-- Recents -->
     <string name="action_lens">Lens</string>
     <!-- App drawer searchbar -->
+    <string name="drawer_search_title">Uygulama arama çubuğu</string>
+    <string name="drawer_search_summary">Uygulama sayfasının üstündeki arama çubuğu</string>
     <!-- AppInfo -->
+    <string name="app_info_source">Kaynak</string>
+    <string name="app_info_source_system">Sistem</string>
+    <string name="app_info_last_update">Son Güncelleme</string>
+    <string name="app_info_version">Sürüm</string>
+    <string name="app_info_more">Daha fazla</string>
     <!-- Icon pack -->
+    <string name="icon_pack_title">Simge paketi</string>
+    <string name="icon_pack_default_label">Varsayılan</string>
+    <string name="icon_pack_add">Daha fazla yükle</string>
+    <string name="icon_pack_no_market">Kullanılabilir uygulama mağazası yok</string>
 </resources>
