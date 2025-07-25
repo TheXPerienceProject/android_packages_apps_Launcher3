@@ -19,4 +19,9 @@
     <!-- Appseat -->
     <color name="appseat_color">@*android:color/system_neutral2_50</color>
     <color name="mid_clear_all_background_color">@*android:color/system_neutral2_50</color>
+
+     <!-- Dashboard/homepage icon colors -->
+    <color name="homepage_dark_green_bg">#ff059267</color>
+    <color name="homepage_orange_bg">#ffff6d00</color>
+    <color name="homepage_blue_bg">#ff00c6ff</color>
 </resources>
