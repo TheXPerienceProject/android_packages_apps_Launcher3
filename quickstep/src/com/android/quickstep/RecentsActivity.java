@@ -520,7 +520,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
 
     @Override
     public void collectStateHandlers(List<StateHandler<RecentsState>> out) {
-        out.add(new FallbackRecentsStateController(this));
+        out.add(new FallbackRecentsStateController(this, this));
     }
 
     @Override

@@ -334,7 +334,7 @@ class RecentsWindowManager(context: Context, wallpaperColorHints: Int) :
     }
 
     override fun collectStateHandlers(out: MutableList<StateManager.StateHandler<RecentsState?>>?) {
-        out!!.add(FallbackRecentsStateController(this))
+        out!!.add(FallbackRecentsStateController(this, this))
     }
 
     override fun getStateManager(): StateManager<RecentsState, RecentsWindowManager> {

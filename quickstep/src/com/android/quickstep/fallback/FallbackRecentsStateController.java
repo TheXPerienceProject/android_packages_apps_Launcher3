@@ -69,7 +69,8 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
     private final RecentsViewContainer mRecentsViewContainer;
     private final FallbackRecentsView mRecentsView;
 
-    public FallbackRecentsStateController(RecentsViewContainer container) {
+    public FallbackRecentsStateController(RecentsViewContainer container, RecentsActivity activity) {
+        mActivity = activity;
         mRecentsViewContainer = container;
         mRecentsView = container.getOverviewPanel();
     }
