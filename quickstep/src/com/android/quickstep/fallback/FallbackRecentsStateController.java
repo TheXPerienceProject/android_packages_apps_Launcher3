@@ -50,6 +50,7 @@ import androidx.annotation.NonNull;
 import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.anim.PropertySetter;
+import com.android.quickstep.RecentsActivity;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.states.StateAnimationConfig;
 import com.android.quickstep.views.AddDesktopButton;
@@ -64,6 +65,7 @@ import com.android.quickstep.views.RecentsViewContainer;
 public class FallbackRecentsStateController implements StateHandler<RecentsState> {
 
     private final StateAnimationConfig mNoConfig = new StateAnimationConfig();
+    private final RecentsActivity mActivity;
     private final RecentsViewContainer mRecentsViewContainer;
     private final FallbackRecentsView mRecentsView;
 
@@ -160,7 +162,7 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
                 ? mRecentsView.getSplitSelectTranslation() : 0, LINEAR);
         setter.setFloat(mRecentsView, taskViewsFloat.second, 0, LINEAR);
         float memInfoAlpha = state.hasMemInfoView() ? 1 : 0;
-        setter.setFloat(mRecentsViewContainer.getMemInfoView(), MemInfoView.STATE_CTRL_ALPHA,
+        setter.setFloat(mActivity.getMemInfoView(), MemInfoView.STATE_CTRL_ALPHA,
                 memInfoAlpha, LINEAR);
     }
 
