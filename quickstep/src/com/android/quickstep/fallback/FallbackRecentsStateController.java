@@ -160,7 +160,7 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
                 ? mRecentsView.getSplitSelectTranslation() : 0, LINEAR);
         setter.setFloat(mRecentsView, taskViewsFloat.second, 0, LINEAR);
         float memInfoAlpha = state.hasMemInfoView() ? 1 : 0;
-        setter.setFloat(mActivity.getMemInfoView(), MemInfoView.STATE_CTRL_ALPHA,
+        setter.setFloat(mRecentsViewContainer.getMemInfoView(), MemInfoView.STATE_CTRL_ALPHA,
                 memInfoAlpha, LINEAR);
     }
 
