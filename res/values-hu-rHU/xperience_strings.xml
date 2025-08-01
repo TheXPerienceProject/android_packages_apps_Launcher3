@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 The XPerience Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Application name -->
+    <!-- Folder titles -->
+    <!-- Lock -->
+    <!-- General -->
+    <string name="settings_title">Kezdőoldal-beállítások</string>
+    <!-- Categories -->
+    <string name="home_category_title">Kezdőképernyő</string>
+    <string name="home_category_summary">A \'Google Now\'-panel és egyebek beállítása</string>
+    <string name="icons_category_title">Ikonok</string>
+    <string name="icons_category_summary">Ikonméret-beállítás és egyebek</string>
+    <string name="app_drawer_category_title">Alkalmazásfiók</string>
+    <string name="app_drawer_category_summary">Testreszabhatja az Alkalmazásfiókját</string>
+    <string name="recents_category_title">Előzmények</string>
+    <string name="recents_category_summary">Az áttekintési nézet újraformálása</string>
+    <string name="misc_category_title">Különlegességek</string>
+    <string name="misc_category_summary">Egyéb lehetőségek</string>
+    <string name="general_category_title">Általános</string>
+    <string name="interface_category_title">Kezelőfelület</string>
+    <string name="search_bar_category_title">Keresősáv</string>
+    <!-- Developer options -->
+    <string name="dev_options_title">Fejlesztői beállítások</string>
+    <string name="dev_options_summary">Saját felelősségére rejtett beállításokat engedélyezhet</string>
+    <!-- Edit workspace -->
+    <string name="settings_lock_layout_title">Elrendezés-zárolás</string>
+    <string name="settings_lock_layout_summary_on">A kezdőképernyőn nem engedélyezett az ikon- és modulhozzáadás, eltávolítás és mozgatás</string>
+    <string name="settings_lock_layout_summary_off">A kezdőképernyőn engedélyezett az ikon- és modulhozzáadás, eltávolítás és mozgatás</string>
+    <string name="settings_edit_widgets_error">Nem lehet kisalkalmazásokat hozzáadni a kezdőképernyőhöz</string>
+    <!-- Hide labels -->
+    <string name="desktop_show_labels">Asztali ikonfeliratok</string>
+    <string name="drawer_show_labels">Alkalmazásfióki ikonfeliratok</string>
+    <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
+    <string name="title_show_google_app">Google-alkalmazás csúsztatással</string>
+    <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_left">Amikor a főképernyőn jobbra csúsztat</string>
+    <!-- Settings message explaining when the -1 screen is available on an RTL device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_right">Amikor a főképernyőn balra csúsztat</string>
+    <!-- All apps themed icons -->
+    <string name="pref_themed_icons_title">Témázott ikonok</string>
+    <string name="pref_themed_icons_summary">A kezdőképernyőn használt témázott ikonokhoz igazodik</string>
+    <!-- DT2S -->
+    <string name="pref_sleep_gesture_title">Dupla érintésre alvómód</string>
+    <string name="pref_sleep_gesture_summary">Képernyő-kikapcsoláshoz duplakopp egy üres területre</string>
+    <!-- Restart launcher -->
+    <string name="pref_restart_title">Újraindítás</string>
+    <string name="pref_restart_summary">Launcher-újraindítás a függőben lévő változások alkalmazásához</string>
+    <string name="restarting_launcher">A Launcher újraindítása...</string>
+    <string name="restarting_launcher_changes">Változások miatti újraindulás...</string>
+    <string name="updating_launcher_components">Launcher alkotóelem frissítése miatti újraindulás...</string>
+    <!-- Custom seekbar -->
+    <string name="custom_seekbar_value"><xliff:g id="v">%s</xliff:g> értékű</string>
+    <string name="custom_seekbar_default_value">alapértelmezés szerint</string>
+    <string name="custom_seekbar_default_value_to_set">Alapértelmezetten <xliff:g id="v">%s</xliff:g> értékű\nNyomja meg hosszan a beállításhoz</string>
+    <string name="custom_seekbar_default_value_is_set">Az alapértelmezett érték beállítva</string>
+    <!-- Icon size -->
+    <string name="icon_size_title">Ikonméret</string>
+    <!-- Font size -->
+    <string name="font_size_title">Betűméret</string>
+    <!-- App label -->
+    <string name="icon_two_lines_title">Kétsoros alkalmazásnevek</string>
+    <!-- Kill App recents action shortcut -->
+    <string name="recent_task_option_kill_app">Alkalmazás kilövése</string>
+    <string name="recents_app_killed">Az alkalmazás kilőve</string>
+    <!-- Row Height -->
+    <string name="row_height_title">Sormagasság</string>
+    <!-- Hotseat searchbar -->
+    <string name="label_search">Keresés</string>
+    <string name="label_lens">Google Lens</string>
+    <string name="label_voice_search">Hangalapú keresés</string>
+    <string name="dock_search_title">Google keresősáv</string>
+    <string name="dock_search_summary">Alsódokki keresősáv</string>
+    <string name="dock_theme_title">Témázott ikonok</string>
+    <string name="dock_theme_summary">A keresősávban témázott ikonok használhatók</string>
+    <string name="search_radius_title">A sarkok sugara</string>
+    <!-- Hotseat Background -->
+    <string name="hotseat_bg_title">Hotseat-háttér</string>
+    <string name="hotseat_bg_summary">Áttetsző háttereket adhat az alkalmazásfiókhoz</string>
+    <!-- Background opacity -->
+    <string name="background_opacity_title">Háttérátlátszóság</string>
+    <!-- Stroke -->
+    <!-- Wallpaper scrolling -->
+    <string name="allow_wallpaper_scrolling">Háttérkép-görgetés</string>
+    <string name="allow_wallpaper_scrolling_summary">Háttérképgörgetési effekt többképernyős megjelenitéshez</string>
+    <!-- Wallpaper zooming -->
+    <string name="allow_wallpaper_zooming">Háttérkép-zoomolás</string>
+    <string name="allow_wallpaper_zooming_summary">Nagyítsa vagy kicsinyítse a háttérképet az alkalmazásfiók vagy az előzmények használatakor</string>
+    <!-- Homescreen Statusbar -->
+    <string name="show_statusbar_title">Értesítési sáv</string>
+    <!-- Top shadow -->
+    <string name="show_top_shadow">Felső árnyék</string>
+    <!-- Parallax -->
+    <string name="short_parallax_title">Rövid paralaxis engedélyezése</string>
+    <string name="short_parallax_summary">Engedélyezze a teljes háttérképgörgetési hatását kisebb oldalszámon a háttérkép levágása helyett</string>
+    <string name="single_page_center_title">Centerezett egyoldalas</string>
+    <string name="single_page_center_summary">Helyezze középre a háttérképet, ha csak egyetlen oldalt használ</string>
+    <!-- App drawer searchbar -->
+    <!-- Recents icons -->
+    <string name="recents_screenshot_title">Képernyőkép</string>
+    <string name="recents_clear_all_title">Az Összes törlése</string>
+    <string name="recents_lens_title">Google Lens</string>
+    <!-- Background blur -->
+    <string name="background_blur_title">A háttér-elmosás mélysége</string>
+    <string name="background_blur_summary">Az előzmények és az alkalmazásfiók elmosási.értéke állítható itt</string>
+</resources>
