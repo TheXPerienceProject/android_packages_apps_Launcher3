@@ -251,7 +251,7 @@ class RecentsWindowManager(context: Context, wallpaperColorHints: Int) :
                 RecentsModel.INSTANCE[this],
                 null, /*activityBackCallback*/
             )
-        recentsView?.init(actionsView, splitSelectStateController, null)
+        recentsView?.init(actionsView, splitSelectStateController, null, null)
         dragLayer = windowView?.findViewById(R.id.drag_layer)
 
         actionsView?.updateDimension(getDeviceProfile(), recentsView?.lastComputedTaskSize)

@@ -15,6 +15,8 @@
  */
 package com.android.quickstep.fallback;
 
+import static com.android.launcher3.util.MemInfoViewUtil.getMemInfoViewFromView;
+
 import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.INSTANT;
 import static com.android.app.animation.Interpolators.LINEAR;
@@ -160,8 +162,8 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
                 ? mRecentsView.getSplitSelectTranslation() : 0, LINEAR);
         setter.setFloat(mRecentsView, taskViewsFloat.second, 0, LINEAR);
         float memInfoAlpha = state.hasMemInfoView() ? 1 : 0;
-        setter.setFloat(mActivity.getMemInfoView(), MemInfoView.STATE_CTRL_ALPHA,
-                memInfoAlpha, LINEAR);
+        setter.setFloat(getMemInfoViewFromView(mRecentsViewContainer.getRootView()),
+                MemInfoView.STATE_CTRL_ALPHA, memInfoAlpha, LINEAR);
     }
 
     private Interpolator getOverviewInterpolator(RecentsState toState) {

@@ -24,7 +24,7 @@ import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.Flags.enableGridOnlyOverview
 import com.android.launcher3.Flags.enableLargeDesktopWindowingTile
 import com.android.launcher3.LauncherState
-import static com.android.launcher3.LauncherState.MEMINFO;
+import com.android.launcher3.LauncherState.MEMINFO
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.anim.AnimatorListeners.forSuccessCallback
 import com.android.launcher3.anim.PendingAnimation
@@ -38,10 +38,10 @@ import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_SCALE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_TRANSLATE_X
 import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_TRANSLATE_Y
 import com.android.launcher3.states.StateAnimationConfig.SKIP_OVERVIEW
-import static com.android.launcher3.LauncherState.MEMINFO;
 import com.android.quickstep.util.AnimUtils
 import com.android.quickstep.views.AddDesktopButton
 import com.android.quickstep.views.ClearAllButton
+import com.android.quickstep.views.MemInfoView
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsView.ADJACENT_PAGE_HORIZONTAL_OFFSET
 import com.android.quickstep.views.RecentsView.CONTENT_ALPHA
@@ -305,9 +305,9 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             overviewButtonAlpha,
             config.getInterpolator(ANIM_OVERVIEW_ACTIONS_FADE, LINEAR),
         )
-        val memInfoAlpha = if (state.areElementsVisible(mLauncher, MEMINFO)) 1f else 0f
+        val memInfoAlpha = if (state.areElementsVisible(launcher, LauncherState.MEMINFO)) 1f else 0f
         propertySetter.setFloat(
-            mLauncher.memInfoView,
+            launcher.memInfoView,
             MemInfoView.STATE_CTRL_ALPHA,
             memInfoAlpha,
             LINEAR
