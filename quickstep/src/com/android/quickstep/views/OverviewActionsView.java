@@ -171,7 +171,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         mUseChips = prefs.getBoolean(KEY_RECENTS_CHIPS, true);
         mScreenshot = prefs.getBoolean(KEY_RECENTS_SCREENSHOT, true);
         mClearAll = prefs.getBoolean(KEY_RECENTS_CLEAR_ALL, true);
-        mLens = prefs.getBoolean(KEY_RECENTS_LENS, false);
+        mLens = prefs.getBoolean(KEY_RECENTS_LENS, true);
         prefs.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -290,7 +290,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         } else if (key.equals(KEY_RECENTS_CLEAR_ALL)) {
             mClearAll = prefs.getBoolean(KEY_RECENTS_CLEAR_ALL, true);
         } else if (key.equals(KEY_RECENTS_LENS)) {
-            mLens = prefs.getBoolean(KEY_RECENTS_LENS, false);
+            mLens = prefs.getBoolean(KEY_RECENTS_LENS, true);
         }
         updateVisibilities();
     }
