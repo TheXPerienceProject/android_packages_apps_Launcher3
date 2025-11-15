@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2022 Project Kaleidoscope
+ *               2024-2025 crDroid Android Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +17,34 @@
 
 package com.android.quickstep.views;
 
-import static com.android.launcher3.util.NavigationMode.TWO_BUTTONS;
+import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.NavigationMode.THREE_BUTTONS;
+import static com.android.launcher3.util.NavigationMode.TWO_BUTTONS;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Debug;
 import android.os.Handler;
-import android.os.Looper;
+import android.text.format.Formatter;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.android.launcher3.anim.AlphaUpdateListener;
+import com.android.internal.util.MemInfoReader;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.util.MultiValueAlpha;
 import com.android.launcher3.util.NavigationMode;
 
-import java.lang.Runnable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.Locale;
 
 public class MemInfoView extends TextView {
-
-    // When to show GB instead of MB
-    private static final int UNIT_CONVERT_THRESHOLD = 1024; /* MiB */
-
-    private static final BigDecimal GB2MB = new BigDecimal(1024);
 
     private static final int ALPHA_STATE_CTRL = 0;
     public static final int ALPHA_FS_PROGRESS = 1;
@@ -70,18 +67,25 @@ public class MemInfoView extends TextView {
     private ActivityManager mActivityManager;
 
     private Handler mHandler;
-    private MemInfoWorker mWorker;
 
     private String mMemInfoText;
+
+    private ActivityManager.MemoryInfo memInfo;
+    private MemInfoReader mMemInfoReader;
+
+    private Context mContext;
+
+    private final MemoryWorker mWorker = new MemoryWorker(this);
 
     public MemInfoView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        mContext = context;
         mAlpha = new MultiValueAlpha(this, 2);
         mAlpha.setUpdateVisibility(true);
         mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        mHandler = new Handler(Looper.getMainLooper());
-        mWorker = new MemInfoWorker();
+        memInfo = new ActivityManager.MemoryInfo();
+        mMemInfoReader = new MemInfoReader();
 
         mMemInfoText = context.getResources().getString(R.string.meminfo_text);
         setListener(context);
@@ -99,10 +103,11 @@ public class MemInfoView extends TextView {
 
         super.setVisibility(visibility);
 
-        if (visibility == VISIBLE)
-            mHandler.post(mWorker);
-        else
-            mHandler.removeCallbacks(mWorker);
+        if (visibility == VISIBLE) {
+            startMemoryMonitoring();
+        } else {
+            stopMemoryMonitoring();
+        }
     }
 
     public void setDp(DeviceProfile dp) {
@@ -118,7 +123,7 @@ public class MemInfoView extends TextView {
     }
 
     public void updateVerticalMargin(NavigationMode mode) {
-        LayoutParams lp = (LayoutParams)getLayoutParams();
+        LayoutParams lp = (LayoutParams) getLayoutParams();
         int bottomMargin;
 
         if (!mDp.isTaskbarPresent && ((mode == THREE_BUTTONS) || (mode == TWO_BUTTONS)))
@@ -132,43 +137,92 @@ public class MemInfoView extends TextView {
         lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
     }
 
-    private String unitConvert(long valueMiB, boolean alignToGB) {
-        BigDecimal rawVal = new BigDecimal(valueMiB);
-
-        if (alignToGB)
-            return rawVal.divide(GB2MB, 0, RoundingMode.UP) + " GB";
-
-        if (valueMiB > UNIT_CONVERT_THRESHOLD)
-            return rawVal.divide(GB2MB, 1, RoundingMode.HALF_UP) + " GB";
-        else
-            return rawVal + " MB";
-    }
-
-    private void updateMemInfoText(long availMemMiB, long totalMemMiB) {
-        String text = String.format(mMemInfoText,
-            unitConvert(availMemMiB, false), unitConvert(totalMemMiB, true));
-        setText(text);
-    }
-
     public void setListener(Context context) {
         setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.setClassName("com.android.settings", "com.android.settings.Settings$DevRunningServicesActivity");
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.Settings$DevRunningServicesActivity");
             context.startActivity(intent);
         });
     }
 
-    private class MemInfoWorker implements Runnable {
+    private long getTotalBackgroundMemory() {
+        long totalBackgroundMemory = 0;
+        List<ActivityManager.RunningAppProcessInfo> runningProcesses =
+                mActivityManager.getRunningAppProcesses();
+        if (runningProcesses != null) {
+            int[] pids = new int[runningProcesses.size()];
+            for (int i = 0; i < runningProcesses.size(); i++) {
+                pids[i] = runningProcesses.get(i).pid;
+            }
+            Debug.MemoryInfo[] memoryInfos = mActivityManager.getProcessMemoryInfo(pids);
+            for (int i = 0; i < memoryInfos.length; i++) {
+                ActivityManager.RunningAppProcessInfo info = runningProcesses.get(i);
+                if (info.importance
+                        == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
+                    long memorySize = memoryInfos[i].getTotalPss() * 1024L;
+                    totalBackgroundMemory += memorySize;
+                }
+            }
+        }
+        return totalBackgroundMemory;
+    }
+
+    private void startMemoryMonitoring() {
+        stopMemoryMonitoring();
+        if (mHandler == null) {
+            mHandler = MODEL_EXECUTOR.getHandler();
+        }
+        mHandler.post(mWorker);
+    }
+
+    private void stopMemoryMonitoring() {
+        synchronized (this) {
+            if (mHandler != null) {
+                mHandler.removeCallbacksAndMessages(null);
+                mHandler = null;
+            }
+        }
+    }
+
+    private static class MemoryWorker implements Runnable {
+        private final WeakReference<MemInfoView> viewRef;
+
+        MemoryWorker(MemInfoView view) {
+            viewRef = new WeakReference<>(view);
+        }
+
         @Override
         public void run() {
-            ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-            mActivityManager.getMemoryInfo(memInfo);
-            long availMemMiB = memInfo.availMem / (1024 * 1024);
-            long totalMemMiB = memInfo.totalMem / (1024 * 1024);
-            updateMemInfoText(availMemMiB, totalMemMiB);
+            MemInfoView view = viewRef.get();
+            if (view == null || view.mHandler == null) {
+                return;
+            }
 
-            mHandler.postDelayed(this, 1000);
+            view.mMemInfoReader.readMemInfo();
+            long freeMemory = view.mMemInfoReader.getFreeSize()
+                    + view.mMemInfoReader.getCachedSize()
+                    + view.getTotalBackgroundMemory();
+            view.mActivityManager.getMemoryInfo(view.memInfo);
+
+            String availResult = Formatter.formatShortFileSize(view.mContext, freeMemory);
+            String totalResult = Formatter.formatShortFileSize(view.mContext, view.memInfo.totalMem);
+            String text = String.format(Locale.getDefault(), view.mMemInfoText, availResult,
+                    totalResult);
+
+            // Post to the view's UI thread (pre-relax; later switched to MAIN_EXECUTOR).
+            view.post(() -> view.setText(text));
+
+            if (view.mHandler != null) {
+                view.mHandler.postDelayed(this, 1000);
+            }
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        stopMemoryMonitoring();
+        super.onDetachedFromWindow();
     }
 }
