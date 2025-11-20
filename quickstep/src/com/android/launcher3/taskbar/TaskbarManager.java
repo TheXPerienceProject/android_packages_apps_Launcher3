@@ -38,6 +38,7 @@ import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.quickstep.util.SystemActionConstants.ACTION_SHOW_TASKBAR;
 import static com.android.quickstep.util.SystemActionConstants.SYSTEM_ACTION_ID_TASKBAR;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAVIGATION_BAR_DISABLED;
 
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
@@ -794,6 +795,7 @@ public class TaskbarManager implements DisplayDecorationListener {
                     + " [dp != null (i.e. mUserUnlocked)]=" + (dp != null)
                     + " FLAG_HIDE_NAVBAR_WINDOW=" + ENABLE_TASKBAR_NAVBAR_UNIFICATION
                     + " dp.isTaskbarPresent=" + (dp == null ? "null" : dp.isTaskbarPresent)
+                    + " isTaskbarEnabled=" + isTaskbarEnabled
                     + " displayExists=" + displayExists, displayId);
             if (!isTaskbarEnabled || !isLargeScreenTaskbar || !displayExists) {
                 SystemUiProxy.INSTANCE.get(mBaseContext)
@@ -860,7 +862,12 @@ public class TaskbarManager implements DisplayDecorationListener {
             Log.d(TAG, "SysUI flags changed: " + formatFlagChange(systemUiStateFlags,
                     mSharedState.sysuiStateFlags, QuickStepContract::getSystemUiStateString));
         }
+        long changedFlags = systemUiStateFlags ^ mSharedState.sysuiStateFlags;
         mSharedState.sysuiStateFlags = systemUiStateFlags;
+        if ((changedFlags & SYSUI_STATE_NAVIGATION_BAR_DISABLED) != 0) {
+            recreateTaskbarForDisplay(displayId, 0);
+            return;
+        }
         TaskbarActivityContext taskbar = getTaskbarForDisplay(displayId);
         if (taskbar != null) {
             taskbar.updateSysuiStateFlags(systemUiStateFlags, false /* fromInit */);
@@ -933,7 +940,10 @@ public class TaskbarManager implements DisplayDecorationListener {
     }
 
     private boolean isTaskbarEnabled(DeviceProfile deviceProfile) {
-        return ENABLE_TASKBAR_NAVBAR_UNIFICATION || deviceProfile.isTaskbarPresent;
+        boolean taskbarDisallowedByDisplayPolicy = (mSharedState.sysuiStateFlags
+            & SYSUI_STATE_NAVIGATION_BAR_DISABLED) != 0;
+        return !taskbarDisallowedByDisplayPolicy
+                && (ENABLE_TASKBAR_NAVBAR_UNIFICATION || deviceProfile.isTaskbarPresent);
     }
 
     public void onRotationProposal(int rotation, boolean isValid) {
