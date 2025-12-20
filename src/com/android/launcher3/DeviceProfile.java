@@ -119,6 +119,11 @@ public class DeviceProfile {
     public final InvariantDeviceProfile inv;
     private final BottomSheetProfile mBottomSheetProfile;
     private FolderProfile mFolderProfile;
+
+    // Meminfo in overview
+    public int memInfoMarginGesturePx;
+    public int memInfoMarginThreeButtonPx;
+
     private AllAppsProfile mAllAppsProfile;
     private final OverviewProfile overviewProfile;
 
@@ -190,6 +195,8 @@ public class DeviceProfile {
         mTypeIndex = 0;
         mIsResponsiveGrid = false;
         mDropTargetProfile = new DropTargetProfile(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        memInfoMarginGesturePx = 0;
+        memInfoMarginThreeButtonPx = 0;
         mViewScaleProvider = null;
         mAllAppsProfile = new AllAppsProfile(new Point(0, 0), 0, 0, 0f, 0, 0, 0, 0, 0, 0,
                 new Rect(), 0, 0);
@@ -294,6 +301,11 @@ public class DeviceProfile {
                         /*responsiveWorkspaceCellSpec*/ mResponsiveWorkspaceCellSpec,
                         qsbHeight
                 );
+
+        memInfoMarginGesturePx = res.getDimensionPixelSize(
+                R.dimen.meminfo_bottom_margin_gesture);
+        memInfoMarginThreeButtonPx = res.getDimensionPixelSize(
+                R.dimen.meminfo_bottom_margin_three_button);
 
         int allAppsTopPadding = mDeviceProperties.getInsets().top;
 

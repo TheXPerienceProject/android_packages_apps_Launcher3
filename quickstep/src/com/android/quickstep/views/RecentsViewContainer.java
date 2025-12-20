@@ -108,6 +108,11 @@ public interface RecentsViewContainer extends ActivityContext, RecentsViewContai
     OverviewActionsView getActionsView();
 
     /**
+     * Returns memory info view
+     */
+    MemInfoView getMemInfoView();
+
+    /**
      * @see BaseActivity#addForceInvisibleFlag(int)
      * @param flag {@link BaseActivity.InvisibilityFlags}
      */

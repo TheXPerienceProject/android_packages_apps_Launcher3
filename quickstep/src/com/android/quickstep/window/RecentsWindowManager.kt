@@ -132,6 +132,7 @@ import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
 import com.android.quickstep.util.SurfaceTransactionApplier
 import com.android.quickstep.util.TraceStateLoggerHelper
+import com.android.quickstep.views.MemInfoView
 import com.android.quickstep.views.OverviewActionsView
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
@@ -209,6 +210,7 @@ constructor(
     private var windowView: LauncherRootView? = null
     private var actionsView: OverviewActionsView<*>? = null
     private var scrimView: ScrimView? = null
+    private var memInfoView: MemInfoView? = null
 
     private var callbacks: RecentsAnimationCallbacks? = null
 
@@ -376,6 +378,7 @@ constructor(
             actionsView = it.findViewById(R.id.overview_actions_view)
             val emptyRecentsMessageView =
                 it.findViewById<ViewGroup?>(R.id.empty_recents_message_view)
+            memInfoView = it.findViewById(R.id.meminfo)
             recentsView =
                 (it.findViewById<ViewStub>(R.id.overview_panel)
                         .apply { layoutResource = R.layout.fallback_window_recents_view }
@@ -392,10 +395,15 @@ constructor(
                             ),
                             SurfaceTransactionApplier(rootView),
                             emptyRecentsMessageView,
+                            memInfoView,
                         )
                     }
             actionsView?.apply {
                 updateDimension(getDeviceProfile(), recentsView?.lastComputedTaskSize)
+                updateVerticalMargin(DisplayController.getNavigationMode(this@RecentsWindowManager))
+            }
+            memInfoView?.apply {
+                setDp(getDeviceProfile())
                 updateVerticalMargin(DisplayController.getNavigationMode(this@RecentsWindowManager))
             }
             scrimView = it.findViewById(R.id.scrim_view)
@@ -963,6 +971,10 @@ constructor(
     }
 
     override fun getActionsView() = actionsView
+
+    override fun getMemInfoView(): MemInfoView? {
+        return memInfoView
+    }
 
     override fun addForceInvisibleFlag(flag: Int) {}
 
