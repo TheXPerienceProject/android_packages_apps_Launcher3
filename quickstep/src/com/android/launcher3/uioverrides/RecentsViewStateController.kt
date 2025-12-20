@@ -20,7 +20,9 @@ import com.android.app.animation.Interpolators.AGGRESSIVE_EASE_IN_OUT
 import com.android.app.animation.Interpolators.FINAL_FRAME
 import com.android.app.animation.Interpolators.INSTANT
 import com.android.app.animation.Interpolators.LINEAR
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherState
+import com.android.launcher3.LauncherState.MEMINFO
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.anim.AnimatorListeners.forSuccessCallback
 import com.android.launcher3.anim.PendingAnimation
@@ -303,7 +305,8 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
                 LINEAR,
             )
         }
-        val memInfoAlpha = if (state.areElementsVisible(launcherUiState, MEMINFO)) 1f else 0f
+        val memInfoAlpha = if (state.areElementsVisible(launcherUiState, MEMINFO) &&
+                LauncherPrefs.RECENTS_MEMINFO.get(launcher)) 1f else 0f
         propertySetter.setFloat(
             launcher.getMemInfoView(),
             MemInfoView.STATE_CTRL_ALPHA,

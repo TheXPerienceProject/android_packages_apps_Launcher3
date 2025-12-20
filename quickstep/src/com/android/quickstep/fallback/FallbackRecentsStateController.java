@@ -51,6 +51,7 @@ import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.anim.PropertySetter;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.states.StateAnimationConfig;
+import com.android.launcher3.LauncherPrefs;
 import com.android.quickstep.views.AddDesktopButton;
 import com.android.quickstep.views.ClearAllButton;
 import com.android.quickstep.views.MemInfoView;
@@ -154,7 +155,8 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
         setter.setFloat(mRecentsView, taskViewsFloat.first, isSplitSelectionState(state)
                 ? mRecentsView.getSplitSelectTranslation() : 0, LINEAR);
         setter.setFloat(mRecentsView, taskViewsFloat.second, 0, LINEAR);
-        float memInfoAlpha = state.hasMemInfoView() ? 1 : 0;
+        float memInfoAlpha = (state.hasMemInfoView() &&
+                LauncherPrefs.RECENTS_MEMINFO.get(mRecentsViewContainer.asContext())) ? 1 : 0;
         setter.setFloat(mRecentsViewContainer.getMemInfoView(), MemInfoView.STATE_CTRL_ALPHA,
                 memInfoAlpha, LINEAR);
     }
