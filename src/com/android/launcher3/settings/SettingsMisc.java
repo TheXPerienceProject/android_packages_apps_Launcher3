@@ -262,7 +262,6 @@ public class SettingsMisc extends CollapsingToolbarBaseActivity
                 return BlurUtils.supportsBlursOnWindows();
             }
 
-            DisplayController.Info info = DisplayController.INSTANCE.get(getContext()).getInfo();
             switch (preference.getKey()) {
                 case ALLOW_ROTATION_PREFERENCE_KEY:
                     DisplayController.Info info =
