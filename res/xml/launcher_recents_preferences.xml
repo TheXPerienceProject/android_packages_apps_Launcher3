@@ -25,14 +25,14 @@
         <SwitchPreferenceCompat
             android:key="pref_recents_meminfo"
             android:title="@string/recents_meminfo_title"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:persistent="true"
             launcher:iconSpaceReserved="false" />
 
         <SwitchPreferenceCompat
             android:key="pref_recents_meminfo_zram"
             android:title="@string/recents_meminfo_zram_title"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:persistent="true"
             android:dependency="pref_recents_meminfo"
             launcher:iconSpaceReserved="false" />
@@ -51,7 +51,7 @@
         <SwitchPreferenceCompat
             android:key="pref_recents_lens"
             android:title="@string/recents_lens_title"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:persistent="true"
             launcher:iconSpaceReserved="false" />
 
