@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 The XPerience Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Application name -->
+    <!-- Folder titles -->
+    <!-- Lock -->
+    <string name="action_lock">Bloquear/Desbloquear app</string>
+    <string name="unlock_app">Aplicación desbloqueada en recientes</string>
+    <string name="lock_app">Aplicación bloqueada en recientes</string>
+    <!-- General -->
+    <string name="settings_title">Configuración de página de inicio</string>
+    <!-- Categories -->
+    <string name="home_category_title">Pantalla de inicio</string>
+    <string name="home_category_summary">Configura el panel de Google Now y más</string>
+    <string name="icons_category_title">Iconos</string>
+    <string name="icons_category_summary">Configurar tamaño de los iconos y más</string>
+    <string name="app_drawer_category_title">Cajón de aplicaciones</string>
+    <string name="app_drawer_category_summary">Personaliza tu cajón de aplicaciones</string>
+    <string name="recents_category_title">Recientes</string>
+    <string name="recents_category_summary">Personaliza tu pantalla de recientes</string>
+    <string name="misc_category_title">Varios</string>
+    <string name="misc_category_summary">Otras opciones</string>
+    <string name="general_category_title">General</string>
+    <string name="interface_category_title">Interfaz</string>
+    <string name="search_bar_category_title">Barra de búsqueda</string>
+    <string name="actions_category_title">Acciones rápidas</string>
+    <!-- Developer options -->
+    <string name="dev_options_title">Opciones de desarrollador</string>
+    <string name="dev_options_summary">Habilite algunas funciones ocultas bajo su propio riesgo</string>
+    <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
+    <string name="title_show_google_app">Desliza para acceder al Feed de Google</string>
+    <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_left">Cuando deslizas a la derecha desde la pantalla principal</string>
+    <!-- Settings message explaining when the -1 screen is available on an RTL device. [CHAR LIMIT=100] -->
+    <string name="msg_minus_one_on_right">Cuando deslizas a la izquierda desde la pantalla principal</string>
+    <!-- Suggestions -->
+    <string name="suggestion_pref_screen_title">Sugerencias</string>
+    <string name="suggestion_pref_screen_desc">Para todas las aplicaciones &amp; Sugerencias en la pantalla de inicio</string>
+    <!-- Restart launcher -->
+    <string name="pref_restart_title">Reiniciar</string>
+    <string name="pref_restart_summary">Reinicie el lanzador manualmente para aplicar cualquier configuración pendiente</string>
+    <string name="restarting_launcher">Reiniciando lanzador...</string>
+    <string name="restarting_launcher_changes">Reiniciando el lanzador para aplicar los cambios...</string>
+    <string name="updating_launcher_components">Reiniciando el lanzador para actualizar sus componentes...</string>
+    <!-- DT2S -->
+    <string name="pref_sleep_gesture_title">Doble toque para apagar pantalla</string>
+    <string name="pref_sleep_gesture_summary">Doble toque en un espacio vacío para apagar la pantalla</string>
+    <string name="pref_sleep_gesture_haptic_title">Vibrar al tocar dos veces para suspender</string>
+    <string name="pref_sleep_gesture_haptic_summary">Proporciona retroalimentación háptica en el gesto de doble toque para suspender</string>
+    <!-- Edit workspace -->
+    <string name="settings_lock_layout_title">Bloquear diseño</string>
+    <string name="settings_lock_layout_summary_on">Los iconos y widgets no se pueden añadir, eliminar y mover en la pantalla principal</string>
+    <string name="settings_lock_layout_summary_off">Los iconos y widgets se pueden añadir, eliminar y mover en la pantalla principal</string>
+    <string name="settings_edit_widgets_error">No es posible añadir widgets en la pantalla de inicio</string>
+    <!-- Hide labels -->
+    <string name="desktop_show_labels">Etiquetas de iconos en el escritorio</string>
+    <string name="drawer_show_labels">Etiquetas de iconos en el cajón</string>
+    <!-- All apps themed icons -->
+    <string name="pref_themed_icons_title">Usar iconos temáticos en el cajón</string>
+    <string name="pref_themed_icons_summary">Seguir iconos tematizados usados en la pantalla de inicio</string>
+    <!-- Trust apps -->
+    <string name="trust_apps_manager_name">Aplicaciones ocultas &amp; protegidas</string>
+    <string name="trust_apps_auth_manager">Desbloquea para gestionar las aplicaciones ocultas y protegidas</string>
+    <string name="trust_apps_auth_open_app">Autenticar para abrir %1$s</string>
+    <string name="trust_apps_loading">Cargando\u2026</string>
+    <string name="trust_apps_no_lock_error">Por favor, configura un bloqueo de pantalla seguro para restringir el acceso a las aplicaciones</string>
+    <string name="trust_apps_help">Ayuda</string>
+    <string name="trust_apps_info_hidden">Las aplicaciones ocultas y sus widgets están ocultos del launcher</string>
+    <string name="trust_apps_info_protected">Las aplicaciones protegidas requieren autenticación para ser abiertas desde el launcher</string>
+    <!-- Icon size -->
+    <string name="icon_size_title">Tamaño de icono</string>
+    <!-- Font size -->
+    <string name="font_size_title">Tamaño de la fuente</string>
+    <!-- Pause apps shortcut -->
+    <string name="pause">Pausa</string>
+    <string name="pause_apps_dialog_title">¿Pausar %1$s?</string>
+    <string name="pause_apps_dialog_message">Las notificaciones de %1$s se pausarán</string>
+    <string name="paused_apps_dialog_title">Aplicación pausada</string>
+    <string name="paused_apps_dialog_message">%1$s fue pausada directamente desde el launcher</string>
+    <string name="paused_apps_drop_target_label">Pausar aplicación</string>
+    <!-- App label -->
+    <string name="icon_two_lines_title">Use dos líneas para la etiqueta de la aplicación</string>
+    <!-- Kill App recents action shortcut -->
+    <string name="recent_task_option_kill_app">Terminar</string>
+    <string name="recents_app_killed">Aplicación finalizada</string>
+    <!-- Row Height -->
+    <string name="row_height_title">Altura de fila</string>
+    <!-- Hotseat Background -->
+    <string name="hotseat_bg_title">Fondo del dock</string>
+    <string name="hotseat_bg_summary">Añadir fondo traslúcido al dock de aplicaciones</string>
+    <!-- Background opacity -->
+    <string name="background_opacity_title">Opacidad del fondo</string>
+    <!-- Stroke -->
+    <string name="stroke_width_title">Stroke</string>
+    <!-- Hotseat searchbar -->
+    <string name="label_search">Búsqueda</string>
+    <string name="label_lens">Google lens</string>
+    <string name="label_voice_search">Búsqueda por voz</string>
+    <string name="label_gemini_search">Modo IA</string>
+    <string name="dock_music_search_title">Búsqueda de música</string>
+    <string name="dock_music_search_summary">Inicie la búsqueda de música al presionar el ícono del micrófono</string>
+    <string name="dock_search_title">Barra de búsqueda de Google</string>
+    <string name="dock_search_summary">Mostrar la barra de búsqueda en la parte inferior</string>
+    <string name="dock_theme_title">Iconos tematizados</string>
+    <string name="dock_theme_summary">Usar iconos temáticos para la barra de búsqueda</string>
+    <string name="search_radius_title">Radio de las esquinas</string>
+    <!-- App drawer searchbar -->
+    <string name="drawer_search_title">Barra de búsqueda de aplicaciones</string>
+    <string name="drawer_search_summary">Barra de búsqueda encima del cajón de aplicaciones</string>
+    <!-- Wallpaper scrolling -->
+    <string name="allow_wallpaper_scrolling">Desplazamiento de fondo de pantalla</string>
+    <string name="allow_wallpaper_scrolling_summary">Efecto de desplazamiento del fondo de pantalla para múltiples pantallas</string>
+    <!-- Wallpaper zooming -->
+    <string name="allow_wallpaper_zooming">Zoom del fondo de pantalla</string>
+    <string name="allow_wallpaper_zooming_summary">Acercar o alejar el fondo de pantalla al usar el cajón o aplicaciones recientes</string>
+    <!-- Homescreen Statusbar -->
+    <string name="show_statusbar_title">Barra de Estado</string>
+    <!-- Top shadow -->
+    <string name="show_top_shadow">Sombra superior</string>
+    <!-- Memory info -->
+    <string name="meminfo_text">%1$s disponible | %2$s</string>
+    <string name="recents_meminfo_title">Información de memoria</string>
+    <string name="recents_meminfo_zram_title">Información de ZRAM</string>
+    <!-- Recents icons -->
+    <string name="recents_screenshot_title">Captura de Pantalla</string>
+    <string name="recents_clear_all_title">Limpiar todo</string>
+    <string name="recents_lens_title">Lens</string>
+    <!-- Parallax -->
+    <string name="short_parallax_title">Permitir parallax corto</string>
+    <string name="short_parallax_summary">Activar el desplazamiento del fondo de pantalla completo en un número menor de páginas en lugar de recortar el fondo de pantalla</string>
+    <string name="single_page_center_title">Centrar en página única</string>
+    <string name="single_page_center_summary">Centrar fondo de pantalla si hay una sola página</string>
+    <!-- App drawer scrollbar -->
+    <string name="drawer_scrollbar_title">Barra de desplazamiento</string>
+    <string name="drawer_scrollbar_summary">Barra de desplazamiento en el lateral del cajón de aplicaciones</string>
+    <!-- Dark Status Bar -->
+    <string name="perf_dark_status_bar_title">Barra de estado oscura</string>
+    <string name="perf_dark_status_bar_summary">Usar siempre la barra de estado oscura en la pantalla de inicio</string>
+    <!-- Background blur -->
+    <string name="background_blur_title">Profundidad de desenfoque de fondo</string>
+    <string name="background_blur_summary">Establecer nivel de profundidad de desenfoque para recientes y cajón de aplicaciones</string>
+    <!-- Open keyboard -->
+    <string name="drawer_open_keyboard_title">Desliza para iniciar la búsqueda</string>
+    <string name="drawer_open_keyboard_summary">Abrir el teclado cuando el cajón de aplicaciones esté visible</string>
+    <!-- AppInfo -->
+    <string name="app_info_title">Información de la aplicación</string>
+    <string name="placeholder_string">Cargando...</string>
+    <!-- Used for preference height loading. -->
+    <string name="app_info_source">Origen</string>
+    <string name="app_info_source_system">Sistema</string>
+    <string name="app_info_last_update">Última actualización</string>
+    <string name="app_info_version">Versión</string>
+    <string name="app_info_more">Más</string>
+    <string name="app_info_icon_pack">Paquete de iconos</string>
+    <string name="app_info_icon_pack_none">Ninguno</string>
+    <string name="pref_tablet_overview_style_title">Usar estilo de visión general de tablet (necesario reiniciar)</string>
+    <string name="pref_tablet_overview_style_summary_on">Usando estilo tablet para descripciones/recientes</string>
+    <string name="pref_tablet_overview_style_summary_off">Usando el estilo del teléfono para resumen/recientes</string>
+</resources>
