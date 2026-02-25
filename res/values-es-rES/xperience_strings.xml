@@ -58,6 +58,8 @@
     <!-- DT2S -->
     <string name="pref_sleep_gesture_title">Doble toque para apagar pantalla</string>
     <string name="pref_sleep_gesture_summary">Doble toque en un espacio vacío para apagar la pantalla</string>
+    <string name="pref_sleep_gesture_haptic_title">Vibrar al tocar dos veces para suspender</string>
+    <string name="pref_sleep_gesture_haptic_summary">Proporciona retroalimentación háptica en el gesto de doble toque para suspender</string>
     <!-- Edit workspace -->
     <string name="settings_lock_layout_title">Bloquear diseño</string>
     <string name="settings_lock_layout_summary_on">Los iconos y widgets no se pueden añadir, eliminar y mover en la pantalla principal</string>
@@ -67,6 +69,7 @@
     <string name="desktop_show_labels">Etiquetas de iconos en el escritorio</string>
     <string name="drawer_show_labels">Etiquetas de iconos en el cajón</string>
     <!-- All apps themed icons -->
+    <string name="pref_themed_icons_title">Usar iconos temáticos en el cajón</string>
     <string name="pref_themed_icons_summary">Seguir iconos tematizados usados en la pantalla de inicio</string>
     <!-- Trust apps -->
     <string name="trust_apps_manager_name">Aplicaciones ocultas &amp; protegidas</string>
@@ -106,6 +109,7 @@
     <string name="label_search">Búsqueda</string>
     <string name="label_lens">Google lens</string>
     <string name="label_voice_search">Búsqueda por voz</string>
+    <string name="label_gemini_search">Modo IA</string>
     <string name="dock_music_search_title">Búsqueda de música</string>
     <string name="dock_music_search_summary">Inicie la búsqueda de música al presionar el ícono del micrófono</string>
     <string name="dock_search_title">Barra de búsqueda de Google</string>
@@ -129,6 +133,7 @@
     <!-- Memory info -->
     <string name="meminfo_text">%1$s disponible | %2$s</string>
     <string name="recents_meminfo_title">Información de memoria</string>
+    <string name="recents_meminfo_zram_title">Información de ZRAM</string>
     <!-- Recents icons -->
     <string name="recents_screenshot_title">Captura de Pantalla</string>
     <string name="recents_clear_all_title">Limpiar todo</string>
@@ -139,16 +144,29 @@
     <string name="single_page_center_title">Centrar en página única</string>
     <string name="single_page_center_summary">Centrar fondo de pantalla si hay una sola página</string>
     <!-- App drawer scrollbar -->
+    <string name="drawer_scrollbar_title">Barra de desplazamiento</string>
+    <string name="drawer_scrollbar_summary">Barra de desplazamiento en el lateral del cajón de aplicaciones</string>
     <!-- Dark Status Bar -->
+    <string name="perf_dark_status_bar_title">Barra de estado oscura</string>
+    <string name="perf_dark_status_bar_summary">Usar siempre la barra de estado oscura en la pantalla de inicio</string>
     <!-- Background blur -->
     <string name="background_blur_title">Profundidad de desenfoque de fondo</string>
     <string name="background_blur_summary">Establecer nivel de profundidad de desenfoque para recientes y cajón de aplicaciones</string>
     <!-- Open keyboard -->
+    <string name="drawer_open_keyboard_title">Desliza para iniciar la búsqueda</string>
+    <string name="drawer_open_keyboard_summary">Abrir el teclado cuando el cajón de aplicaciones esté visible</string>
     <!-- AppInfo -->
+    <string name="app_info_title">Información de la aplicación</string>
+    <string name="placeholder_string">Cargando...</string>
     <!-- Used for preference height loading. -->
     <string name="app_info_source">Origen</string>
     <string name="app_info_source_system">Sistema</string>
     <string name="app_info_last_update">Última actualización</string>
     <string name="app_info_version">Versión</string>
     <string name="app_info_more">Más</string>
+    <string name="app_info_icon_pack">Paquete de iconos</string>
+    <string name="app_info_icon_pack_none">Ninguno</string>
+    <string name="pref_tablet_overview_style_title">Usar estilo de visión general de tablet (necesario reiniciar)</string>
+    <string name="pref_tablet_overview_style_summary_on">Usando estilo tablet para descripciones/recientes</string>
+    <string name="pref_tablet_overview_style_summary_off">Usando el estilo del teléfono para resumen/recientes</string>
 </resources>
