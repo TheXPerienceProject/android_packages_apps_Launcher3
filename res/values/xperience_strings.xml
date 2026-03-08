@@ -210,4 +210,12 @@
     <string name="pref_tablet_overview_style_title">Use tablet overview style(Need restart)</string>
     <string name="pref_tablet_overview_style_summary_on">Using tablet style for overview/recents</string>
     <string name="pref_tablet_overview_style_summary_off">Using phone style for overview/recents</string>
+
+    <!-- Recents style -->
+    <string name="recents_style_title">Recents layout style</string>
+    <string name="recents_style_stock">Stock</string>
+    <string name="recents_style_staple">Kami Style</string>
+    <string name="recents_style_ios">iOS Style</string>
+    <string name="recents_style_oxygen">OxygenOS Style</string>
+
 </resources>
