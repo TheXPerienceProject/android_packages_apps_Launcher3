@@ -110,21 +110,34 @@ public class InfoBottomSheet extends WidgetsBottomSheet {
         }
 
         public void loadForApp(ItemInfo itemInfo) {
+            if (itemInfo == null || mContext == null) return;
+
             mComponent = itemInfo.getTargetComponent();
             mItemInfo = itemInfo;
             mKey = new ComponentKey(mComponent, itemInfo.user);
             MetadataExtractor extractor = new MetadataExtractor(mContext, mComponent);
 
-            Preference iconPack = findPreference(KEY_ICON_PACK);
-            iconPack.setOnPreferenceChangeListener(this);
-            iconPack.setSummary(R.string.app_info_icon_pack_none);
-            findPreference(KEY_SOURCE).setSummary(extractor.getSource());
-            findPreference(KEY_LAST_UPDATE).setSummary(extractor.getLastUpdate());
-            findPreference(KEY_VERSION).setSummary(mContext.getString(
+            setupPref(KEY_ICON_PACK, p -> {
+                p.setOnPreferenceChangeListener(this);
+                p.setSummary(R.string.app_info_icon_pack_none);
+            });
+
+            setupPref(KEY_SOURCE, p -> p.setSummary(extractor.getSource()));
+            setupPref(KEY_LAST_UPDATE, p -> p.setSummary(extractor.getLastUpdate()));
+
+            setupPref(KEY_VERSION, p -> p.setSummary(mContext.getString(
                     R.string.app_info_version_value,
                     extractor.getVersionName(),
-                    extractor.getVersionCode()));
-            findPreference(KEY_MORE).setOnPreferenceClickListener(this);
+                    extractor.getVersionCode())));
+
+            setupPref(KEY_MORE, p -> p.setOnPreferenceClickListener(this));
+        }
+
+        private void setupPref(String key, java.util.function.Consumer<Preference> action) {
+            Preference pref = findPreference(key);
+            if (pref != null) {
+                action.accept(pref);
+            }
         }
 
         @Override
