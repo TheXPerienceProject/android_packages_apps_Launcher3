@@ -151,4 +151,5 @@
     <string name="app_info_last_update">Legutóbbi frissítés</string>
     <string name="app_info_version">Verzió</string>
     <string name="app_info_more">Egyebek</string>
+    <!-- Recents style -->
 </resources>

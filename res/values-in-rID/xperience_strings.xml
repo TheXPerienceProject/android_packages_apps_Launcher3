@@ -25,6 +25,8 @@
     <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
     <!-- Settings message explaining when the -1 screen is available on an RTL device. [CHAR LIMIT=100] -->
     <!-- Suggestions -->
+    <string name="suggestion_pref_screen_title">Saran</string>
+    <string name="suggestion_pref_screen_desc">Untuk semua aplikasi &amp; saran layar beranda</string>
     <!-- Restart launcher -->
     <!-- DT2S -->
     <!-- Edit workspace -->
@@ -49,6 +51,7 @@
     <string name="label_lens">Google Lens</string>
     <string name="label_voice_search">Pencarian suara</string>
     <string name="dock_search_title">Bilah pencarian Google</string>
+    <string name="dock_search_summary">Bilah pencarian di dok bawah</string>
     <string name="dock_theme_summary">Gunakan ikon bertema untuk bilah pencarian</string>
     <!-- App drawer searchbar -->
     <!-- Wallpaper scrolling -->
@@ -56,12 +59,20 @@
     <!-- Homescreen Statusbar -->
     <!-- Top shadow -->
     <!-- Memory info -->
+    <string name="meminfo_text">%1$s Tersedia | %2$s Total</string>
+    <string name="recents_meminfo_title">Info memori</string>
     <!-- Recents icons -->
+    <string name="recents_screenshot_title">Tangkapan layar</string>
+    <string name="recents_clear_all_title">Hapus semua</string>
+    <string name="recents_lens_title">Lens</string>
     <!-- Parallax -->
     <!-- App drawer scrollbar -->
     <!-- Dark Status Bar -->
     <!-- Background blur -->
+    <string name="background_blur_title">Kedalaman blur latar belakang</string>
+    <string name="background_blur_summary">Setel tingkat kedalaman blur untuk baru-baru ini dan laci aplikasi</string>
     <!-- Open keyboard -->
     <!-- AppInfo -->
     <!-- Used for preference height loading. -->
+    <!-- Recents style -->
 </resources>
