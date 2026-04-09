@@ -170,4 +170,9 @@
     <string name="pref_tablet_overview_style_summary_on">Usando estilo tablet para descripciones/recientes</string>
     <string name="pref_tablet_overview_style_summary_off">Usando el estilo del teléfono para resumen/recientes</string>
     <!-- Recents style -->
+    <string name="recents_style_title">Estilo de diseño de recientes</string>
+    <string name="recents_style_stock">Stock</string>
+    <string name="recents_style_staple">Estilo de Kami</string>
+    <string name="recents_style_ios">Estilo iOS</string>
+    <string name="recents_style_oxygen">Estilo OxygenOS</string>
 </resources>
