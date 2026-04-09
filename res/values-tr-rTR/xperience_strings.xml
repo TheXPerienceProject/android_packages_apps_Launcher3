@@ -144,4 +144,5 @@
     <string name="app_info_last_update">Son Güncelleme</string>
     <string name="app_info_version">Sürüm</string>
     <string name="app_info_more">Daha fazla</string>
+    <!-- Recents style -->
 </resources>
