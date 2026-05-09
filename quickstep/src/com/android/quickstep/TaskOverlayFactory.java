@@ -236,6 +236,12 @@ public class TaskOverlayFactory {
                     .saveAppPair(taskView);
         }
 
+        private void clearAllTasks() {
+            RecentsView recentsView = mTaskContainer.getTaskView().getRecentsView();
+            if (recentsView == null) return;
+            recentsView.dismissAllTasks();
+        }
+
         /**
          * Called when the overlay is no longer used.
          */
@@ -389,16 +395,24 @@ public class TaskOverlayFactory {
             }
 
             @SuppressLint("NewApi")
+            @Override
             public void onScreenshot() {
                 endLiveTileMode(() -> saveScreenshot(mTask));
             }
 
+            @Override
             public void onSplit() {
                 endLiveTileMode(TaskOverlay.this::enterSplitSelect);
             }
 
+            @Override
             public void onSaveAppPair() {
                 endLiveTileMode(TaskOverlay.this::saveAppPair);
+            }
+
+            @Override
+            public void onClearAllTasksRequested() {
+                endLiveTileMode(TaskOverlay.this::clearAllTasks);
             }
         }
     }
@@ -416,5 +430,8 @@ public class TaskOverlayFactory {
 
         /** User wants to save an app pair with current group of apps. */
         void onSaveAppPair();
+
+        /** User wants to dismiss all tasks in overview. */
+        void onClearAllTasksRequested();
     }
 }
