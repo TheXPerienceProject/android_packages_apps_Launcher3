@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2026 The XPerience Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Luna Creciente (Nightfall) centrada -->
+    <path
+        android:fillColor="#8A2BE2"
+        android:pathData="M54,34 C42.95,34 34,42.95 34,54 C34,65.05 42.95,74 54,74 C62.15,74 69.05,69.1 72.05,62.1 C63.95,63.55 56.1,57.25 56.1,48.5 C56.1,42.25 59.85,36.85 65.35,34.45 C61.85,34.15 58.05,34 54,34 Z" />
+
+    <!-- Detalle de estrella pequeña -->
+    <path
+        android:fillColor="#D8B4FE"
+        android:pathData="M70,38 L71.2,41.8 L75,43 L71.2,44.2 L70,48 L68.8,44.2 L65,43 L68.8,41.8 Z" />
+</vector>
