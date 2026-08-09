@@ -217,7 +217,7 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
         switch (buttonType) {
             case BUTTON_HOME:
                 logEvent(LAUNCHER_TASKBAR_HOME_BUTTON_LONGPRESS);
-                mSystemUiProxy.onLongPressKeyEvent(KeyEvent.KEYCODE_HOME, mDisplayId);
+                onLongPressHome(view);
                 playHapticAndSound = true;
                 break;
             case BUTTON_A11Y:
@@ -229,16 +229,12 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
                 logEvent(LAUNCHER_TASKBAR_BACK_BUTTON_LONGPRESS);
                 if (backRecentsLongpress(buttonType)) {
                     playHapticAndSound = true;
-                } else {
-                    mSystemUiProxy.onLongPressKeyEvent(KeyEvent.KEYCODE_BACK, mDisplayId);
                 }
                 break;
             case BUTTON_RECENTS:
                 logEvent(LAUNCHER_TASKBAR_OVERVIEW_BUTTON_LONGPRESS);
                 if (backRecentsLongpress(buttonType)) {
                     playHapticAndSound = true;
-                } else {
-                    mSystemUiProxy.onLongPressKeyEvent(KeyEvent.KEYCODE_APP_SWITCH, mDisplayId);
                 }
                 break;
             case BUTTON_IME_SWITCH:
