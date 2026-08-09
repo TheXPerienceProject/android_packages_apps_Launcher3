@@ -23,18 +23,28 @@
     <string name="pref_themed_icons_title">Usar iconos temáticos en el cajón</string>
     <string name="pref_themed_icons_summary">Seguir iconos tematizados usados en la pantalla de inicio</string>
     <!-- Additional shape options in customization picker -->
+    <string name="pebble_shape_title">Pebble</string>
+    <string name="vessel_shape_title">Vessel</string>
+    <string name="pure_square_shape_title">Cuadrado puro</string>
+    <string name="squircle_shape_title">Squircle</string>
+    <string name="tapered_rect_shape_title">Tapered rect</string>
+    <string name="teardrop_shape_title">Lágrima</string>
+    <string name="rounded_rect_shape_title">Rounded rect</string>
     <!-- App suggestions -->
     <string name="pref_suggestions_title">Sugerencias</string>
+    <string name="pref_suggestions_summary">Para todas las aplicaciones &amp; Sugerencias en la pantalla de inicio</string>
     <!-- Hide labels -->
     <string name="desktop_show_labels">Mostrar etiquetas de iconos en el escritorio</string>
     <string name="drawer_show_labels">Mostrar etiquetas en los iconos del cajón de aplicaciones</string>
     <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
+    <string name="title_show_google_app">Mostrar Google app</string>
     <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
     <string name="msg_minus_one_on_left">Cuando deslizas a la derecha desde la pantalla principal</string>
     <!-- Settings message explaining when the -1 screen is available on an RTL device. [CHAR LIMIT=100] -->
     <string name="msg_minus_one_on_right">Cuando deslizas a la izquierda desde la pantalla principal</string>
     <!-- Sleep gesture -->
     <string name="pref_sleep_gesture_title">Doble toque para apagar pantalla</string>
+    <string name="pref_sleep_gesture_summary">Doble toque en un espacio vacío de la pantalla de inicio para apagar pantalla</string>
     <!-- Trust apps -->
     <string name="trust_apps_manager_name">Aplicaciones ocultas &amp; protegidas</string>
     <string name="trust_apps_auth_manager">Desbloquea para gestionar las aplicaciones ocultas y protegidas</string>
