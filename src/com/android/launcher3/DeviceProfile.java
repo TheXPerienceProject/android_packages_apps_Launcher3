@@ -177,7 +177,7 @@ public class DeviceProfile {
         );
         mHotseatProfile = new HotseatProfile(false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, false);
-        mIsHotseatQsbEnabled = false;
+        mIsHotseatQsbEnabled = true;
         mTaskbarProfile = new TaskbarProfile(0, 0, 0, 0, 0, false, false, false);
         mFolderProfile = new FolderProfile(0, 0, 0, 0, 0, new Point(), 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0);
