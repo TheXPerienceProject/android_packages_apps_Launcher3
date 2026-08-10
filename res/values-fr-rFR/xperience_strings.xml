@@ -26,6 +26,7 @@
     <!-- Hide labels -->
     <string name="desktop_show_labels">Afficher le libellé des icônes sur le bureau</string>
     <string name="drawer_show_labels">Afficher les libellés des icônes dans le tiroir d\'applications</string>
+    <!-- Search bar -->
     <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
     <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
     <!-- Settings message explaining when the -1 screen is available on an RTL device. [CHAR LIMIT=100] -->
