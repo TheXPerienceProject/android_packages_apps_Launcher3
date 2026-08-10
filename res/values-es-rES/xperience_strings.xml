@@ -37,6 +37,8 @@
     <string name="desktop_show_labels">Mostrar etiquetas de iconos en el escritorio</string>
     <string name="drawer_show_labels">Mostrar etiquetas en los iconos del cajón de aplicaciones</string>
     <!-- Search bar -->
+    <string name="pref_show_hotseat_qsb_title">Mostrar barra de búsqueda</string>
+    <string name="pref_show_hotseat_qsb_summary">En la parte inferior de tu pantalla de inicio</string>
     <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
     <string name="title_show_google_app">Mostrar Google app</string>
     <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
