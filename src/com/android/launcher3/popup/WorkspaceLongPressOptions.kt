@@ -18,7 +18,7 @@ package com.android.launcher3.popup
 
 import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
+import android.content.pm.PackageManager
 import android.view.View
 import android.widget.Toast
 import com.android.launcher3.BuildConfig
@@ -184,23 +184,50 @@ object WorkspaceLongPressOptions {
      */
     private fun startWallpaperPicker(ac: ActivityContext, v: View) {
         val launcher = ac as? Launcher ?: return
+
         if (!Utilities.isWallpaperAllowed(launcher)) {
             val message =
-                if (launcher.stringCache != null) launcher.stringCache!!.disabledByAdminMessage
-                else launcher.getString(R.string.msg_disabled_by_admin)
+                if (launcher.stringCache != null) {
+                    launcher.stringCache!!.disabledByAdminMessage
+                } else {
+                    launcher.getString(R.string.msg_disabled_by_admin)
+                }
+
             Toast.makeText(launcher, message, Toast.LENGTH_SHORT).show()
             return
         }
+
         val intent =
             Intent(Intent.ACTION_SET_WALLPAPER)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                .putExtra(EXTRA_WALLPAPER_OFFSET, launcher.workspace.wallpaperOffsetForCenterPage)
+                .putExtra(
+                    EXTRA_WALLPAPER_OFFSET,
+                    launcher.workspace.wallpaperOffsetForCenterPage,
+                )
                 .putExtra(EXTRA_WALLPAPER_LAUNCH_SOURCE, "app_launched_launcher")
                 .putExtra(EXTRA_WALLPAPER_FLAVOR, "focus_wallpaper")
-        val pickerPackage = launcher.getString(R.string.wallpaper_picker_package)
-        if (!TextUtils.isEmpty(pickerPackage)) {
+
+        val configuredPackage = launcher.getString(R.string.wallpaper_picker_package)
+
+        val pickerPackage =
+            listOf(
+                    configuredPackage,
+                    GOOGLE_WALLPAPER_PICKER_PACKAGE,
+                    AOSP_WALLPAPER_PICKER_PACKAGE,
+                )
+                .filter { it.isNotBlank() }
+                .distinct()
+                .firstOrNull { packageName ->
+                    launcher.packageManager.resolveActivity(
+                        Intent(Intent.ACTION_SET_WALLPAPER).setPackage(packageName),
+                        PackageManager.MATCH_DEFAULT_ONLY,
+                    ) != null
+                }
+
+        if (pickerPackage != null) {
             intent.setPackage(pickerPackage)
         }
+
         launcher.startActivitySafely(
             v,
             intent,
@@ -259,4 +286,7 @@ object WorkspaceLongPressOptions {
     private const val EXTRA_WALLPAPER_FLAVOR = "com.android.launcher3.WALLPAPER_FLAVOR"
     // An intent extra to indicate the launch source by launcher.
     private const val EXTRA_WALLPAPER_LAUNCH_SOURCE = "com.android.wallpaper.LAUNCH_SOURCE"
+
+    private const val GOOGLE_WALLPAPER_PICKER_PACKAGE = "com.google.android.apps.wallpaper"
+    private const val AOSP_WALLPAPER_PICKER_PACKAGE = "com.android.wallpaper"
 }
