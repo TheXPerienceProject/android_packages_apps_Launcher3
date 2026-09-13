@@ -31,6 +31,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.Person;
 import android.app.WallpaperManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
