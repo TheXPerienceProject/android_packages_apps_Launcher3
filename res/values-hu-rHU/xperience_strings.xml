@@ -44,4 +44,25 @@
     <string name="trust_apps_help">Súgó</string>
     <string name="trust_apps_info_hidden">A rejtett alkalmazások és kisalkalmazásaik az alkalmazásfiókban sem láthatóak</string>
     <string name="trust_apps_info_protected">Egy védett alkalmazás megnyitása a launcherből hitelesítést igényel</string>
+    <!-- LMOFreeform -->
+    <!-- Recents -->
+    <string name="action_lens">Google Lens</string>
+    <!-- Memory info -->
+    <string name="meminfo_text">%2$s memóriából %1$s érhető el</string>
+    <string name="recents_meminfo_title">Memória-információ</string>
+    <!-- Categories -->
+    <string name="home_category_title">Kezdőképernyő</string>
+    <string name="icons_category_title">Ikonok</string>
+    <string name="icons_category_summary">Ikonméret-beállítás és egyebek</string>
+    <string name="app_drawer_category_title">Alkalmazásfiók</string>
+    <string name="app_drawer_category_summary">Testreszabhatja az Alkalmazásfiókját</string>
+    <string name="recents_category_title">Előzmények</string>
+    <string name="recents_category_summary">Az áttekintési nézet újraformálása</string>
+    <string name="misc_category_title">Különlegességek</string>
+    <string name="misc_category_summary">Egyéb lehetőségek</string>
+    <string name="general_category_title">Általános</string>
+    <string name="interface_category_title">Kezelőfelület</string>
+    <!-- Developer options -->
+    <string name="dev_options_title">Fejlesztői beállítások</string>
+    <string name="dev_options_summary">Saját felelősségére rejtett beállításokat engedélyezhet</string>
 </resources>
