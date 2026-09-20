@@ -370,7 +370,7 @@ public class DeviceProfile {
                     mResponsiveWorkspaceCellSpec);
         }
 
-        memInfoHeight = LauncherPrefs.RECENTS_MEMINFO.get(context) ? res.getDimensionPixelSize(
+        memInfoHeight = LauncherPrefs.isRecentsMemInfoEnabled(context) ? res.getDimensionPixelSize(
                 R.dimen.meminfo_claimed_height) : 0;
 
         mWorkspaceProfile = WorkspaceProfile.Factory.createWorkspaceProfile(

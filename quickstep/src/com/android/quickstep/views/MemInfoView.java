@@ -102,7 +102,7 @@ public class MemInfoView extends TextView implements Insettable {
     @Override
     public void setVisibility(int visibility) {
         if (visibility == VISIBLE) {
-            boolean showMeminfo = LauncherPrefs.RECENTS_MEMINFO.get(getContext());
+            boolean showMeminfo = LauncherPrefs.isRecentsMemInfoEnabled(getContext());
             if (!showMeminfo) visibility = GONE;
         }
 

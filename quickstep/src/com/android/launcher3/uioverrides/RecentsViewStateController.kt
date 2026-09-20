@@ -306,7 +306,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             )
         }
         val memInfoAlpha = if (state.areElementsVisible(launcherUiState, MEMINFO) &&
-                LauncherPrefs.RECENTS_MEMINFO.get(launcher)) 1f else 0f
+                LauncherPrefs.isRecentsMemInfoEnabled(launcher)) 1f else 0f
         propertySetter.setFloat(
             launcher.getMemInfoView(),
             MemInfoView.STATE_CTRL_ALPHA,
