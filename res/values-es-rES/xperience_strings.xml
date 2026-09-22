@@ -58,13 +58,16 @@
     <string name="trust_apps_info_hidden">Las aplicaciones ocultas y sus widgets están ocultos del launcher</string>
     <string name="trust_apps_info_protected">Las aplicaciones protegidas requieren autenticación para ser abiertas desde el launcher</string>
     <!-- LMOFreeform -->
+    <string name="floating_window">Ventana flotante</string>
     <!-- Recents -->
     <string name="action_lens">Lens</string>
     <!-- Memory info -->
     <string name="meminfo_text">%1$s disponible | %2$s</string>
     <string name="recents_meminfo_title">Información de memoria</string>
+    <string name="recents_meminfo_summary">Mostrar uso de RAM en la parte inferior</string>
     <!-- Categories -->
     <string name="home_category_title">Pantalla de inicio</string>
+    <string name="home_category_summary">Establecer panel de inicio y más</string>
     <string name="icons_category_title">Iconos</string>
     <string name="icons_category_summary">Configurar tamaño de los iconos y más</string>
     <string name="app_drawer_category_title">Cajón de aplicaciones</string>
