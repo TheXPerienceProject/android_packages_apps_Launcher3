@@ -37,6 +37,8 @@
     <string name="desktop_show_labels">Mostrar etiquetas de iconos en el escritorio</string>
     <string name="drawer_show_labels">Mostrar etiquetas en los iconos del cajón de aplicaciones</string>
     <!-- Search bar -->
+    <string name="pref_show_hotseat_qsb_title">Mostrar barra de búsqueda</string>
+    <string name="pref_show_hotseat_qsb_summary">En la parte inferior de tu pantalla de inicio</string>
     <!-- Settings title to show Google Now at -1 screen on launcher. [CHAR LIMIT=50] -->
     <string name="title_show_google_app">Mostrar Google app</string>
     <!-- Settings message explaining when the -1 screen is available on an LTR device. [CHAR LIMIT=100] -->
@@ -55,4 +57,28 @@
     <string name="trust_apps_help">Ayuda</string>
     <string name="trust_apps_info_hidden">Las aplicaciones ocultas y sus widgets están ocultos del launcher</string>
     <string name="trust_apps_info_protected">Las aplicaciones protegidas requieren autenticación para ser abiertas desde el launcher</string>
+    <!-- LMOFreeform -->
+    <string name="floating_window">Ventana flotante</string>
+    <!-- Recents -->
+    <string name="action_lens">Lens</string>
+    <!-- Memory info -->
+    <string name="meminfo_text">%1$s disponible | %2$s</string>
+    <string name="recents_meminfo_title">Información de memoria</string>
+    <string name="recents_meminfo_summary">Mostrar uso de RAM en la parte inferior</string>
+    <!-- Categories -->
+    <string name="home_category_title">Pantalla de inicio</string>
+    <string name="home_category_summary">Establecer panel de inicio y más</string>
+    <string name="icons_category_title">Iconos</string>
+    <string name="icons_category_summary">Configurar tamaño de los iconos y más</string>
+    <string name="app_drawer_category_title">Cajón de aplicaciones</string>
+    <string name="app_drawer_category_summary">Personaliza tu cajón de aplicaciones</string>
+    <string name="recents_category_title">Recientes</string>
+    <string name="recents_category_summary">Personaliza tu pantalla de recientes</string>
+    <string name="misc_category_title">Varios</string>
+    <string name="misc_category_summary">Otras opciones</string>
+    <string name="general_category_title">General</string>
+    <string name="interface_category_title">Interfaz</string>
+    <!-- Developer options -->
+    <string name="dev_options_title">Opciones de desarrollador</string>
+    <string name="dev_options_summary">Habilite algunas funciones ocultas bajo su propio riesgo</string>
 </resources>

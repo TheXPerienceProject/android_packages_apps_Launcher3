@@ -44,4 +44,25 @@
     <string name="trust_apps_help">Yardım</string>
     <string name="trust_apps_info_hidden">Gizli uygulamalar ve widgetler uygulama menüsünde görünmeyecek</string>
     <string name="trust_apps_info_protected">Korunan uygulamaların başlatıcıdan açılması için kimlik doğrulama gerekir</string>
+    <!-- LMOFreeform -->
+    <!-- Recents -->
+    <string name="action_lens">Lens</string>
+    <!-- Memory info -->
+    <string name="meminfo_text">%1$s Kullanılabilir | %2$s Toplam</string>
+    <string name="recents_meminfo_title">Bellek bilgisi</string>
+    <!-- Categories -->
+    <string name="home_category_title">Ana ekran</string>
+    <string name="icons_category_title">Simgeler</string>
+    <string name="icons_category_summary">Simge boyutunu ve daha fazlasını ayarlayın</string>
+    <string name="app_drawer_category_title">Uygulama çekmecesi</string>
+    <string name="app_drawer_category_summary">Uygulama çekmecenizi özelleştirin</string>
+    <string name="recents_category_title">Son uygulamalar</string>
+    <string name="recents_category_summary">Son uygulamalar ekranını yenileyin</string>
+    <string name="misc_category_title">Çeşitli</string>
+    <string name="misc_category_summary">Diğer seçenekler</string>
+    <string name="general_category_title">Genel</string>
+    <string name="interface_category_title">Arayüz</string>
+    <!-- Developer options -->
+    <string name="dev_options_title">Geliştirici seçenekleri</string>
+    <string name="dev_options_summary">Bazı gizli özellikleri aktif etmek kendi sorumluluğunuzdadır</string>
 </resources>
