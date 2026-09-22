@@ -17,6 +17,7 @@
 package com.android.launcher3.dagger
 
 import android.net.Uri
+import com.android.launcher3.util.SettingsCache.NAVBAR_IME_SPACE_URI
 import com.android.launcher3.util.SettingsCache.NOTIFICATION_BADGING_URI
 import com.android.launcher3.util.SettingsCache.TOUCHPAD_NATURAL_SCROLLING
 import dagger.Module
@@ -40,4 +41,9 @@ object SettingsModule {
      * [android.hardware.input.InputSettings.useTouchpadNaturalScrolling()].
      */
     fun provideTouchpadNaturalScrollingDefaults(): Uri = TOUCHPAD_NATURAL_SCROLLING
+
+    @Provides
+    @IntoSet
+    @Named("SETTINGS_ENABLED_BY_DEFAULT")
+    fun provideNavbarImeSpaceDefaults(): Uri = NAVBAR_IME_SPACE_URI
 }

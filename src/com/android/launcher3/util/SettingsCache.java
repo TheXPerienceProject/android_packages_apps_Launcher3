@@ -79,6 +79,9 @@ public class SettingsCache extends ContentObserver {
     /** Hidden field {@link Settings.System#TOUCHPAD_NATURAL_SCROLLING}. */
     public static final Uri TOUCHPAD_NATURAL_SCROLLING = Settings.System.getUriFor(
             "touchpad_natural_scrolling");
+    /** Hidden field Settings.Secure.NAVBAR_IME_SPACE */
+    public static final Uri NAVBAR_IME_SPACE_URI =
+            Settings.Secure.getUriFor("navbar_ime_space");
 
     private static final String SYSTEM_URI_PREFIX = Settings.System.CONTENT_URI.toString();
     private static final String GLOBAL_URI_PREFIX = Settings.Global.CONTENT_URI.toString();
