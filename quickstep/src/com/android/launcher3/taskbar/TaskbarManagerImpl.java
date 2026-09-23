@@ -138,6 +138,9 @@ public class TaskbarManagerImpl {
     private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
             Settings.Secure.NAV_BAR_KIDS_MODE);
 
+    private static final Uri NAVBAR_IME_SPACE_URI = Settings.Secure.getUriFor(
+            "navbar_ime_space");
+
     private final Context mBaseContext;
     private final int mPrimaryDisplayId;
     private final TaskbarNavButtonCallbacks mNavCallbacks;
@@ -344,6 +347,11 @@ public class TaskbarManagerImpl {
                 getTaskbarUiThread(),
                 v -> onSettingChanged(v, TaskbarActivityContext::isInKidsMode));
         cleanupTasks.addCloseable(getTaskbarUiThread(), navBarKidsModeSafeCloseable);
+
+        var navbarImeSpaceSafeCloseable = settingsCache.getListenableRef(NAVBAR_IME_SPACE_URI)
+                .forEach(getTaskbarUiThread(),
+                        v -> onSettingChanged(v, TaskbarActivityContext::imeDrawsImeNavBar));
+        cleanupTasks.addCloseable(getTaskbarUiThread(), navbarImeSpaceSafeCloseable);
 
         SimpleBroadcastReceiver shutdownReceiver = new SimpleBroadcastReceiver(
                 mBaseContext,

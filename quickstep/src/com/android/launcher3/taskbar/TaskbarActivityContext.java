@@ -233,6 +233,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     private static final Uri URI_USER_SETUP_COMPLETE = Secure.getUriFor(Secure.USER_SETUP_COMPLETE);
     private static final Uri URI_NAV_BAR_KIDS_MODE = Secure.getUriFor(Secure.NAV_BAR_KIDS_MODE);
+    private static final Uri URI_NAVBAR_IME_SPACE = Secure.getUriFor("navbar_ime_space");
 
     private static final String TAG = "TaskbarActivityContext";
 
@@ -363,7 +364,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 mDeviceProfile.inv.numColumns);
 
         mImeDrawsImeNavBar = getBoolByName(IME_DRAWS_IME_NAV_BAR_RES_NAME, getResources(), false)
-                && isPrimaryDisplay();
+                && isPrimaryDisplay()
+                && settingsCache.getValue(URI_NAVBAR_IME_SPACE);
         mIsSafeModeEnabled = TraceHelper.allowIpcs("isSafeMode",
                 () -> getPackageManager().isSafeMode());
 
@@ -620,7 +622,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      */
     public void init(@NonNull TaskbarSharedState sharedState, boolean userUnlocked, int duration) {
         mImeDrawsImeNavBar = getBoolByName(IME_DRAWS_IME_NAV_BAR_RES_NAME, getResources(), false)
-                && isPrimaryDisplay();
+                && isPrimaryDisplay()
+                && SettingsCache.INSTANCE.get(this).getValue(URI_NAVBAR_IME_SPACE);
         mLastRequestedNonFullscreenSize = getDefaultTaskbarWindowSize();
         mWindowLayoutParams = createAllWindowParams();
         mLastUpdatedLayoutParams = new WindowManager.LayoutParams();
